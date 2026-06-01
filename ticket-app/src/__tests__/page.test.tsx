@@ -1,5 +1,8 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import HomePage from "../app/page";
+import HomePageClient from "../app/HomePageClient";
+import { getEventConfig } from "@/config";
+
+const eventConfig = getEventConfig();
 
 // Mock global.fetch
 const mockFetch = vi.fn();
@@ -23,7 +26,7 @@ describe("HomePage", () => {
       }),
     });
 
-    render(<HomePage />);
+    render(<HomePageClient eventConfig={eventConfig} />);
 
     // Header checks
     expect(screen.getByText("Conseguí tu entrada")).toBeInTheDocument();
@@ -54,7 +57,7 @@ describe("HomePage", () => {
       json: () => Promise.resolve({ error: "No active batch found" }),
     });
 
-    render(<HomePage />);
+    render(<HomePageClient eventConfig={eventConfig} />);
 
     await waitFor(() => {
       expect(screen.getByText("No hay lotes activos en este momento.")).toBeInTheDocument();
@@ -67,7 +70,7 @@ describe("HomePage", () => {
       json: () => Promise.resolve({ error: "No active batch found" }),
     });
 
-    render(<HomePage />);
+    render(<HomePageClient eventConfig={eventConfig} />);
 
     const copyBtn = screen.getByRole("button", { name: "Copiar alias" });
     fireEvent.click(copyBtn);
@@ -84,13 +87,19 @@ describe("HomePage", () => {
     }, { timeout: 2500 });
   });
 
+  it("uses MP_DEEP_LINK env var when set", () => {
+    process.env.MP_DEEP_LINK = "https://link.mercadopago.com.ar/otro-link";
+    expect(getEventConfig().mpDeepLink).toBe("https://link.mercadopago.com.ar/otro-link");
+    delete process.env.MP_DEEP_LINK;
+  });
+
   it("handles copy phone functionality", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: false,
       json: () => Promise.resolve({ error: "No active batch found" }),
     });
 
-    render(<HomePage />);
+    render(<HomePageClient eventConfig={eventConfig} />);
 
     const copyBtn = screen.getByRole("button", { name: /Copiar teléfono/ });
     fireEvent.click(copyBtn);
