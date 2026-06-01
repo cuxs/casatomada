@@ -12,6 +12,7 @@ describe("HomePage", () => {
 
   it("renders basic info correctly", async () => {
     mockFetch.mockResolvedValueOnce({
+      ok: true,
       json: () => Promise.resolve({
         id: "1",
         name: "Tanda 1 — Comunidad",
@@ -49,7 +50,8 @@ describe("HomePage", () => {
 
   it("handles empty/no active batch state correctly", async () => {
     mockFetch.mockResolvedValueOnce({
-      json: () => Promise.resolve(null),
+      ok: false,
+      json: () => Promise.resolve({ error: "No active batch found" }),
     });
 
     render(<HomePage />);
@@ -61,7 +63,8 @@ describe("HomePage", () => {
 
   it("handles copy alias functionality", async () => {
     mockFetch.mockResolvedValueOnce({
-      json: () => Promise.resolve(null),
+      ok: false,
+      json: () => Promise.resolve({ error: "No active batch found" }),
     });
 
     render(<HomePage />);
@@ -83,7 +86,8 @@ describe("HomePage", () => {
 
   it("handles copy phone functionality", async () => {
     mockFetch.mockResolvedValueOnce({
-      json: () => Promise.resolve(null),
+      ok: false,
+      json: () => Promise.resolve({ error: "No active batch found" }),
     });
 
     render(<HomePage />);

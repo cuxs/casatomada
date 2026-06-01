@@ -21,12 +21,16 @@ export default function HomePage() {
 
   useEffect(() => {
     fetch("/api/batches/active")
-      .then((res) => res.json())
-      .then((data) => {
+      .then(async (res) => {
+        if (!res.ok) {
+          setActiveBatch(null);
+          return;
+        }
+        const data = await res.json();
         setActiveBatch(data);
-        setLoadingBatch(false);
       })
-      .catch(() => setLoadingBatch(false));
+      .catch(() => setActiveBatch(null))
+      .finally(() => setLoadingBatch(false));
   }, []);
 
   function copyAlias() {
