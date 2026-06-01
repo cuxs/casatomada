@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { v4 as uuidv4 } from "uuid";
 import QRCode from "qrcode";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: NextRequest) {
   const authResponse = checkApiAuth(request);
   if (authResponse) return authResponse;
