@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import type { EventConfig } from "@/config";
 import SectionHeader from "./section-header";
 
@@ -47,6 +48,11 @@ export default function EntradasSection({
   onBack,
 }: EntradasSectionProps) {
   const currentPrice = priceInfo?.currentPrice ?? 10000;
+  const paymentRef = useRef<HTMLDivElement>(null);
+
+  function scrollToPayment() {
+    paymentRef.current?.scrollIntoView({ behavior: "smooth" });
+  }
 
   return (
     <div className="relative bg-[#080808]">
@@ -55,30 +61,30 @@ export default function EntradasSection({
       {/* ── Screen 1: Flyer + Prices ── */}
       <div className="relative flex flex-col items-center justify-center min-h-screen pt-[26px] px-5 pb-12 overflow-hidden">
         <div
-          className="absolute inset-0 bg-cover bg-center brightness-[0.25] saturate-50"
-          style={{ backgroundImage: "url('/fotos-landing/005.png')" }}
+          className="absolute inset-0 bg-cover bg-center brightness-50"
+          style={{ backgroundImage: "url('/comprar-entradas/01E.jpg')" }}
         />
 
         <img
           src="/comprar-entradas/02E.jpg"
           alt="evento"
-          className="relative z-[1] w-[min(86vw,380px)] block rounded-[14px] mb-7 shadow-[0_12px_48px_rgba(0,0,0,0.7)]"
+          className="relative z-[1] w-[min(86vw,380px)] block mb-7 mix-blend-lighten"
         />
 
         <div className="relative z-[1] w-[min(86vw,380px)]">
           {eventConfig.soldOut ? (
             <SoldOutDisplay />
           ) : (
-            <PriceDisplay priceInfo={priceInfo} countdown={countdown} />
+            <PriceDisplay priceInfo={priceInfo} countdown={countdown} onBuyNow={scrollToPayment} />
           )}
         </div>
       </div>
 
       {/* ── Screen 2: Payment instructions ── */}
-      <div className="relative flex flex-col justify-center min-h-screen pt-[100px] px-7 pb-[60px]">
+      <div ref={paymentRef} className="relative flex flex-col justify-center min-h-screen pt-[100px] px-7 pb-[60px]">
         <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('/comprar-entradas/03E.jpg')" }}
+          className="absolute inset-0"
+          style={{ backgroundImage: "url('/comprar-entradas/03E.jpg')", backgroundSize: "290% auto", backgroundPosition: "50% 55%", backgroundRepeat: "no-repeat" }}
         />
         <div className="absolute inset-0 bg-black/[0.62]" />
 
@@ -126,7 +132,15 @@ export default function EntradasSection({
   );
 }
 
-function PriceDisplay({ priceInfo, countdown }: { priceInfo: PriceInfo | null; countdown: Countdown | null }) {
+function PriceDisplay({
+  priceInfo,
+  countdown,
+  onBuyNow,
+}: {
+  priceInfo: PriceInfo | null;
+  countdown: Countdown | null;
+  onBuyNow: () => void;
+}) {
   if (!priceInfo) return null;
 
   const activeTier = ALL_TIERS[priceInfo.currentTierIndex];
@@ -134,7 +148,10 @@ function PriceDisplay({ priceInfo, countdown }: { priceInfo: PriceInfo | null; c
 
   return (
     <div className="flex flex-col">
-      <div className="bg-[rgba(8,8,8,0.88)] border-2 border-white/[0.28] rounded-[18px] px-6 py-4 text-center backdrop-blur-sm mb-5">
+      <button
+        onClick={onBuyNow}
+        className="bg-[rgba(8,8,8,0.88)] border-2 border-white/[0.28] rounded-[18px] px-6 py-4 text-center backdrop-blur-sm mb-5 cursor-pointer w-full"
+      >
         <p className="font-epilogue font-bold text-[clamp(24px,7vw,38px)] tracking-[-0.05em] text-white leading-none m-0">
           {activeTier.label} ${activeTier.price.toLocaleString("es-AR")}
         </p>
@@ -156,7 +173,7 @@ function PriceDisplay({ priceInfo, countdown }: { priceInfo: PriceInfo | null; c
             </div>
           </div>
         )}
-      </div>
+      </button>
 
       {futureTiers.map((tier) => (
         <p

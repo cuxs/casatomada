@@ -204,12 +204,12 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
         ))}
         <div className="absolute inset-0 bg-black/45" />
 
-        <div className="relative z-10 h-full flex flex-col justify-between py-[8vh] px-[5vw]">
+        <div className="relative h-full flex flex-col justify-between py-[8vh] px-[5vw]">
           <div className="flex-1 flex flex-col justify-center">
             <div
               className="font-epilogue font-bold leading-[0.88] tracking-[-0.1em] text-white mix-blend-exclusion transition-transform duration-[600ms] ease-in-out"
               style={{
-                fontSize: "clamp(120px, 31vw, 240px)",
+                fontSize: "clamp(100px, 26vw, 200px)",
                 transform: section === "entradas" ? "translateX(-150%)" : "translateX(0)",
               }}
             >
@@ -240,7 +240,7 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
                 <button
                   key={label}
                   onClick={onClick}
-                  className="flex-1 font-epilogue font-bold text-[17px] tracking-[-0.04em] text-white/85 bg-transparent border-[1.5px] border-white/55 rounded-full py-[11px] px-2 cursor-pointer backdrop-blur-sm whitespace-nowrap"
+                  className="flex-1 font-epilogue font-bold text-[17px] tracking-[-0.04em] text-white/85 bg-transparent border-[1.5px] border-white/55 rounded-3xl py-[11px] px-2 cursor-pointer backdrop-blur-sm whitespace-nowrap"
                 >
                   {label}
                 </button>
@@ -249,7 +249,7 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
 
             <button
               onClick={() => setSection("entradas")}
-              className="entradas-animated font-epilogue font-bold tracking-[-0.05em] text-white/90 bg-[rgba(10,10,10,0.75)] border-2 border-white/35 rounded-2xl py-[14px] cursor-pointer backdrop-blur-sm w-full block"
+              className="entradas-animated font-epilogue font-bold tracking-[-0.05em] text-white/90 bg-[rgba(10,10,10,0.75)] border-2 border-white/35 rounded-3xl py-[14px] cursor-pointer backdrop-blur-sm w-full block"
               style={{ fontSize: "clamp(36px, 9.5vw, 46px)" }}
             >
               entradas

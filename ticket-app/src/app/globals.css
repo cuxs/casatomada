@@ -3,20 +3,14 @@
 @tailwind utilities;
 
 @keyframes entradas-pulse {
-  0%, 100% {
-    font-variation-settings: "wght" 700;
-    letter-spacing: -0.05em;
-  }
-  40% {
-    font-variation-settings: "wght" 900;
-    letter-spacing: -0.065em;
-  }
-  70% {
-    font-variation-settings: "wght" 400;
-    letter-spacing: -0.03em;
-  }
+  0%   { font-variation-settings: "wght" 700; font-style: normal; }
+  25%  { font-variation-settings: "wght" 900; font-style: normal; }
+  50%  { font-variation-settings: "wght" 900; font-style: italic; }
+  75%  { font-variation-settings: "wght" 300; font-style: italic; }
+  100% { font-variation-settings: "wght" 700; font-style: normal; }
 }
 
 .entradas-animated {
   animation: entradas-pulse 4s ease-in-out infinite;
+  will-change: font-variation-settings;
 }

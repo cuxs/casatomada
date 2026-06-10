@@ -3,6 +3,7 @@ export interface Sale {
   buyerName: string;
   ticketCount: number;
   used: boolean;
+  usedAt: string | null;
   createdAt: string;
 }
 

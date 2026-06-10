@@ -116,7 +116,8 @@ export default function SalesPage() {
                     <th className="px-6 py-4">Comprador</th>
                     <th className="px-6 py-4 text-center">Entradas</th>
                     <th className="px-6 py-4">Estado</th>
-                    <th className="px-6 py-4">Fecha</th>
+                    <th className="px-6 py-4">Compra</th>
+                    <th className="px-6 py-4">Canjeado</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 text-sm text-gray-700">
@@ -139,6 +140,9 @@ export default function SalesPage() {
                       </td>
                       <td className="px-6 py-4 text-xs text-gray-400 whitespace-nowrap">
                         {formatDate(sale.createdAt)}
+                      </td>
+                      <td className="px-6 py-4 text-xs text-gray-400 whitespace-nowrap">
+                        {sale.usedAt ? formatDate(sale.usedAt) : "—"}
                       </td>
                     </tr>
                   ))}
