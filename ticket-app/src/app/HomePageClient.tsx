@@ -3,6 +3,17 @@
 import { useEffect, useState } from "react";
 import type { EventConfig } from "@/config";
 
+const IMAGES = [
+  "/fotos-landing/002.png",
+  "/fotos-landing/003.png",
+  "/fotos-landing/004.png",
+  "/fotos-landing/005.png",
+  "/fotos-landing/006.png",
+  "/fotos-landing/007.png",
+  "/fotos-landing/008.png",
+  "/fotos-landing/009.png",
+];
+
 // Price increase dates — ART is UTC-3, so midnight ART = 03:00 UTC
 const PRICE_CHANGES = [
   { at: new Date("2026-06-24T03:00:00Z"), toPrice: 13000 },
@@ -37,10 +48,18 @@ export default function HomePageClient({ eventConfig }: HomePageClientProps) {
   const [aliasCopied, setAliasCopied] = useState(false);
   const [phoneCopied, setPhoneCopied] = useState(false);
   const [now, setNow] = useState<Date | null>(null);
+  const [bgIndex, setBgIndex] = useState(0);
 
   useEffect(() => {
     setNow(new Date());
-    const id = setInterval(() => setNow(new Date()), 1000);
+    const clockId = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(clockId);
+  }, []);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setBgIndex((i) => (i + 1) % IMAGES.length);
+    }, 5000);
     return () => clearInterval(id);
   }, []);
 
@@ -63,18 +82,34 @@ export default function HomePageClient({ eventConfig }: HomePageClientProps) {
   const countdown = msLeft !== null ? formatCountdown(msLeft) : null;
 
   return (
-    <main className="min-h-screen bg-white flex flex-col items-center px-4 py-12">
-      <div className="w-full max-w-md space-y-6">
+    <main className="relative min-h-screen bg-gray-900 flex flex-col items-center px-4 py-12 overflow-hidden">
+      {/* Background slideshow */}
+      {IMAGES.map((src, i) => (
+        <div
+          key={src}
+          className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
+          style={{
+            backgroundImage: `url(${src})`,
+            opacity: i === bgIndex ? 1 : 0,
+          }}
+        />
+      ))}
+
+      {/* Dark overlay for readability */}
+      <div className="absolute inset-0 bg-black/55" />
+
+      {/* Content */}
+      <div className="relative z-10 w-full max-w-md space-y-6">
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">Conseguí tu entrada</h1>
-          <p className="mt-2 text-gray-500 text-sm">
+          <h1 className="text-3xl font-bold text-white">Conseguí tu entrada</h1>
+          <p className="mt-2 text-white/70 text-sm">
             Realizá la transferencia y registrá tu compra
           </p>
         </div>
 
         {/* Payment card */}
-        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 space-y-4">
+        <div className="bg-white/95 border border-white/20 rounded-2xl shadow-xl p-6 space-y-4">
           <h2 className="text-lg font-semibold text-gray-800">Datos de pago</h2>
 
           {/* Alias */}
@@ -113,7 +148,7 @@ export default function HomePageClient({ eventConfig }: HomePageClientProps) {
         </div>
 
         {/* Price countdown */}
-        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 text-center">
+        <div className="bg-white/95 border border-white/20 rounded-2xl shadow-xl p-6 text-center">
           {!priceInfo ? (
             <div className="h-24 flex items-center justify-center">
               <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-700 rounded-full animate-spin" />
