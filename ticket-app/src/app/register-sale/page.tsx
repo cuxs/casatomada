@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import BuyersSummary from "./BuyersSummary";
+import BuyersSummary from "./buyers-summary";
 
 interface SaleResult {
   qrDataUrl: string;

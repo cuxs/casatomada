@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import BuyersSummary from "../register-sale/BuyersSummary";
+import BuyersSummary from "../register-sale/buyers-summary";
 import type { Sale } from "@/lib/sales-summary";
 
 export default function SalesPage() {

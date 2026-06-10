@@ -1,9 +1,6 @@
 "use client";
 
-import SectionHeader from "./SectionHeader";
-
-const EP = { fontFamily: "var(--font-epilogue), sans-serif" } as const;
-const MONO = { fontFamily: "var(--font-space-mono), monospace" } as const;
+import SectionHeader from "./section-header";
 
 const MANIFESTO_BLOCKS = [
   { text: "casa tomada\nno es una fiesta,\nno es ni desconexión,\nni relax,\nni entretenimiento", emphasis: false },
@@ -22,75 +19,34 @@ const MANIFESTO_BLOCKS = [
 
 export default function ManifiestaSection({ onBack }: { onBack: () => void }) {
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        backgroundColor: "#080000",
-        position: "relative",
-      }}
-    >
+    <div className="relative min-h-screen bg-[#080000]">
       <SectionHeader onBack={onBack} />
 
-      {/* Tiled reflected background */}
-      <div
-        style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 0,
-          overflow: "hidden",
-          pointerEvents: "none",
-        }}
-      >
+      {/* Tiled background — absolute so it stretches with scrollable content */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
         <div
-          style={{
-            position: "absolute",
-            inset: "-20%",
-            backgroundImage: "url('/manifiesta/M01.jpg')",
-            backgroundSize: "50% auto",
-            backgroundRepeat: "repeat",
-            opacity: 0.35,
-            filter: "saturate(0.6)",
-          }}
+          className="absolute inset-0 bg-repeat opacity-40 saturate-50"
+          style={{ backgroundImage: "url('/manifiesta/M01.jpg')", backgroundSize: "60% auto" }}
         />
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(8,0,0,0.5) 0%, rgba(8,0,0,0.3) 50%, rgba(8,0,0,0.5) 100%)" }} />
+        <div className="absolute inset-0 bg-[rgba(8,0,0,0.55)]" />
       </div>
 
       {/* Content */}
-      <div style={{ position: "relative", zIndex: 1, padding: "100px 24px 80px", maxWidth: 600, margin: "0 auto" }}>
-
-        {/* _maniest@ heading */}
-        <h1
-          style={{
-            ...MONO,
-            fontWeight: 700,
-            fontSize: "clamp(60px, 18vw, 135px)",
-            letterSpacing: "-0.05em",
-            color: "rgba(200,200,200,0.85)",
-            lineHeight: 0.9,
-            marginBottom: "8vh",
-            wordBreak: "break-all",
-          }}
-        >
+      <div className="relative z-[1] pt-[100px] px-6 pb-20 max-w-[600px] mx-auto">
+        <h1 className="font-mono font-bold text-[clamp(60px,18vw,135px)] tracking-[-0.05em] text-[rgba(200,200,200,0.85)] leading-[0.9] mb-[8vh] break-all">
           _maniest@
         </h1>
 
-        {/* Manifesto blocks */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "8vh" }}>
+        <div className="flex flex-col gap-[8vh]">
           {MANIFESTO_BLOCKS.map((block, i) => (
             <p
               key={i}
-              style={{
-                ...EP,
-                fontWeight: block.emphasis ? 800 : 500,
-                fontSize: block.emphasis
-                  ? "clamp(28px, 8vw, 68px)"
-                  : "clamp(20px, 5.5vw, 50px)",
-                letterSpacing: "-0.05em",
-                color: block.emphasis ? "rgba(210,210,210,0.9)" : "rgba(170,170,170,0.75)",
-                lineHeight: 1.15,
-                margin: 0,
-                whiteSpace: "pre-line",
-              }}
+              className={[
+                "font-epilogue tracking-[-0.05em] leading-[1.15] m-0 whitespace-pre-line",
+                block.emphasis
+                  ? "font-extrabold text-[clamp(28px,8vw,68px)] text-[rgba(210,210,210,0.9)]"
+                  : "font-medium text-[clamp(20px,5.5vw,50px)] text-[rgba(170,170,170,0.75)]",
+              ].join(" ")}
             >
               {block.text}
             </p>

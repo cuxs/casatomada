@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { EventConfig } from "@/config";
-import EntradasSection from "./sections/EntradasSection";
-import ManifiestaSection from "./sections/ManifiestaSection";
-import RizomaSection from "./sections/RizomaSection";
+import EntradasSection from "./sections/tickets-section";
+import ManifiestaSection from "./sections/manifesta-section";
+import RizomaSection from "./sections/rizoma-section";
 
 const LANDING_IMAGES = [
   "/fotos-landing/002.png",
@@ -51,7 +51,6 @@ type SwipeState =
 
 const SWIPE_THRESHOLD = 80;
 const EXIT_DURATION = 400;
-const PANEL_TRANSITION = "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)";
 
 export default function HomePageClient({ eventConfig }: { eventConfig: EventConfig }) {
   const [section, setSection] = useState<Section>("hero");
@@ -109,7 +108,6 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
       const dx = e.touches[0].clientX - touchStart.current.x;
       const dy = e.touches[0].clientY - touchStart.current.y;
 
-      // Ignore if mostly vertical (scrolling)
       if (Math.abs(dy) > Math.abs(dx) * 1.2) return;
 
       // manifiest@ exits left (swipe left, dx < 0)
@@ -139,14 +137,13 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
       if (didSwipe) {
         goBack(panel, exitX);
       } else {
-        setSwipe({ status: "idle" }); // spring back
+        setSwipe({ status: "idle" });
       }
       touchStart.current = null;
     },
     [goBack]
   );
 
-  // Compute transform for a swipeable panel
   function swipeableTransform(
     panel: SwipePanel,
     defaultVisible: string,
@@ -161,10 +158,8 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
     return section === panel ? defaultVisible : defaultHidden;
   }
 
-  function swipeableTransition(panel: SwipePanel): string {
-    return swipe.status === "dragging" && swipe.panel === panel
-      ? "none"
-      : PANEL_TRANSITION;
+  function swipeableTransition(panel: SwipePanel): string | undefined {
+    return swipe.status === "dragging" && swipe.panel === panel ? "none" : undefined;
   }
 
   const priceInfo = now ? getPriceInfo(now) : null;
@@ -193,91 +188,49 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
       : "translateX(0)";
 
   return (
-    <div style={{ position: "fixed", inset: 0, overflow: "hidden", backgroundColor: "#000" }}>
+    <div className="fixed inset-0 overflow-hidden bg-black">
 
       {/* ===== HERO ===== */}
       <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          transform: heroX,
-          transition: PANEL_TRANSITION,
-          zIndex: section === "hero" || section === "entradas" ? 10 : 5,
-          overflow: "hidden",
-        }}
+        className={`absolute inset-0 transition-transform duration-[600ms] ease-in-out overflow-hidden ${section === "hero" || section === "entradas" ? "z-10" : "z-[5]"}`}
+        style={{ transform: heroX }}
       >
         {LANDING_IMAGES.map((src, i) => (
           <div
             key={src}
-            style={{
-              position: "absolute",
-              inset: 0,
-              backgroundImage: `url(${src})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              opacity: i === bgIndex ? 1 : 0,
-              transition: "opacity 1.5s ease",
-            }}
+            className="absolute inset-0 bg-cover bg-center transition-opacity duration-[1500ms] ease-in-out"
+            style={{ backgroundImage: `url(${src})`, opacity: i === bgIndex ? 1 : 0 }}
           />
         ))}
-        <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0,0,0,0.45)" }} />
+        <div className="absolute inset-0 bg-black/45" />
 
-        <div
-          style={{
-            position: "relative",
-            zIndex: 10,
-            height: "100%",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            padding: "10vh 6vw 8vh",
-          }}
-        >
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+        <div className="relative z-10 h-full flex flex-col justify-between py-[8vh] px-[5vw]">
+          <div className="flex-1 flex flex-col justify-center">
             <div
+              className="font-epilogue font-bold leading-[0.88] tracking-[-0.1em] text-white mix-blend-exclusion transition-transform duration-[600ms] ease-in-out"
               style={{
-                fontFamily: "var(--font-epilogue), sans-serif",
-                fontWeight: 700,
-                fontSize: "clamp(90px, 23vw, 230px)",
-                lineHeight: 0.88,
-                letterSpacing: "-0.1em",
-                color: "white",
-                mixBlendMode: "exclusion",
+                fontSize: "clamp(120px, 31vw, 240px)",
                 transform: section === "entradas" ? "translateX(-150%)" : "translateX(0)",
-                transition: PANEL_TRANSITION,
               }}
             >
               casa
             </div>
             <div
+              className="font-epilogue font-bold leading-[0.88] tracking-[-0.1em] text-white mix-blend-exclusion transition-transform duration-[600ms] ease-in-out"
               style={{
-                fontFamily: "var(--font-epilogue), sans-serif",
-                fontWeight: 700,
-                fontSize: "clamp(75px, 20vw, 195px)",
-                lineHeight: 0.88,
-                letterSpacing: "-0.1em",
-                color: "white",
-                mixBlendMode: "exclusion",
+                fontSize: "clamp(100px, 26vw, 200px)",
                 transform: section === "entradas" ? "translateX(150%)" : "translateX(0)",
-                transition: PANEL_TRANSITION,
               }}
             >
               tomada
             </div>
           </div>
 
+          {/* Pills + entradas button */}
           <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 20,
-              opacity: section === "hero" ? 1 : 0,
-              pointerEvents: section === "hero" ? "auto" : "none",
-              transition: "opacity 0.35s ease",
-            }}
+            className={`self-center flex flex-col items-center gap-3 w-[min(76vw,320px)] transition-opacity duration-[350ms] ease-in-out ${section === "hero" ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
           >
-            <div style={{ display: "flex", gap: 12 }}>
+            <div className="flex gap-2.5 w-full">
               {(
                 [
                   { label: "manifiest@", onClick: () => setSection("manifiest") },
@@ -287,19 +240,7 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
                 <button
                   key={label}
                   onClick={onClick}
-                  style={{
-                    fontFamily: "var(--font-epilogue), sans-serif",
-                    fontWeight: 700,
-                    fontSize: "clamp(14px, 4vw, 48px)",
-                    letterSpacing: "-0.05em",
-                    color: "rgba(255,255,255,0.8)",
-                    background: "transparent",
-                    border: "1.5px solid rgba(255,255,255,0.6)",
-                    borderRadius: 100,
-                    padding: "10px 22px",
-                    cursor: "pointer",
-                    backdropFilter: "blur(8px)",
-                  }}
+                  className="flex-1 font-epilogue font-bold text-[17px] tracking-[-0.04em] text-white/85 bg-transparent border-[1.5px] border-white/55 rounded-full py-[11px] px-2 cursor-pointer backdrop-blur-sm whitespace-nowrap"
                 >
                   {label}
                 </button>
@@ -308,29 +249,15 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
 
             <button
               onClick={() => setSection("entradas")}
-              className="entradas-animated"
-              style={{
-                fontFamily: "var(--font-epilogue), sans-serif",
-                fontWeight: 700,
-                fontSize: "clamp(42px, 11vw, 105px)",
-                letterSpacing: "-0.05em",
-                color: "rgba(255,255,255,0.85)",
-                background: "rgba(10,10,10,0.72)",
-                border: "2px solid rgba(255,255,255,0.3)",
-                borderRadius: 18,
-                padding: "18px 0",
-                cursor: "pointer",
-                backdropFilter: "blur(8px)",
-                width: "min(82vw, 420px)",
-                display: "block",
-              }}
+              className="entradas-animated font-epilogue font-bold tracking-[-0.05em] text-white/90 bg-[rgba(10,10,10,0.75)] border-2 border-white/35 rounded-2xl py-[14px] cursor-pointer backdrop-blur-sm w-full block"
+              style={{ fontSize: "clamp(36px, 9.5vw, 46px)" }}
             >
               entradas
             </button>
 
             <button
               onClick={() => setSection("entradas")}
-              style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.5)", padding: 4 }}
+              className="bg-transparent border-0 cursor-pointer text-white/50 p-1"
               aria-label="Ver más"
             >
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -344,15 +271,8 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
       {/* ===== ENTRADAS ===== */}
       <div
         ref={entradasRef}
-        style={{
-          position: "absolute",
-          inset: 0,
-          overflowY: "auto",
-          overflowX: "hidden",
-          transform: section === "entradas" ? "translateY(0)" : "translateY(100%)",
-          transition: PANEL_TRANSITION,
-          zIndex: section === "entradas" ? 20 : 5,
-        }}
+        className={`absolute inset-0 overflow-y-auto overflow-x-hidden transition-transform duration-[600ms] ease-in-out ${section === "entradas" ? "z-20" : "z-[5]"}`}
+        style={{ transform: section === "entradas" ? "translateY(0)" : "translateY(100%)" }}
       >
         <EntradasSection
           eventConfig={eventConfig}
@@ -373,14 +293,10 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
         onTouchMove={(e) => onTouchMove(e, "manifiest")}
         onTouchEnd={() => onTouchEnd("manifiest", "translateX(-100%)")}
         onTouchCancel={() => { setSwipe({ status: "idle" }); touchStart.current = null; }}
+        className={`absolute inset-0 overflow-x-hidden transition-transform duration-[600ms] ease-in-out ${section === "manifiest" ? "z-20" : "z-[5]"} ${swipe.status === "dragging" && swipe.panel === "manifiest" ? "overflow-y-hidden" : "overflow-y-auto"}`}
         style={{
-          position: "absolute",
-          inset: 0,
-          overflowY: swipe.status === "dragging" && swipe.panel === "manifiest" ? "hidden" : "auto",
-          overflowX: "hidden",
           transform: swipeableTransform("manifiest", "translateX(0)", "translateX(-100%)"),
           transition: swipeableTransition("manifiest"),
-          zIndex: section === "manifiest" ? 20 : 5,
         }}
       >
         <ManifiestaSection onBack={() => goBack("manifiest", "translateX(-100%)")} />
@@ -393,14 +309,10 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
         onTouchMove={(e) => onTouchMove(e, "rizoma")}
         onTouchEnd={() => onTouchEnd("rizoma", "translateX(100%)")}
         onTouchCancel={() => { setSwipe({ status: "idle" }); touchStart.current = null; }}
+        className={`absolute inset-0 overflow-x-hidden transition-transform duration-[600ms] ease-in-out ${section === "rizoma" ? "z-20" : "z-[5]"} ${swipe.status === "dragging" && swipe.panel === "rizoma" ? "overflow-y-hidden" : "overflow-y-auto"}`}
         style={{
-          position: "absolute",
-          inset: 0,
-          overflowY: swipe.status === "dragging" && swipe.panel === "rizoma" ? "hidden" : "auto",
-          overflowX: "hidden",
           transform: swipeableTransform("rizoma", "translateX(0)", "translateX(100%)"),
           transition: swipeableTransition("rizoma"),
-          zIndex: section === "rizoma" ? 20 : 5,
         }}
       >
         <RizomaSection onBack={() => goBack("rizoma", "translateX(100%)")} />

@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import HomePageClient from "../app/HomePageClient";
+import HomePageClient from "../app/home-page-client";
 import { getEventConfig } from "@/config";
 
 const eventConfig = getEventConfig();
