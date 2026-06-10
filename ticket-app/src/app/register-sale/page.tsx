@@ -9,9 +9,19 @@ interface SaleResult {
   ticketCount: number;
 }
 
+const PRICES = [10000, 13000, 15000];
+
+function getCurrentPrice(): number {
+  const now = new Date();
+  if (now < new Date("2026-06-24T03:00:00Z")) return 10000;
+  if (now < new Date("2026-07-01T03:00:00Z")) return 13000;
+  return 15000;
+}
+
 export default function RegisterSalePage() {
   const [buyerName, setBuyerName] = useState("");
-  const [promoCode, setPromoCode] = useState("");
+  const [price, setPrice] = useState<number>(getCurrentPrice);
+  const [ticketCount, setTicketCount] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<SaleResult | null>(null);
@@ -26,10 +36,7 @@ export default function RegisterSalePage() {
       const res = await fetch("/api/sales", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          buyerName,
-          promoCode: promoCode.trim() || undefined,
-        }),
+        body: JSON.stringify({ buyerName, price, ticketCount }),
       });
 
       const data = await res.json();
@@ -50,7 +57,8 @@ export default function RegisterSalePage() {
 
   function handleNewSale() {
     setBuyerName("");
-    setPromoCode("");
+    setPrice(getCurrentPrice());
+    setTicketCount(1);
     setError(null);
     setResult(null);
   }
@@ -118,14 +126,14 @@ export default function RegisterSalePage() {
           </Link>
           <h1 className="mt-4 text-3xl font-bold text-gray-900">Registrar compra</h1>
           <p className="mt-1 text-gray-500 text-sm">
-            Completá tus datos y generamos tu entrada
+            Completá los datos y generamos la entrada
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 space-y-5">
           <div className="space-y-1.5">
             <label htmlFor="buyerName" className="block text-sm font-medium text-gray-700">
-              Tu nombre <span className="text-red-500">*</span>
+              Nombre <span className="text-red-500">*</span>
             </label>
             <input
               id="buyerName"
@@ -139,17 +147,35 @@ export default function RegisterSalePage() {
           </div>
 
           <div className="space-y-1.5">
-            <label htmlFor="promoCode" className="block text-sm font-medium text-gray-700">
-              Código de promo{" "}
-              <span className="text-gray-400 font-normal">(opcional)</span>
+            <label htmlFor="price" className="block text-sm font-medium text-gray-700">
+              Precio
+            </label>
+            <select
+              id="price"
+              value={price}
+              onChange={(e) => setPrice(Number(e.target.value))}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
+            >
+              {PRICES.map((p) => (
+                <option key={p} value={p}>
+                  ${p.toLocaleString("es-AR")}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label htmlFor="ticketCount" className="block text-sm font-medium text-gray-700">
+              Válido por
             </label>
             <input
-              id="promoCode"
-              type="text"
-              value={promoCode}
-              onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-              placeholder="Si tenés un código, ingresalo acá"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 font-mono focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
+              id="ticketCount"
+              type="number"
+              min={1}
+              step={1}
+              value={ticketCount}
+              onChange={(e) => setTicketCount(Math.max(1, Math.floor(Number(e.target.value))))}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
             />
           </div>
 

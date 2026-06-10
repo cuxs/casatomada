@@ -4,19 +4,10 @@ import { prisma } from "@/lib/prisma";
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    batch: {
-      findFirst: vi.fn(),
-      update: vi.fn(),
-    },
     sale: {
       create: vi.fn(),
       findMany: vi.fn(),
     },
-    promoCode: {
-      findUnique: vi.fn(),
-      update: vi.fn(),
-    },
-    $transaction: vi.fn(),
   },
 }));
 
@@ -74,8 +65,6 @@ describe("POST and GET /api/sales - Auth protection", () => {
     process.env.USER = "mariano";
     process.env.PASSWORD = "casa123tomada";
 
-    vi.mocked(prisma.batch.findFirst).mockResolvedValueOnce(null);
-
     const goodCreds = btoa("mariano:casa123tomada");
     const req = new NextRequest("http://localhost:3000/api/sales", {
       method: "POST",
@@ -92,8 +81,6 @@ describe("POST and GET /api/sales - Auth protection", () => {
   it("bypasses POST auth checks if USER and PASSWORD are not set in environment", async () => {
     delete process.env.USER;
     delete process.env.PASSWORD;
-
-    vi.mocked(prisma.batch.findFirst).mockResolvedValueOnce(null);
 
     const req = new NextRequest("http://localhost:3000/api/sales", {
       method: "POST",

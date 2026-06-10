@@ -3,13 +3,30 @@
 import { useEffect, useState } from "react";
 import type { EventConfig } from "@/config";
 
-interface ActiveBatch {
-  id: string;
-  name: string;
-  price: number;
-  total: number;
-  sold: number;
-  remaining: number;
+// Price increase dates — ART is UTC-3, so midnight ART = 03:00 UTC
+const PRICE_CHANGES = [
+  { at: new Date("2026-06-24T03:00:00Z"), toPrice: 13000 },
+  { at: new Date("2026-07-01T03:00:00Z"), toPrice: 15000 },
+];
+
+function getPriceInfo(now: Date) {
+  if (now < PRICE_CHANGES[0].at) {
+    return { currentPrice: 10000, nextPrice: 13000, changeAt: PRICE_CHANGES[0].at };
+  }
+  if (now < PRICE_CHANGES[1].at) {
+    return { currentPrice: 13000, nextPrice: 15000, changeAt: PRICE_CHANGES[1].at };
+  }
+  return { currentPrice: 15000, nextPrice: null, changeAt: null };
+}
+
+function formatCountdown(ms: number) {
+  const s = Math.floor(ms / 1000);
+  return {
+    days: Math.floor(s / 86400),
+    hours: Math.floor((s % 86400) / 3600),
+    minutes: Math.floor((s % 3600) / 60),
+    seconds: s % 60,
+  };
 }
 
 interface HomePageClientProps {
@@ -19,21 +36,12 @@ interface HomePageClientProps {
 export default function HomePageClient({ eventConfig }: HomePageClientProps) {
   const [aliasCopied, setAliasCopied] = useState(false);
   const [phoneCopied, setPhoneCopied] = useState(false);
-  const [activeBatch, setActiveBatch] = useState<ActiveBatch | null>(null);
-  const [loadingBatch, setLoadingBatch] = useState(true);
+  const [now, setNow] = useState<Date | null>(null);
 
   useEffect(() => {
-    fetch("/api/batches/active")
-      .then(async (res) => {
-        if (!res.ok) {
-          setActiveBatch(null);
-          return;
-        }
-        const data = await res.json();
-        setActiveBatch(data);
-      })
-      .catch(() => setActiveBatch(null))
-      .finally(() => setLoadingBatch(false));
+    setNow(new Date());
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
   }, []);
 
   function copyAlias() {
@@ -49,6 +57,10 @@ export default function HomePageClient({ eventConfig }: HomePageClientProps) {
       setTimeout(() => setPhoneCopied(false), 2000);
     });
   }
+
+  const priceInfo = now ? getPriceInfo(now) : null;
+  const msLeft = priceInfo?.changeAt ? priceInfo.changeAt.getTime() - now!.getTime() : null;
+  const countdown = msLeft !== null ? formatCountdown(msLeft) : null;
 
   return (
     <main className="min-h-screen bg-white flex flex-col items-center px-4 py-12">
@@ -100,24 +112,43 @@ export default function HomePageClient({ eventConfig }: HomePageClientProps) {
           </button>
         </div>
 
-        {/* Remaining tickets */}
+        {/* Price countdown */}
         <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 text-center">
-          {loadingBatch ? (
-            <div className="h-16 flex items-center justify-center">
+          {!priceInfo ? (
+            <div className="h-24 flex items-center justify-center">
               <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-700 rounded-full animate-spin" />
             </div>
-          ) : activeBatch ? (
-            <>
-              <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-                Entradas disponibles — {activeBatch.name}
-              </p>
-              <p className="text-6xl font-bold text-gray-900">{activeBatch.remaining}</p>
-              <p className="text-sm text-gray-400 mt-1">
-                de {activeBatch.total} • ${activeBatch.price.toLocaleString("es-AR")}
-              </p>
-            </>
           ) : (
-            <p className="text-gray-500">No hay lotes activos en este momento.</p>
+            <div className="space-y-3">
+              <p className="text-xs text-gray-500 uppercase tracking-wide">Precio actual</p>
+              <p className="text-5xl font-bold text-gray-900">
+                ${priceInfo.currentPrice.toLocaleString("es-AR")}
+              </p>
+              {countdown ? (
+                <div className="space-y-2 pt-1">
+                  <p className="text-sm text-gray-500">
+                    El precio sube a ${priceInfo.nextPrice!.toLocaleString("es-AR")} en:
+                  </p>
+                  <div className="flex justify-center gap-4">
+                    {[
+                      { value: countdown.days, label: "días" },
+                      { value: countdown.hours, label: "hs" },
+                      { value: countdown.minutes, label: "min" },
+                      { value: countdown.seconds, label: "seg" },
+                    ].map(({ value, label }) => (
+                      <div key={label} className="flex flex-col items-center">
+                        <span className="text-2xl font-bold text-gray-900 tabular-nums w-10 text-center">
+                          {String(value).padStart(2, "0")}
+                        </span>
+                        <span className="text-xs text-gray-400">{label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-gray-400 pt-1">Precio final</p>
+              )}
+            </div>
           )}
         </div>
       </div>

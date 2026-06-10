@@ -3,42 +3,17 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
-model Batch {
-  id         String      @id @default(uuid())
-  name       String
-  price      Int
-  total      Int
-  sold       Int         @default(0)
-  active     Boolean     @default(false)
-  createdAt  DateTime    @default(now())
-  promoCodes PromoCode[]
-  sales      Sale[]
-}
-
-model PromoCode {
-  id        String   @id @default(uuid())
-  code      String   @unique
-  batchId   String
-  uses      Int      @default(0)
-  createdAt DateTime @default(now())
-  batch     Batch    @relation(fields: [batchId], references: [id])
-  sales     Sale[]
-}
-
 model Sale {
-  id          String     @id @default(uuid())
+  id          String    @id @default(uuid())
   buyerName   String
-  promoCodeId String?
-  qrToken     String     @unique
-  ticketCount Int        @default(1)
-  used        Boolean    @default(false)
+  price       Int
+  qrToken     String    @unique
+  ticketCount Int       @default(1)
+  used        Boolean   @default(false)
   usedAt      DateTime?
-  createdAt   DateTime   @default(now())
-  promoCode   PromoCode? @relation(fields: [promoCodeId], references: [id])
-  batch       Batch      @relation(fields: [batchId], references: [id])
-  batchId     String
+  createdAt   DateTime  @default(now())
 }
