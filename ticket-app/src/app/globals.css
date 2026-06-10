@@ -1,3 +1,30 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes entradas-pulse {
+  0%, 100% {
+    font-variation-settings: "wght" 700;
+    letter-spacing: -0.05em;
+    transform: none;
+  }
+  30% {
+    font-variation-settings: "wght" 900;
+    letter-spacing: -0.07em;
+    transform: skewX(-4deg);
+  }
+  60% {
+    font-variation-settings: "wght" 400;
+    letter-spacing: -0.02em;
+    transform: none;
+  }
+  80% {
+    font-variation-settings: "wght" 800;
+    letter-spacing: -0.06em;
+    transform: skewX(3deg);
+  }
+}
+
+.entradas-animated {
+  animation: entradas-pulse 4s ease-in-out infinite;
+}
