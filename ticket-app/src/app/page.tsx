@@ -25,7 +25,14 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: "Casa Tomada",
       description,
-      images: [{ url: "/comprar-entradas/02E.jpg" }],
+      images: [
+        {
+          url: "/comprar-entradas/02E.jpg",
+          width: 1080,
+          height: 1350,
+          alt: "Casa Tomada — Entradas",
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",

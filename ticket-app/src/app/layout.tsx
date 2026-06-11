@@ -18,13 +18,33 @@ const spaceMono = Space_Mono({
   display: "swap",
 });
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_APP_URL ??
+  process.env.NEXT_PUBLIC_BASE_URL ??
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_BASE_URL ??
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000")
-  ),
+  metadataBase: new URL(siteUrl),
   title: "Casa Tomada — Entradas",
   description: "Conseguí tu entrada para el evento",
+  openGraph: {
+    title: "Casa Tomada",
+    description: "Conseguí tu entrada para el evento",
+    images: [
+      {
+        url: "/comprar-entradas/02E.jpg",
+        width: 1080,
+        height: 1350,
+        alt: "Casa Tomada — Entradas",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Casa Tomada",
+    description: "Conseguí tu entrada para el evento",
+    images: ["/comprar-entradas/02E.jpg"],
+  },
 };
 
 export default function RootLayout({
