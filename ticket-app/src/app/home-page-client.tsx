@@ -24,7 +24,7 @@ const PRICE_CHANGES = [
 
 function getPriceInfo(now: Date) {
   if (now < PRICE_CHANGES[0].at) {
-    return { currentTierIndex: 0, currentPrice: 10000, nextPrice: 13000, changeAt: PRICE_CHANGES[0].at, currentLabel: "early bird" };
+    return { currentTierIndex: 0, currentPrice: 10000, nextPrice: 13000, changeAt: PRICE_CHANGES[0].at, currentLabel: "pajarito tempranero" };
   }
   if (now < PRICE_CHANGES[1].at) {
     return { currentTierIndex: 1, currentPrice: 13000, nextPrice: 15000, changeAt: PRICE_CHANGES[1].at, currentLabel: "primera tanda" };

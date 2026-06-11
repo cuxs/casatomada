@@ -5,7 +5,7 @@ import type { EventConfig } from "@/config";
 import SectionHeader from "./section-header";
 
 const ALL_TIERS = [
-  { label: "early bird", price: 10000 },
+  { label: "pajarito tempranero", price: 10000 },
   { label: "primera tanda", price: 13000 },
   { label: "segunda tanda", price: 15000 },
   { label: "entradas en puerta", price: 20000 },
@@ -143,11 +143,21 @@ function PriceDisplay({
 }) {
   if (!priceInfo) return null;
 
+  const pastTiers = ALL_TIERS.slice(0, priceInfo.currentTierIndex);
   const activeTier = ALL_TIERS[priceInfo.currentTierIndex];
   const futureTiers = ALL_TIERS.slice(priceInfo.currentTierIndex + 1);
 
   return (
     <div className="flex flex-col">
+      {pastTiers.map((tier) => (
+        <p
+          key={tier.label}
+          className="font-epilogue font-medium text-[clamp(18px,5vw,26px)] tracking-[-0.05em] text-white/40 line-through m-0 leading-[1.8] text-center"
+        >
+          {tier.label} ${tier.price.toLocaleString("es-AR")}
+        </p>
+      ))}
+
       <button
         onClick={onBuyNow}
         className="bg-[rgba(8,8,8,0.88)] border-2 border-white/[0.28] rounded-[18px] px-6 py-4 text-center backdrop-blur-sm mb-5 cursor-pointer w-full"

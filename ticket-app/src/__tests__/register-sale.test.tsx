@@ -16,13 +16,13 @@ describe("RegisterSalePage", () => {
     });
   }
 
-  it("renders the form initially with empty fields", async () => {
+  it("renders the form initially with default values", async () => {
     mockBuyersFetch();
     render(<RegisterSalePage />);
 
     expect(screen.getByText("Registrar compra")).toBeInTheDocument();
-    expect(screen.getByLabelText(/Tu nombre/)).toHaveValue("");
-    expect(screen.getByLabelText(/Código de promo/)).toHaveValue("");
+    expect(screen.getByLabelText(/Nombre/)).toHaveValue("");
+    expect(screen.getByLabelText("Válido por")).toHaveValue(1);
     expect(screen.getByRole("button", { name: "Confirmar compra" })).toBeDisabled();
 
     await waitFor(() => {
@@ -34,11 +34,16 @@ describe("RegisterSalePage", () => {
     mockBuyersFetch();
     render(<RegisterSalePage />);
 
-    const nameInput = screen.getByLabelText(/Tu nombre/);
+    const nameInput = screen.getByLabelText(/Nombre/);
     const submitBtn = screen.getByRole("button", { name: "Confirmar compra" });
+
+    expect(submitBtn).toBeDisabled();
 
     fireEvent.change(nameInput, { target: { value: "Pedro Gómez" } });
     expect(submitBtn).toBeEnabled();
+
+    fireEvent.change(nameInput, { target: { value: "   " } });
+    expect(submitBtn).toBeDisabled();
   });
 
   it("submits the form successfully and displays the QR code", async () => {
@@ -63,12 +68,10 @@ describe("RegisterSalePage", () => {
 
     render(<RegisterSalePage />);
 
-    const nameInput = screen.getByLabelText(/Tu nombre/);
-    const promoInput = screen.getByLabelText(/Código de promo/);
+    const nameInput = screen.getByLabelText(/Nombre/);
     const submitBtn = screen.getByRole("button", { name: "Confirmar compra" });
 
     fireEvent.change(nameInput, { target: { value: "Pedro Gómez" } });
-    fireEvent.change(promoInput, { target: { value: "tanda1" } });
     fireEvent.click(submitBtn);
 
     expect(mockFetch).toHaveBeenCalledWith("/api/sales", {
@@ -76,7 +79,8 @@ describe("RegisterSalePage", () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         buyerName: "Pedro Gómez",
-        promoCode: "TANDA1",
+        price: 10000,
+        ticketCount: 1,
       }),
     });
 
@@ -98,8 +102,61 @@ describe("RegisterSalePage", () => {
     fireEvent.click(newSaleBtn);
 
     expect(screen.getByText("Registrar compra")).toBeInTheDocument();
-    expect(screen.getByLabelText(/Tu nombre/)).toHaveValue("");
-    expect(screen.getByLabelText(/Código de promo/)).toHaveValue("");
+    expect(screen.getByLabelText(/Nombre/)).toHaveValue("");
+    expect(screen.getByLabelText("Válido por")).toHaveValue(1);
+  });
+
+  it("submits the selected price and ticket count", async () => {
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          qrDataUrl: "data:image/png;base64,mockqr",
+          ticketCount: 3,
+        }),
+      })
+      .mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve([]),
+      });
+
+    render(<RegisterSalePage />);
+
+    fireEvent.change(screen.getByLabelText(/Nombre/), { target: { value: "Ana Díaz" } });
+    fireEvent.change(screen.getByLabelText("Precio"), { target: { value: "15000" } });
+    fireEvent.change(screen.getByLabelText("Válido por"), { target: { value: "3" } });
+    fireEvent.click(screen.getByRole("button", { name: "Confirmar compra" }));
+
+    expect(mockFetch).toHaveBeenCalledWith("/api/sales", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        buyerName: "Ana Díaz",
+        price: 15000,
+        ticketCount: 3,
+      }),
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("¡Listo!")).toBeInTheDocument();
+    });
+    expect(screen.getByText(/3 entradas/)).toBeInTheDocument();
+  });
+
+  it("clamps the ticket count to a minimum of 1", () => {
+    mockBuyersFetch();
+    render(<RegisterSalePage />);
+
+    const ticketInput = screen.getByLabelText("Válido por");
+    fireEvent.change(ticketInput, { target: { value: "0" } });
+    expect(ticketInput).toHaveValue(1);
+
+    fireEvent.change(ticketInput, { target: { value: "-5" } });
+    expect(ticketInput).toHaveValue(1);
   });
 
   it("displays error message if the API call fails", async () => {
@@ -117,7 +174,7 @@ describe("RegisterSalePage", () => {
 
     render(<RegisterSalePage />);
 
-    fireEvent.change(screen.getByLabelText(/Tu nombre/), { target: { value: "Pedro Gómez" } });
+    fireEvent.change(screen.getByLabelText(/Nombre/), { target: { value: "Pedro Gómez" } });
     fireEvent.click(screen.getByRole("button", { name: "Confirmar compra" }));
 
     await waitFor(() => {
@@ -135,7 +192,7 @@ describe("RegisterSalePage", () => {
 
     render(<RegisterSalePage />);
 
-    fireEvent.change(screen.getByLabelText(/Tu nombre/), { target: { value: "Pedro Gómez" } });
+    fireEvent.change(screen.getByLabelText(/Nombre/), { target: { value: "Pedro Gómez" } });
     fireEvent.click(screen.getByRole("button", { name: "Confirmar compra" }));
 
     await waitFor(() => {
