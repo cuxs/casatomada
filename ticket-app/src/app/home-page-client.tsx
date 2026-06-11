@@ -68,6 +68,13 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
   const rizomaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    LANDING_IMAGES.forEach((src) => {
+      const img = new window.Image();
+      img.src = src;
+    });
+  }, []);
+
+  useEffect(() => {
     const id = setInterval(() => setBgIndex((i) => (i + 1) % LANDING_IMAGES.length), 5000);
     return () => clearInterval(id);
   }, []);
@@ -133,6 +140,7 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
         className={`absolute inset-0 transition-transform duration-[600ms] ease-in-out overflow-hidden ${section === "hero" || section === "entradas" ? "z-10" : "z-[5]"}`}
         style={{ transform: heroX }}
       >
+        <div className="absolute inset-0 bg-[#2a1f1a]" />
         {LANDING_IMAGES.map((src, i) => (
           <div
             key={src}
