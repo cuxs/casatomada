@@ -206,24 +206,11 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
 
         <div className="relative h-full flex flex-col justify-between py-[8vh] px-[5vw]">
           <div className="flex-1 flex flex-col justify-center">
-            <div
-              className="font-epilogue font-bold leading-[0.88] tracking-[-0.1em] text-white mix-blend-exclusion transition-transform duration-[600ms] ease-in-out"
-              style={{
-                fontSize: "clamp(100px, 26vw, 200px)",
-                transform: section === "entradas" ? "translateX(-150%)" : "translateX(0)",
-              }}
-            >
-              casa
-            </div>
-            <div
-              className="font-epilogue font-bold leading-[0.88] tracking-[-0.1em] text-white mix-blend-exclusion transition-transform duration-[600ms] ease-in-out"
-              style={{
-                fontSize: "clamp(100px, 26vw, 200px)",
-                transform: section === "entradas" ? "translateX(150%)" : "translateX(0)",
-              }}
-            >
-              tomada
-            </div>
+            <img
+              src="/svg/loguito-casa-tomada.svg"
+              alt="casa tomada"
+              className="w-[min(90vw,900px)] mix-blend-exclusion"
+            />
           </div>
 
           {/* Pills + entradas button */}
