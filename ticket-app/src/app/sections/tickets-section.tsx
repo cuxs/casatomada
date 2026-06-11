@@ -103,7 +103,7 @@ export default function EntradasSection({
 
           <button
             onClick={onCopyAlias}
-            className={`font-epilogue font-medium text-base rounded-full py-2 px-6 cursor-pointer mb-10 tracking-[-0.01em] transition-colors bg-white/[0.08] border border-white/20 ${aliasCopied ? "text-white/50" : "text-white/75"}`}
+            className={`font-epilogue font-medium text-base rounded-full py-2 px-6 cursor-pointer mb-10 tracking-[-0.01em] transition-colors bg-white/[0.18] border border-white/30 ${aliasCopied ? "text-white/50" : "text-white/75"}`}
           >
             {aliasCopied ? "¡copiado!" : "copiar el alias"}
           </button>
@@ -118,7 +118,7 @@ export default function EntradasSection({
 
           <button
             onClick={onCopyPhone}
-            className={`font-epilogue font-medium text-base rounded-full py-2 px-6 cursor-pointer mb-10 tracking-[-0.01em] transition-colors bg-white/[0.08] border border-white/20 ${phoneCopied ? "text-white/50" : "text-white/75"}`}
+            className={`font-epilogue font-medium text-base rounded-full py-2 px-6 cursor-pointer mb-10 tracking-[-0.01em] transition-colors bg-white/[0.18] border border-white/30 ${phoneCopied ? "text-white/50" : "text-white/75"}`}
           >
             {phoneCopied ? "¡copiado!" : "copiar el número"}
           </button>
@@ -129,7 +129,7 @@ export default function EntradasSection({
 
           <button
             onClick={onBack}
-            className="mt-12 mx-auto flex items-center gap-2.5 font-epilogue font-medium text-base tracking-[-0.01em] text-white/50 bg-white/[0.06] border border-white/15 rounded-full py-3 px-7 cursor-pointer hover:bg-white/10 hover:text-white/70 transition-colors"
+            className="mt-12 mx-auto flex items-center gap-2.5 font-epilogue font-medium text-base tracking-[-0.01em] text-white/60 bg-white/[0.16] border border-white/25 rounded-full py-3 px-7 cursor-pointer hover:bg-white/25 hover:text-white/80 transition-colors"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="18 15 12 9 6 15" />
