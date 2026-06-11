@@ -56,7 +56,7 @@ export default function EntradasSection({
 
   return (
     <div className="relative bg-[#080808]">
-      <SectionHeader onBack={onBack} />
+      <SectionHeader onBack={onBack} backSide="up" />
 
       {/* ── Screen 1: Flyer + Prices ── */}
       <div className="relative flex flex-col items-center justify-center min-h-screen pt-[26px] px-5 pb-12 overflow-hidden">
@@ -126,6 +126,16 @@ export default function EntradasSection({
           <p className="font-epilogue font-medium text-[clamp(16px,4vw,30px)] tracking-[-0.01em] text-white/70 leading-[1.4] text-center">
             Una vez completados los pasos te va a llegar un QR con la entrada a tu whatsapp
           </p>
+
+          <button
+            onClick={onBack}
+            className="mt-12 mx-auto flex items-center gap-2.5 font-epilogue font-medium text-base tracking-[-0.01em] text-white/50 bg-white/[0.06] border border-white/15 rounded-full py-3 px-7 cursor-pointer hover:bg-white/10 hover:text-white/70 transition-colors"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="18 15 12 9 6 15" />
+            </svg>
+            volver al inicio
+          </button>
         </div>
       </div>
     </div>
@@ -160,7 +170,7 @@ function PriceDisplay({
 
       <button
         onClick={onBuyNow}
-        className="bg-[rgba(8,8,8,0.88)] border-2 border-white/[0.28] rounded-[18px] px-6 py-4 text-center backdrop-blur-sm mb-5 cursor-pointer w-full"
+        className="entradas-glow bg-[rgba(8,8,8,0.88)] border-2 border-white/[0.28] rounded-[18px] px-6 py-4 text-center backdrop-blur-sm mb-5 cursor-pointer w-full"
       >
         <p className="font-epilogue font-bold text-[clamp(24px,7vw,38px)] tracking-[-0.05em] text-white leading-none m-0">
           {activeTier.label} ${activeTier.price.toLocaleString("es-AR")}

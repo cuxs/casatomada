@@ -20,7 +20,7 @@ const MANIFESTO_BLOCKS = [
 export default function ManifiestaSection({ onBack }: { onBack: () => void }) {
   return (
     <div className="relative min-h-screen bg-[#080000]">
-      <SectionHeader onBack={onBack} />
+      <SectionHeader onBack={onBack} backSide="right" />
 
       {/* Tiled background — absolute so it stretches with scrollable content */}
       <div className="absolute inset-0 z-0 pointer-events-none">

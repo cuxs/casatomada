@@ -1,10 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { EventConfig } from "@/config";
 import EntradasSection from "./sections/tickets-section";
 import ManifiestaSection from "./sections/manifesta-section";
 import RizomaSection from "./sections/rizoma-section";
+
+const FONT_VARIANTS: { wght: number; italic: boolean }[] = [
+  { wght: 900, italic: false },
+  { wght: 300, italic: true },
+  { wght: 700, italic: false },
+  { wght: 900, italic: true },
+  { wght: 300, italic: false },
+  { wght: 800, italic: true },
+  { wght: 400, italic: false },
+  { wght: 700, italic: true },
+];
 
 const LANDING_IMAGES = [
   "/fotos-landing/002.png",
@@ -43,32 +54,34 @@ function formatCountdown(ms: number) {
 }
 
 type Section = "hero" | "entradas" | "manifiest" | "rizoma";
-type SwipePanel = "manifiest" | "rizoma";
-type SwipeState =
-  | { status: "idle" }
-  | { status: "dragging"; panel: SwipePanel; delta: number }
-  | { status: "exiting"; panel: SwipePanel; x: string };
-
-const SWIPE_THRESHOLD = 80;
-const EXIT_DURATION = 400;
 
 export default function HomePageClient({ eventConfig }: { eventConfig: EventConfig }) {
   const [section, setSection] = useState<Section>("hero");
-  const [swipe, setSwipe] = useState<SwipeState>({ status: "idle" });
   const [bgIndex, setBgIndex] = useState(0);
   const [now, setNow] = useState<Date | null>(null);
   const [aliasCopied, setAliasCopied] = useState(false);
   const [phoneCopied, setPhoneCopied] = useState(false);
+  const [fontVariant, setFontVariant] = useState(FONT_VARIANTS[0]);
 
   const entradasRef = useRef<HTMLDivElement>(null);
   const manifiestaRef = useRef<HTMLDivElement>(null);
   const rizomaRef = useRef<HTMLDivElement>(null);
-  const touchStart = useRef<{ x: number; y: number } | null>(null);
-  const swipeRef = useRef(swipe);
-  swipeRef.current = swipe;
 
   useEffect(() => {
     const id = setInterval(() => setBgIndex((i) => (i + 1) % LANDING_IMAGES.length), 5000);
+    return () => clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    let last = 0;
+    const id = setInterval(() => {
+      setFontVariant((prev) => {
+        let next;
+        do { next = Math.floor(Math.random() * FONT_VARIANTS.length); } while (next === last);
+        last = next;
+        return FONT_VARIANTS[next];
+      });
+    }, 120);
     return () => clearInterval(id);
   }, []);
 
@@ -86,81 +99,6 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
     if (section === "manifiest") scrollTop(manifiestaRef.current);
     if (section === "rizoma") scrollTop(rizomaRef.current);
   }, [section]);
-
-  const goBack = useCallback(
-    (panel: SwipePanel, exitX: string) => {
-      setSwipe({ status: "exiting", panel, x: exitX });
-      setTimeout(() => {
-        setSection("hero");
-        setSwipe({ status: "idle" });
-      }, EXIT_DURATION);
-    },
-    []
-  );
-
-  const onTouchStart = useCallback((e: React.TouchEvent) => {
-    touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-  }, []);
-
-  const onTouchMove = useCallback(
-    (e: React.TouchEvent, panel: SwipePanel) => {
-      if (!touchStart.current) return;
-      const dx = e.touches[0].clientX - touchStart.current.x;
-      const dy = e.touches[0].clientY - touchStart.current.y;
-
-      if (Math.abs(dy) > Math.abs(dx) * 1.2) return;
-
-      // manifiest@ exits left (swipe left, dx < 0)
-      // rizoma exits right (swipe right, dx > 0)
-      const relevant =
-        (panel === "manifiest" && dx < 0) ||
-        (panel === "rizoma" && dx > 0);
-      if (!relevant) return;
-
-      setSwipe({ status: "dragging", panel, delta: dx });
-    },
-    []
-  );
-
-  const onTouchEnd = useCallback(
-    (panel: SwipePanel, exitX: string) => {
-      const s = swipeRef.current;
-      if (s.status !== "dragging" || s.panel !== panel) {
-        setSwipe({ status: "idle" });
-        touchStart.current = null;
-        return;
-      }
-      const { delta } = s;
-      const didSwipe =
-        panel === "manifiest" ? delta < -SWIPE_THRESHOLD : delta > SWIPE_THRESHOLD;
-
-      if (didSwipe) {
-        goBack(panel, exitX);
-      } else {
-        setSwipe({ status: "idle" });
-      }
-      touchStart.current = null;
-    },
-    [goBack]
-  );
-
-  function swipeableTransform(
-    panel: SwipePanel,
-    defaultVisible: string,
-    defaultHidden: string
-  ): string {
-    if (swipe.status === "dragging" && swipe.panel === panel) {
-      return `translateX(${swipe.delta}px)`;
-    }
-    if (swipe.status === "exiting" && swipe.panel === panel) {
-      return swipe.x;
-    }
-    return section === panel ? defaultVisible : defaultHidden;
-  }
-
-  function swipeableTransition(panel: SwipePanel): string | undefined {
-    return swipe.status === "dragging" && swipe.panel === panel ? "none" : undefined;
-  }
 
   const priceInfo = now ? getPriceInfo(now) : null;
   const msLeft = priceInfo?.changeAt ? priceInfo.changeAt.getTime() - now!.getTime() : null;
@@ -181,9 +119,9 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
   }
 
   const heroX =
-    section === "manifiest" || (swipe.status === "exiting" && swipe.panel === "manifiest")
+    section === "manifiest"
       ? "translateX(100%)"
-      : section === "rizoma" || (swipe.status === "exiting" && swipe.panel === "rizoma")
+      : section === "rizoma"
       ? "translateX(-100%)"
       : "translateX(0)";
 
@@ -236,8 +174,12 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
 
             <button
               onClick={() => setSection("entradas")}
-              className="entradas-animated font-epilogue font-bold tracking-[-0.05em] text-white/90 bg-[rgba(10,10,10,0.75)] border-2 border-white/35 rounded-3xl py-[14px] cursor-pointer backdrop-blur-sm w-full block"
-              style={{ fontSize: "clamp(36px, 9.5vw, 46px)" }}
+              className="font-epilogue tracking-[-0.05em] text-white/90 bg-[rgba(10,10,10,0.75)] border-2 border-white/35 rounded-3xl py-[14px] cursor-pointer backdrop-blur-sm w-full block"
+              style={{
+                fontSize: "clamp(36px, 9.5vw, 46px)",
+                fontVariationSettings: `"wght" ${fontVariant.wght}`,
+                fontStyle: fontVariant.italic ? "italic" : "normal",
+              }}
             >
               entradas
             </button>
@@ -276,33 +218,19 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
       {/* ===== MANIFIEST@ ===== */}
       <div
         ref={manifiestaRef}
-        onTouchStart={onTouchStart}
-        onTouchMove={(e) => onTouchMove(e, "manifiest")}
-        onTouchEnd={() => onTouchEnd("manifiest", "translateX(-100%)")}
-        onTouchCancel={() => { setSwipe({ status: "idle" }); touchStart.current = null; }}
-        className={`absolute inset-0 overflow-x-hidden transition-transform duration-[600ms] ease-in-out ${section === "manifiest" ? "z-20" : "z-[5]"} ${swipe.status === "dragging" && swipe.panel === "manifiest" ? "overflow-y-hidden" : "overflow-y-auto"}`}
-        style={{
-          transform: swipeableTransform("manifiest", "translateX(0)", "translateX(-100%)"),
-          transition: swipeableTransition("manifiest"),
-        }}
+        className={`absolute inset-0 overflow-x-hidden overflow-y-auto transition-transform duration-[600ms] ease-in-out ${section === "manifiest" ? "z-20" : "z-[5]"}`}
+        style={{ transform: section === "manifiest" ? "translateX(0)" : "translateX(-100%)" }}
       >
-        <ManifiestaSection onBack={() => goBack("manifiest", "translateX(-100%)")} />
+        <ManifiestaSection onBack={() => setSection("hero")} />
       </div>
 
       {/* ===== RIZOMA ===== */}
       <div
         ref={rizomaRef}
-        onTouchStart={onTouchStart}
-        onTouchMove={(e) => onTouchMove(e, "rizoma")}
-        onTouchEnd={() => onTouchEnd("rizoma", "translateX(100%)")}
-        onTouchCancel={() => { setSwipe({ status: "idle" }); touchStart.current = null; }}
-        className={`absolute inset-0 overflow-x-hidden transition-transform duration-[600ms] ease-in-out ${section === "rizoma" ? "z-20" : "z-[5]"} ${swipe.status === "dragging" && swipe.panel === "rizoma" ? "overflow-y-hidden" : "overflow-y-auto"}`}
-        style={{
-          transform: swipeableTransform("rizoma", "translateX(0)", "translateX(100%)"),
-          transition: swipeableTransition("rizoma"),
-        }}
+        className={`absolute inset-0 overflow-x-hidden overflow-y-auto transition-transform duration-[600ms] ease-in-out ${section === "rizoma" ? "z-20" : "z-[5]"}`}
+        style={{ transform: section === "rizoma" ? "translateX(0)" : "translateX(100%)" }}
       >
-        <RizomaSection onBack={() => goBack("rizoma", "translateX(100%)")} />
+        <RizomaSection onBack={() => setSection("hero")} />
       </div>
 
     </div>

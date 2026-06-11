@@ -11,12 +11,12 @@ export default function RizomaSection({ onBack }: { onBack: () => void }) {
         muted
         loop
         playsInline
-        className="absolute inset-0 w-full h-full object-cover opacity-50 z-0"
+        className="absolute inset-0 w-full h-full object-cover opacity-50 z-0 object-left-bottom"
       />
       <div className="absolute inset-0 bg-black/45 z-[1]" />
 
       <div className="relative z-10">
-        <SectionHeader onBack={onBack} />
+        <SectionHeader onBack={onBack} backSide="left" />
       </div>
 
       <div className="relative z-[2] flex flex-col items-center justify-center min-h-[calc(100vh-80px)] pt-5 px-6 pb-[60px] gap-10">

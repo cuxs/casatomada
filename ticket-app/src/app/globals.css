@@ -2,15 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
-@keyframes entradas-pulse {
-  0%   { font-variation-settings: "wght" 700; font-style: normal; }
-  25%  { font-variation-settings: "wght" 900; font-style: normal; }
-  50%  { font-variation-settings: "wght" 900; font-style: italic; }
-  75%  { font-variation-settings: "wght" 300; font-style: italic; }
-  100% { font-variation-settings: "wght" 700; font-style: normal; }
+@keyframes entradas-glow {
+  0%, 100% {
+    box-shadow:
+      0 0 18px rgba(255, 255, 255, 0.10),
+      0 0 40px rgba(255, 255, 255, 0.04),
+      0 8px 28px rgba(0, 0, 0, 0.55);
+  }
+  50% {
+    box-shadow:
+      0 0 32px rgba(255, 255, 255, 0.22),
+      0 0 64px rgba(255, 255, 255, 0.08),
+      0 8px 28px rgba(0, 0, 0, 0.55);
+  }
 }
 
-.entradas-animated {
-  animation: entradas-pulse 4s ease-in-out infinite;
-  will-change: font-variation-settings;
+.entradas-glow {
+  animation: entradas-glow 2.8s ease-in-out infinite;
 }
+
