@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { checkApiAuth } from "@/lib/basic-auth";
 import { prisma } from "@/lib/prisma";
 import { v4 as uuidv4 } from "uuid";
 import QRCode from "qrcode";
+import { codeWordForIndex, TOTAL_CODE_WORDS } from "@/lib/code-words";
 
 export const dynamic = "force-dynamic";
 
@@ -42,16 +44,42 @@ export async function POST(request: NextRequest) {
     color: { dark: "#111827", light: "#ffffff" },
   });
 
-  await prisma.sale.create({
-    data: {
-      buyerName: buyerName.trim(),
-      price,
-      qrToken,
-      ticketCount,
-    },
-  });
+  const salesCount = await prisma.sale.count();
 
-  return NextResponse.json({ qrToken, qrDataUrl, ticketCount });
+  let codeWord = "";
+  let created = false;
+  for (let attempt = 0; attempt < TOTAL_CODE_WORDS; attempt++) {
+    codeWord = codeWordForIndex(salesCount + attempt);
+    try {
+      await prisma.sale.create({
+        data: {
+          buyerName: buyerName.trim(),
+          price,
+          qrToken,
+          codeWord,
+          ticketCount,
+        },
+      });
+      created = true;
+      break;
+    } catch (err) {
+      const isCodeWordCollision =
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === "P2002" &&
+        (err.meta?.target as string[] | undefined)?.includes("codeWord");
+
+      if (!isCodeWordCollision) throw err;
+    }
+  }
+
+  if (!created) {
+    return NextResponse.json(
+      { error: "No se pudo generar una palabra clave única" },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json({ qrToken, qrDataUrl, codeWord, ticketCount });
 }
 
 export async function GET(request: NextRequest) {

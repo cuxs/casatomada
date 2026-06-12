@@ -6,6 +6,8 @@ import BuyersSummary from "./buyers-summary";
 
 interface SaleResult {
   qrDataUrl: string;
+  codeWord: string;
+  qrToken: string;
   ticketCount: number;
 }
 
@@ -46,7 +48,12 @@ export default function RegisterSalePage() {
         return;
       }
 
-      setResult({ qrDataUrl: data.qrDataUrl, ticketCount: data.ticketCount });
+      setResult({
+        qrDataUrl: data.qrDataUrl,
+        codeWord: data.codeWord,
+        qrToken: data.qrToken,
+        ticketCount: data.ticketCount,
+      });
       setBuyersRefreshKey((key) => key + 1);
     } catch {
       setError("No se pudo conectar con el servidor. Intentá de nuevo.");
@@ -88,6 +95,16 @@ export default function RegisterSalePage() {
                 {result.ticketCount} {result.ticketCount === 1 ? "entrada" : "entradas"}
               </span>
             </p>
+            <div className="w-full text-center bg-gray-900 rounded-xl px-4 py-3">
+              <p className="text-xs text-gray-300 uppercase tracking-wider">Tu animal</p>
+              <p className="mt-1 text-lg font-bold text-white capitalize">{result.codeWord}</p>
+            </div>
+            <div className="w-full text-center bg-gray-900 rounded-xl px-4 py-3">
+              <p className="text-xs text-gray-300 uppercase tracking-wider">Tu código</p>
+              <p className="mt-1 text-lg font-bold text-white tracking-widest">
+                {result.qrToken.slice(-3).toUpperCase()}
+              </p>
+            </div>
           </div>
 
           <div className="flex flex-col gap-3">

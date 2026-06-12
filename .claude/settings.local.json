@@ -10,7 +10,8 @@
       "Bash(mkdir -p /Users/mariano/Trabajo/FIIT/casatomada/ticket-app/src/app/api/sales *)",
       "Bash(npm install *)",
       "Bash(npx vitest *)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(npx prisma *)"
     ]
   }
 }

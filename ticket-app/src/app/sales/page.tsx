@@ -114,6 +114,7 @@ export default function SalesPage() {
                 <thead>
                   <tr className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     <th className="px-6 py-4">Comprador</th>
+                    <th className="px-6 py-4">Palabra clave</th>
                     <th className="px-6 py-4 text-center">Entradas</th>
                     <th className="px-6 py-4">Estado</th>
                     <th className="px-6 py-4">Compra</th>
@@ -124,6 +125,9 @@ export default function SalesPage() {
                   {sales.map((sale) => (
                     <tr key={sale.id} className="hover:bg-gray-50/50 transition-colors">
                       <td className="px-6 py-4 font-medium text-gray-900">{sale.buyerName}</td>
+                      <td className="px-6 py-4 text-gray-700 capitalize whitespace-nowrap">
+                        {sale.codeWord}
+                      </td>
                       <td className="px-6 py-4 text-center font-bold text-gray-900">
                         {sale.ticketCount}
                       </td>

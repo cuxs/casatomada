@@ -7,9 +7,9 @@ import {
 
 describe("sales-summary", () => {
   const sales: Sale[] = [
-    { id: "1", buyerName: "Juan Pérez", ticketCount: 2, used: false, usedAt: null, createdAt: "2026-05-29" },
-    { id: "2", buyerName: "Ana Ruiz", ticketCount: 1, used: true, usedAt: "2026-05-30", createdAt: "2026-05-29" },
-    { id: "3", buyerName: "Juan Pérez", ticketCount: 1, used: false, usedAt: null, createdAt: "2026-05-30" },
+    { id: "1", buyerName: "Juan Pérez", codeWord: "lombriz roja del monte", ticketCount: 2, used: false, usedAt: null, createdAt: "2026-05-29" },
+    { id: "2", buyerName: "Ana Ruiz", codeWord: "marmota azul de la esquina", ticketCount: 1, used: true, usedAt: "2026-05-30", createdAt: "2026-05-29" },
+    { id: "3", buyerName: "Juan Pérez", codeWord: "capibara verde de la terraza", ticketCount: 1, used: false, usedAt: null, createdAt: "2026-05-30" },
   ];
 
   it("aggregates ticket counts by buyer name", () => {

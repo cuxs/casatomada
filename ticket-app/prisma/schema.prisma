@@ -12,6 +12,7 @@ model Sale {
   buyerName   String
   price       Int
   qrToken     String    @unique
+  codeWord    String    @unique
   ticketCount Int       @default(1)
   used        Boolean   @default(false)
   usedAt      DateTime?
