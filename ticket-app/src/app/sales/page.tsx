@@ -148,7 +148,7 @@ export default function SalesPage() {
 
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col items-center px-4 py-12">
-      <div className="w-full max-w-2xl space-y-6">
+      <div className="w-full max-w-2xl lg:max-w-4xl space-y-6">
         <div>
           <Link
             href="/register-sale"
@@ -160,7 +160,7 @@ export default function SalesPage() {
         </div>
 
         <section className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 space-y-3">
+          <div className="px-6 py-4 lg:px-4 lg:py-2.5 border-b border-gray-100 space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
                 <h2 className="text-sm font-semibold text-gray-800 uppercase tracking-wider">
@@ -194,7 +194,7 @@ export default function SalesPage() {
               )}
             </div>
 
-            <div className="relative">
+            <div className="relative lg:max-w-xs lg:ml-auto">
               <input
                 type="search"
                 value={search}
@@ -223,12 +223,12 @@ export default function SalesPage() {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                      <th className="px-6 py-4">Nombre</th>
-                      <th className="px-6 py-4 text-center">Entradas</th>
-                      <th className="px-6 py-4 w-12">
+                      <th className="px-6 py-4 lg:px-4 lg:py-2.5">Nombre</th>
+                      <th className="px-6 py-4 lg:px-4 lg:py-2.5 text-center">Entradas</th>
+                      <th className="px-6 py-4 lg:px-4 lg:py-2.5 w-12">
                         <span className="sr-only">Ver detalle</span>
                       </th>
-                      <th className="px-6 py-4 w-12">
+                      <th className="px-6 py-4 lg:px-4 lg:py-2.5 w-12">
                         <span className="sr-only">Editar</span>
                       </th>
                     </tr>
@@ -236,11 +236,11 @@ export default function SalesPage() {
                   <tbody className="divide-y divide-gray-100 text-sm text-gray-700">
                     {sales.map((sale) => (
                       <tr key={sale.id} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="px-6 py-4 font-medium text-gray-900">{sale.buyerName}</td>
-                        <td className="px-6 py-4 text-center font-bold text-gray-900">
+                        <td className="px-6 py-4 lg:px-4 lg:py-2.5 font-medium text-gray-900">{sale.buyerName}</td>
+                        <td className="px-6 py-4 lg:px-4 lg:py-2.5 text-center font-bold text-gray-900">
                           {sale.ticketCount}
                         </td>
-                        <td className="px-6 py-4 text-center">
+                        <td className="px-6 py-4 lg:px-4 lg:py-2.5 text-center">
                           <button
                             type="button"
                             onClick={() => setViewSale(sale)}
@@ -253,7 +253,7 @@ export default function SalesPage() {
                             </svg>
                           </button>
                         </td>
-                        <td className="px-6 py-4 text-center">
+                        <td className="px-6 py-4 lg:px-4 lg:py-2.5 text-center">
                           <button
                             type="button"
                             onClick={() => setEditSale(sale)}
@@ -271,7 +271,7 @@ export default function SalesPage() {
                 </table>
               </div>
 
-              <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between text-sm">
+              <div className="px-6 py-4 lg:px-4 lg:py-2.5 border-t border-gray-100 flex items-center justify-between text-sm">
                 <button
                   type="button"
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
