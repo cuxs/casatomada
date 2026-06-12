@@ -57,7 +57,7 @@ describe("RegisterSalePage", () => {
         json: () => Promise.resolve({
           qrDataUrl: "data:image/png;base64,mockqr",
           codeWord: "lombriz roja del monte",
-          qrToken: "620671fe-2b30-43d0-a54a-bc5b2950b614",
+          qrToken: "mock-qr-token-aaa",
           ticketCount: 1,
         }),
       })
@@ -119,7 +119,7 @@ describe("RegisterSalePage", () => {
         json: () => Promise.resolve({
           qrDataUrl: "data:image/png;base64,mockqr",
           codeWord: "marmota azul de la esquina",
-          qrToken: "abcd1234-2b30-43d0-a54a-bc5b2950b9f1",
+          qrToken: "mock-qr-token-bbb",
           ticketCount: 3,
         }),
       })

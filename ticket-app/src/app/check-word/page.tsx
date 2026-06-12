@@ -207,7 +207,7 @@ export default function CheckWordPage() {
                       {codeMarking ? (
                         <span className="w-6 h-6 border-2 border-green-700 border-t-transparent rounded-full animate-spin inline-block" />
                       ) : (
-                        <span className="text-4xl">Validar ✅</span>
+                        <span className="text-4xl text-black">Validar ✅</span>
                       )}
                     </button>
                   )}
