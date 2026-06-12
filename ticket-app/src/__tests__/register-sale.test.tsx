@@ -64,7 +64,7 @@ describe("RegisterSalePage", () => {
       .mockResolvedValue({
         ok: true,
         json: () => Promise.resolve([
-          { id: "1", buyerName: "Pedro Gómez", ticketCount: 1, used: false, createdAt: "2026-05-29" },
+          { id: "1", buyerName: "Pedro Gómez", codeWord: "lombriz roja del monte", qrToken: "mock-qr-token-aaa", ticketCount: 1, used: false, createdAt: "2026-05-29" },
         ]),
       });
 

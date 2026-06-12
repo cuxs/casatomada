@@ -2,6 +2,7 @@ export interface Sale {
   id: string;
   buyerName: string;
   codeWord: string;
+  qrToken: string;
   price?: number;
   ticketCount: number;
   used: boolean;
@@ -12,26 +13,37 @@ export interface Sale {
 export interface BuyerSummary {
   buyerName: string;
   ticketCount: number;
+  codes: string[];
+}
+
+// The "c\u00F3digo" a buyer needs to validate their entry at the door: their
+// palabra clave plus the last 3 characters of their QR token.
+function validationCode(sale: Sale): string {
+  return `${sale.codeWord} ${sale.qrToken.slice(-3).toUpperCase()}`;
 }
 
 export function aggregateBuyers(sales: Sale[]): BuyerSummary[] {
-  const totals = new Map<string, number>();
+  const totals = new Map<string, { ticketCount: number; codes: string[] }>();
 
   for (const sale of sales) {
     const name = sale.buyerName.trim();
-    totals.set(name, (totals.get(name) ?? 0) + sale.ticketCount);
+    const entry = totals.get(name) ?? { ticketCount: 0, codes: [] };
+    entry.ticketCount += sale.ticketCount;
+    entry.codes.push(validationCode(sale));
+    totals.set(name, entry);
   }
 
   return Array.from(totals.entries())
-    .map(([buyerName, ticketCount]) => ({ buyerName, ticketCount }))
+    .map(([buyerName, { ticketCount, codes }]) => ({ buyerName, ticketCount, codes }))
     .sort((a, b) => a.buyerName.localeCompare(b.buyerName, "es"));
 }
 
 export function downloadBuyersCSV(buyers: BuyerSummary[]) {
-  const csvRows = ["Nombre,Entradas"];
-  buyers.forEach(({ buyerName, ticketCount }) => {
+  const csvRows = ["Nombre,Entradas,C\u00F3digo"];
+  buyers.forEach(({ buyerName, ticketCount, codes }) => {
     const escapedName = buyerName.replace(/"/g, '""');
-    csvRows.push(`"${escapedName}",${ticketCount}`);
+    const escapedCodes = codes.join(" / ").replace(/"/g, '""');
+    csvRows.push(`"${escapedName}",${ticketCount},"${escapedCodes}"`);
   });
 
   triggerDownload(
@@ -41,7 +53,9 @@ export function downloadBuyersCSV(buyers: BuyerSummary[]) {
 }
 
 export function downloadBuyersTXT(buyers: BuyerSummary[]) {
-  const txtRows = buyers.map(({ buyerName, ticketCount }) => `${buyerName}: ${ticketCount}`);
+  const txtRows = buyers.map(
+    ({ buyerName, ticketCount, codes }) => `${buyerName}: ${ticketCount} \u2014 ${codes.join(" / ")}`
+  );
   triggerDownload(
     "data:text/plain;charset=utf-8,\uFEFF" + txtRows.join("\n"),
     "lista_compradores.txt"

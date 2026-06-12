@@ -71,9 +71,9 @@ describe("SalesPage", () => {
 
   it("displays sales, aggregated buyers table, and supports downloads", async () => {
     const mockSales = [
-      { id: "1", buyerName: "Juan Pérez", codeWord: "lombriz roja del monte", price: 10000, ticketCount: 2, used: false, usedAt: null, createdAt: "2026-05-29T10:00:00.000Z" },
-      { id: "2", buyerName: "Ana Ruiz", codeWord: "marmota azul de la esquina", price: 10000, ticketCount: 1, used: true, usedAt: "2026-05-30T10:00:00.000Z", createdAt: "2026-05-29T11:00:00.000Z" },
-      { id: "3", buyerName: "Juan Pérez", codeWord: "capibara verde de la terraza", price: 10000, ticketCount: 1, used: false, usedAt: null, createdAt: "2026-05-29T12:00:00.000Z" },
+      { id: "1", buyerName: "Juan Pérez", codeWord: "lombriz roja del monte", qrToken: "qr-token-001", price: 10000, ticketCount: 2, used: false, usedAt: null, createdAt: "2026-05-29T10:00:00.000Z" },
+      { id: "2", buyerName: "Ana Ruiz", codeWord: "marmota azul de la esquina", qrToken: "qr-token-002", price: 10000, ticketCount: 1, used: true, usedAt: "2026-05-30T10:00:00.000Z", createdAt: "2026-05-29T11:00:00.000Z" },
+      { id: "3", buyerName: "Juan Pérez", codeWord: "capibara verde de la terraza", qrToken: "qr-token-003", price: 10000, ticketCount: 1, used: false, usedAt: null, createdAt: "2026-05-29T12:00:00.000Z" },
     ];
 
     mockFetch
@@ -146,7 +146,7 @@ describe("SalesPage", () => {
 
   it("paginates results", async () => {
     const mockSales = [
-      { id: "1", buyerName: "Juan Pérez", codeWord: "lombriz roja del monte", price: 10000, ticketCount: 2, used: false, usedAt: null, createdAt: "2026-05-29T10:00:00.000Z" },
+      { id: "1", buyerName: "Juan Pérez", codeWord: "lombriz roja del monte", qrToken: "qr-token-001", price: 10000, ticketCount: 2, used: false, usedAt: null, createdAt: "2026-05-29T10:00:00.000Z" },
     ];
 
     mockFetch
@@ -181,7 +181,7 @@ describe("SalesPage", () => {
 
   it("opens the details modal when clicking the view icon", async () => {
     const mockSales = [
-      { id: "1", buyerName: "Juan Pérez", codeWord: "lombriz roja del monte", price: 10000, ticketCount: 2, used: false, usedAt: null, createdAt: "2026-05-29T10:00:00.000Z" },
+      { id: "1", buyerName: "Juan Pérez", codeWord: "lombriz roja del monte", qrToken: "qr-token-001", price: 10000, ticketCount: 2, used: false, usedAt: null, createdAt: "2026-05-29T10:00:00.000Z" },
     ];
 
     mockFetch
@@ -208,7 +208,7 @@ describe("SalesPage", () => {
   });
 
   it("edits a sale via the edit modal", async () => {
-    const sale = { id: "1", buyerName: "Juan Pérez", codeWord: "lombriz roja del monte", price: 10000, ticketCount: 2, used: false, usedAt: null, createdAt: "2026-05-29T10:00:00.000Z" };
+    const sale = { id: "1", buyerName: "Juan Pérez", codeWord: "lombriz roja del monte", qrToken: "qr-token-001", price: 10000, ticketCount: 2, used: false, usedAt: null, createdAt: "2026-05-29T10:00:00.000Z" };
     const updatedSale = { ...sale, buyerName: "Pedro Gómez" };
 
     mockFetch
