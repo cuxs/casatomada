@@ -2,6 +2,7 @@ export interface Sale {
   id: string;
   buyerName: string;
   codeWord: string;
+  price?: number;
   ticketCount: number;
   used: boolean;
   usedAt: string | null;
