@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
-import { ANIMALS, COLORS, PLACES } from "@/lib/code-words";
 
 interface SaleInfo {
   found: boolean;
@@ -12,15 +11,6 @@ interface SaleInfo {
   buyerName: string;
   ticketCount: number;
   usedAt: string | null;
-}
-
-interface CodeResult {
-  found: boolean;
-  used: boolean;
-  buyerName: string;
-  ticketCount: number;
-  usedAt: string | null;
-  qrToken: string;
 }
 
 function CheckQRContent() {
@@ -33,16 +23,6 @@ function CheckQRContent() {
   const [marking, setMarking] = useState(false);
   const [sale, setSale] = useState<SaleInfo | null>(null);
   const [checked, setChecked] = useState(false);
-
-  const [animal, setAnimal] = useState("");
-  const [color, setColor] = useState("");
-  const [place, setPlace] = useState("");
-  const [tokenSuffix, setTokenSuffix] = useState("");
-  const [codeLoading, setCodeLoading] = useState(false);
-  const [codeChecked, setCodeChecked] = useState(false);
-  const [codeResult, setCodeResult] = useState<CodeResult | null>(null);
-  const [codeMarking, setCodeMarking] = useState(false);
-  const [codeJustMarked, setCodeJustMarked] = useState(false);
 
   const fetchSale = useCallback(async (t: string) => {
     if (!t.trim()) return;
@@ -91,70 +71,6 @@ function CheckQRContent() {
     fetchSale(t);
   }
 
-  // Auto-lookup once animal, color, place and the 3-character suffix are all set
-  useEffect(() => {
-    if (!animal || !color || !place || tokenSuffix.length !== 3) {
-      setCodeResult(null);
-      setCodeChecked(false);
-      setCodeJustMarked(false);
-      return;
-    }
-
-    let cancelled = false;
-    const codeWord = `${animal} ${color} ${place}`;
-
-    setCodeLoading(true);
-    setCodeChecked(false);
-    setCodeResult(null);
-    setCodeJustMarked(false);
-
-    fetch(`/api/qr/lookup?codeWord=${encodeURIComponent(codeWord)}&suffix=${encodeURIComponent(tokenSuffix)}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (!cancelled) setCodeResult(data);
-      })
-      .catch(() => {
-        if (!cancelled) setCodeResult(null);
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setCodeLoading(false);
-          setCodeChecked(true);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [animal, color, place, tokenSuffix]);
-
-  async function markCodeAsUsed() {
-    if (!codeResult?.qrToken) return;
-    setCodeMarking(true);
-    try {
-      const res = await fetch(`/api/qr/${encodeURIComponent(codeResult.qrToken)}`, {
-        method: "POST",
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setCodeResult((prev) => (prev ? { ...prev, used: data.used, usedAt: data.usedAt } : prev));
-        setCodeJustMarked(true);
-      }
-    } finally {
-      setCodeMarking(false);
-    }
-  }
-
-  function resetCodeSearch() {
-    setAnimal("");
-    setColor("");
-    setPlace("");
-    setTokenSuffix("");
-    setCodeResult(null);
-    setCodeChecked(false);
-    setCodeJustMarked(false);
-  }
-
   // Format timestamp in Spanish
   function formatDate(dateStr: string) {
     const date = new Date(dateStr);
@@ -175,117 +91,6 @@ function CheckQRContent() {
             ← Volver
           </Link>
           <h1 className="mt-4 text-3xl font-bold text-gray-900">Validar entrada</h1>
-        </div>
-
-        {/* Validate by "palabra clave" + last 3 characters of the token */}
-        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 space-y-4">
-          <h2 className="text-sm font-semibold text-gray-800 uppercase tracking-wider">
-            Validar por palabra clave
-          </h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-            <select
-              value={animal}
-              onChange={(e) => setAnimal(e.target.value)}
-              className="w-full px-3 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
-            >
-              <option value="">Animal</option>
-              {ANIMALS.map((a) => (
-                <option key={a} value={a}>
-                  {a}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={color}
-              onChange={(e) => setColor(e.target.value)}
-              className="w-full px-3 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
-            >
-              <option value="">Color</option>
-              {COLORS.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={place}
-              onChange={(e) => setPlace(e.target.value)}
-              className="w-full px-3 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
-            >
-              <option value="">Lugar</option>
-              {PLACES.map((p) => (
-                <option key={p} value={p}>
-                  {p}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <input
-            type="text"
-            value={tokenSuffix}
-            onChange={(e) => setTokenSuffix(e.target.value.trim().slice(0, 3))}
-            placeholder="Últimos 3 caracteres del token"
-            maxLength={3}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm font-mono uppercase text-center tracking-widest text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
-          />
-
-          {codeLoading && (
-            <div className="flex justify-center py-4">
-              <span className="w-6 h-6 border-2 border-gray-300 border-t-gray-700 rounded-full animate-spin" />
-            </div>
-          )}
-
-          {!codeLoading && codeChecked && codeResult && (
-            <>
-              {codeResult.found && (!codeResult.used || codeJustMarked) ? (
-                <div className="space-y-3 text-center">
-                  <div className="bg-green-50 border border-green-100 rounded-xl px-4 py-3 space-y-1">
-                    <p className="text-sm text-gray-500">Nombre</p>
-                    <p className="font-semibold text-gray-900">{codeResult.buyerName}</p>
-                    <p className="text-sm text-gray-500 mt-2">Entradas</p>
-                    <p className="font-bold text-xl text-gray-900">{codeResult.ticketCount}</p>
-                  </div>
-
-                  {codeJustMarked ? (
-                    <p className="text-2xl text-black">✅ Entrada validada</p>
-                  ) : (
-                    <button
-                      onClick={markCodeAsUsed}
-                      disabled={codeMarking}
-                      className="w-full py-4 bg-green-50 border border-green-200 rounded-xl hover:bg-green-100 disabled:opacity-50 transition-colors"
-                    >
-                      {codeMarking ? (
-                        <span className="w-6 h-6 border-2 border-green-700 border-t-transparent rounded-full animate-spin inline-block" />
-                      ) : (
-                        <span className="text-4xl">✅</span>
-                      )}
-                    </button>
-                  )}
-
-                  <button
-                    onClick={resetCodeSearch}
-                    className="text-black p-2 border border-gray-300 rounded-xl"
-                  >
-                    Validar otra entrada
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-3 text-center">
-                  <p className="text-4xl">❌</p>
-                  <button
-                    onClick={resetCodeSearch}
-                    className="text-sm text-gray-500 hover:text-gray-800 transition-colors"
-                  >
-                    Validar otra entrada
-                  </button>
-                </div>
-              )}
-            </>
-          )}
         </div>
 
         {/* Manual token input — shown if no token in URL or to check a different one */}
@@ -379,6 +184,12 @@ function CheckQRContent() {
             )}
           </>
         )}
+        <Link
+          href="/check-word"
+          className="block w-full text-center px-4 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          Validar por palabra clave →
+        </Link>
       </div>
     </main>
   );
