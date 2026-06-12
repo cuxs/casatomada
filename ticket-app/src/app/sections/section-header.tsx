@@ -9,7 +9,9 @@ export default function SectionHeader({ onBack, backSide }: SectionHeaderProps) 
   return (
     <>
       <div className="sticky top-0 z-50 flex justify-between items-start px-6 py-5 pointer-events-none">
-        <img src="/svg/loguito-casa-tomada.svg" alt="casa tomada" className="h-9 opacity-85" />
+        <button onClick={onBack} aria-label="Ir al inicio" className="pointer-events-auto cursor-pointer bg-transparent border-0 p-0">
+          <img src="/svg/loguito-casa-tomada.svg" alt="casa tomada" className="h-9 opacity-85" />
+        </button>
         <img src="/svg/arte-y-resistencia.svg" alt="arte y resistencia" className="h-[13px] opacity-80 mt-1.5" />
       </div>
 
