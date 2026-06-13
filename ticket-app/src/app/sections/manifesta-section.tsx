@@ -33,9 +33,7 @@ export default function ManifiestaSection({ onBack }: { onBack: () => void }) {
 
       {/* Content */}
       <div className="relative z-[1] pt-[100px] px-6 pb-20 max-w-[600px] mx-auto">
-        <h1 className="font-mono font-bold text-[clamp(60px,18vw,135px)] tracking-[-0.05em] text-[rgba(200,200,200,0.85)] leading-[0.9] mb-[8vh] break-all">
-          _maniest@
-        </h1>
+        <img src="/svg/manifiesta.svg" alt="manifiesta" className="w-full opacity-85 mb-[8vh]" />
 
         <div className="flex flex-col gap-[8vh]">
           {MANIFESTO_BLOCKS.map((block, i) => (
