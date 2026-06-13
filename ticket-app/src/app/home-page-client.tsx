@@ -18,14 +18,14 @@ const FONT_VARIANTS: { wght: number; italic: boolean }[] = [
 ];
 
 const LANDING_IMAGES = [
-  "/fotos-landing/002.png",
-  "/fotos-landing/003.png",
-  "/fotos-landing/004.png",
-  "/fotos-landing/005.png",
-  "/fotos-landing/006.png",
-  "/fotos-landing/007.png",
-  "/fotos-landing/008.png",
-  "/fotos-landing/009.png",
+  "/fotos-landing/002.webp",
+  "/fotos-landing/003.webp",
+  "/fotos-landing/004.webp",
+  "/fotos-landing/005.webp",
+  "/fotos-landing/006.webp",
+  "/fotos-landing/007.webp",
+  "/fotos-landing/008.webp",
+  "/fotos-landing/009.webp",
 ];
 
 const PRICE_CHANGES = [
@@ -155,6 +155,9 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
             <img
               src="/svg/loguito-casa-tomada.svg"
               alt="casa tomada"
+              width={838}
+              height={394}
+              fetchPriority="high"
               className="w-[min(90vw,900px)] mix-blend-exclusion"
             />
           </div>

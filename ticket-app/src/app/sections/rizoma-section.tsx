@@ -23,12 +23,16 @@ export default function RizomaSection({ onBack }: { onBack: () => void }) {
         <img
           src="/rizoma/titulo-rizoma-001.svg"
           alt="rizoma 001"
+          width={789}
+          height={161}
           className="w-[min(90vw,520px)]"
         />
 
         <img
           src="/rizoma/nombres.svg"
           alt="participantes"
+          width={653}
+          height={625}
           className="w-[min(80vw,440px)] opacity-80"
         />
 

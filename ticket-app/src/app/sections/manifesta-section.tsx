@@ -26,14 +26,14 @@ export default function ManifiestaSection({ onBack }: { onBack: () => void }) {
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div
           className="absolute inset-0 bg-repeat opacity-40 saturate-50"
-          style={{ backgroundImage: "url('/manifiesta/M01.jpg')", backgroundSize: "60% auto" }}
+          style={{ backgroundImage: "url('/manifiesta/M01.webp')", backgroundSize: "60% auto" }}
         />
         <div className="absolute inset-0 bg-[rgba(8,0,0,0.55)]" />
       </div>
 
       {/* Content */}
       <div className="relative z-[1] pt-[100px] px-6 pb-20 max-w-[600px] mx-auto">
-        <img src="/svg/manifiesta.svg" alt="manifiesta" className="w-full opacity-85 mb-[8vh]" />
+        <img src="/svg/manifiesta.svg" alt="manifiesta" width={747} height={126} className="w-full opacity-85 mb-[8vh]" />
 
         <div className="flex flex-col gap-[8vh]">
           {MANIFESTO_BLOCKS.map((block, i) => (

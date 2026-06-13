@@ -62,12 +62,14 @@ export default function EntradasSection({
       <div className="relative flex flex-col items-center justify-center min-h-screen pt-[26px] px-5 pb-12 overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center brightness-50"
-          style={{ backgroundImage: "url('/comprar-entradas/01E.jpg')" }}
+          style={{ backgroundImage: "url('/comprar-entradas/01E.webp')" }}
         />
 
         <img
-          src="/comprar-entradas/02E.jpg"
+          src="/comprar-entradas/02E.webp"
           alt="evento"
+          width={760}
+          height={950}
           className="relative z-[1] w-[min(86vw,380px)] block mb-7 mix-blend-lighten"
         />
 
@@ -84,7 +86,7 @@ export default function EntradasSection({
       <div ref={paymentRef} className="relative flex flex-col justify-center min-h-screen pt-[100px] px-7 pb-[60px]">
         <div
           className="absolute inset-0"
-          style={{ backgroundImage: "url('/comprar-entradas/03E.jpg')", backgroundSize: "290% auto", backgroundPosition: "50% 55%", backgroundRepeat: "no-repeat" }}
+          style={{ backgroundImage: "url('/comprar-entradas/03E.webp')", backgroundSize: "290% auto", backgroundPosition: "50% 55%", backgroundRepeat: "no-repeat" }}
         />
         <div className="absolute inset-0 bg-black/[0.62]" />
 
