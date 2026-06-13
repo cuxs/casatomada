@@ -11,6 +11,7 @@ export default function RizomaSection({ onBack }: { onBack: () => void }) {
         muted
         loop
         playsInline
+        aria-hidden="true"
         className="absolute inset-0 w-full h-full object-cover opacity-50 z-0 object-left-bottom"
       />
       <div className="absolute inset-0 bg-black/45 z-[1]" />

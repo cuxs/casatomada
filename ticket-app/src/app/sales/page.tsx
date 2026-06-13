@@ -299,7 +299,7 @@ export default function SalesPage() {
 
       {viewSale && <SaleDetailsModal sale={viewSale} onClose={() => setViewSale(null)} />}
       {editSale && (
-        <EditSaleModal sale={editSale} onClose={() => setEditSale(null)} onSaved={handleSaleSaved} />
+        <EditSaleModal key={editSale.id} sale={editSale} onClose={() => setEditSale(null)} onSaved={handleSaleSaved} />
       )}
     </main>
   );

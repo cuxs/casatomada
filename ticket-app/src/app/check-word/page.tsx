@@ -175,6 +175,7 @@ export default function CheckWordPage() {
             value={tokenSuffix}
             onChange={(e) => setTokenSuffix(e.target.value.trim().slice(0, 3))}
             placeholder="Últimos 3 caracteres del token"
+            aria-label="Últimos 3 caracteres del token"
             maxLength={3}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm font-mono uppercase text-center tracking-widest text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
           />
@@ -200,6 +201,7 @@ export default function CheckWordPage() {
                     <p className="text-2xl text-black">✅ Entrada validada</p>
                   ) : (
                     <button
+                      type="button"
                       onClick={markCodeAsUsed}
                       disabled={codeMarking}
                       className="w-full py-4 bg-green-50 border border-green-200 rounded-xl hover:bg-green-100 disabled:opacity-50 transition-colors"
@@ -213,6 +215,7 @@ export default function CheckWordPage() {
                   )}
 
                   <button
+                    type="button"
                     onClick={resetCodeSearch}
                     className="text-black p-2 border border-gray-300 rounded-xl"
                   >
@@ -223,6 +226,7 @@ export default function CheckWordPage() {
                 <div className="space-y-3 text-center">
                   <p className="text-4xl">❌</p>
                   <button
+                    type="button"
                     onClick={resetCodeSearch}
                     className="text-sm text-gray-500 hover:text-gray-800 transition-colors"
                   >

@@ -109,6 +109,7 @@ export default function RegisterSalePage() {
 
           <div className="flex flex-col gap-3">
             <button
+              type="button"
               onClick={handleNewSale}
               className="w-full px-4 py-3 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-700 transition-colors"
             >

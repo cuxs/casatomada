@@ -13,6 +13,7 @@ export default function Modal({ title, onClose, children }: ModalProps) {
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
       onClick={onClose}
+      role="presentation"
     >
       <div
         className="w-full max-w-md bg-white rounded-2xl shadow-xl p-6 space-y-5"

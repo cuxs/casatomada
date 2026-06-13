@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import Image from "next/image";
 import type { EventConfig } from "@/config";
 import SectionHeader from "./section-header";
 
@@ -65,7 +66,7 @@ export default function EntradasSection({
           style={{ backgroundImage: "url('/comprar-entradas/01E.webp')" }}
         />
 
-        <img
+        <Image
           src="/comprar-entradas/02E.webp"
           alt="evento"
           width={760}
@@ -104,6 +105,7 @@ export default function EntradasSection({
           </p>
 
           <button
+            type="button"
             onClick={onCopyAlias}
             className={`font-epilogue font-medium text-base rounded-full py-2 px-6 cursor-pointer mb-10 tracking-[-0.01em] transition-colors bg-white/[0.18] border border-white/30 ${aliasCopied ? "text-white/50" : "text-white/75"}`}
           >
@@ -119,6 +121,7 @@ export default function EntradasSection({
           </p>
 
           <button
+            type="button"
             onClick={onCopyPhone}
             className={`font-epilogue font-medium text-base rounded-full py-2 px-6 cursor-pointer mb-10 tracking-[-0.01em] transition-colors bg-white/[0.18] border border-white/30 ${phoneCopied ? "text-white/50" : "text-white/75"}`}
           >
@@ -130,6 +133,7 @@ export default function EntradasSection({
           </p>
 
           <button
+            type="button"
             onClick={onBack}
             className="mt-12 mx-auto flex items-center gap-2.5 font-epilogue font-medium text-base tracking-[-0.01em] text-white/60 bg-white/[0.16] border border-white/25 rounded-full py-3 px-7 cursor-pointer hover:bg-white/25 hover:text-white/80 transition-colors"
           >
@@ -171,6 +175,7 @@ function PriceDisplay({
       ))}
 
       <button
+        type="button"
         onClick={onBuyNow}
         className="entradas-glow bg-[rgba(8,8,8,0.88)] border-2 border-white/[0.28] rounded-[18px] px-6 py-4 text-center backdrop-blur-sm mb-5 cursor-pointer w-full"
       >

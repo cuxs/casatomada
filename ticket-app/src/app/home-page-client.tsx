@@ -175,6 +175,7 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
               ).map(({ label, onClick }) => (
                 <button
                   key={label}
+                  type="button"
                   onClick={onClick}
                   className="flex-1 font-epilogue font-bold text-[17px] tracking-[-0.04em] text-white/85 bg-transparent border-[1.5px] border-white/55 rounded-3xl py-[11px] px-2 cursor-pointer backdrop-blur-sm whitespace-nowrap"
                 >
@@ -184,6 +185,7 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
             </div>
 
             <button
+              type="button"
               onClick={() => setSection("entradas")}
               className="font-epilogue tracking-[-0.05em] text-white/90 bg-[rgba(10,10,10,0.75)] border-2 border-white/35 rounded-3xl py-[14px] cursor-pointer backdrop-blur-sm w-full block"
               style={{
@@ -196,6 +198,7 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
             </button>
 
             <button
+              type="button"
               onClick={() => setSection("entradas")}
               className="bg-transparent border-0 cursor-pointer text-white/50 p-1"
               aria-label="Ver más"

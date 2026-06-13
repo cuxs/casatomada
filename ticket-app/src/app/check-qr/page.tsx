@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -13,11 +13,23 @@ interface SaleInfo {
   usedAt: string | null;
 }
 
+// Format timestamp in Spanish
+function formatDate(dateStr: string) {
+  const date = new Date(dateStr);
+  return date.toLocaleString("es-AR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 function CheckQRContent() {
   const searchParams = useSearchParams();
   const tokenFromUrl = searchParams.get("token");
 
-  const [token, setToken] = useState(tokenFromUrl ?? "");
+  const tokenRef = useRef(tokenFromUrl ?? "");
   const [manualInput, setManualInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [marking, setMarking] = useState(false);
@@ -49,10 +61,10 @@ function CheckQRContent() {
   }, [tokenFromUrl, fetchSale]);
 
   async function markAsUsed() {
-    if (!token) return;
+    if (!tokenRef.current) return;
     setMarking(true);
     try {
-      const res = await fetch(`/api/qr/${encodeURIComponent(token.trim())}`, {
+      const res = await fetch(`/api/qr/${encodeURIComponent(tokenRef.current.trim())}`, {
         method: "POST",
       });
       const data = await res.json();
@@ -67,20 +79,8 @@ function CheckQRContent() {
   function handleManualSubmit(e: React.FormEvent) {
     e.preventDefault();
     const t = manualInput.trim();
-    setToken(t);
+    tokenRef.current = t;
     fetchSale(t);
-  }
-
-  // Format timestamp in Spanish
-  function formatDate(dateStr: string) {
-    const date = new Date(dateStr);
-    return date.toLocaleString("es-AR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
   }
 
   return (
@@ -101,6 +101,7 @@ function CheckQRContent() {
               value={manualInput}
               onChange={(e) => setManualInput(e.target.value)}
               placeholder="Pegá el token del QR"
+              aria-label="Token del QR"
               className="w-full sm:flex-1 px-4 py-3 border border-gray-300 rounded-lg text-sm font-mono text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 transition"
             />
             <button
@@ -167,6 +168,7 @@ function CheckQRContent() {
                 </div>
 
                 <button
+                  type="button"
                   onClick={markAsUsed}
                   disabled={marking}
                   className="w-full px-4 py-4 bg-green-700 text-white font-bold text-lg rounded-xl hover:bg-green-600 disabled:opacity-50 transition-colors"

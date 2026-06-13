@@ -43,13 +43,14 @@ export async function POST(request: NextRequest) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   const qrUrl = `${appUrl}/check-qr?token=${qrToken}`;
 
-  const qrDataUrl = await QRCode.toDataURL(qrUrl, {
-    width: 300,
-    margin: 2,
-    color: { dark: "#111827", light: "#ffffff" },
-  });
-
-  const salesCount = await prisma.sale.count();
+  const [qrDataUrl, salesCount] = await Promise.all([
+    QRCode.toDataURL(qrUrl, {
+      width: 300,
+      margin: 2,
+      color: { dark: "#111827", light: "#ffffff" },
+    }),
+    prisma.sale.count(),
+  ]);
 
   let codeWord = "";
   let created = false;

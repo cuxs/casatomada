@@ -4,7 +4,7 @@ export function isAuthConfigured(): boolean {
   return Boolean(process.env.USER && process.env.PASSWORD);
 }
 
-export function parseBasicAuth(
+function parseBasicAuth(
   authHeader: string | null
 ): { username: string; password: string } | null {
   if (!authHeader?.startsWith("Basic ")) return null;
@@ -44,7 +44,7 @@ export function basicAuthUnauthorized(): NextResponse {
   });
 }
 
-export function apiAuthUnauthorized(
+function apiAuthUnauthorized(
   reason: "missing" | "invalid" | "wrong"
 ): NextResponse {
   const messages = {

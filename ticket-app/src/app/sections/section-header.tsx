@@ -9,7 +9,7 @@ export default function SectionHeader({ onBack, backSide }: SectionHeaderProps) 
   return (
     <>
       <div className="sticky top-0 z-50 flex justify-between items-start px-6 py-5 pointer-events-none">
-        <button onClick={onBack} aria-label="Ir al inicio" className="pointer-events-auto cursor-pointer bg-transparent border-0 p-0">
+        <button type="button" onClick={onBack} aria-label="Ir al inicio" className="pointer-events-auto cursor-pointer bg-transparent border-0 p-0">
           <img src="/svg/loguito-casa-tomada.svg" alt="casa tomada" width={838} height={394} className="h-9 opacity-85" />
         </button>
         <img src="/svg/arte-y-resistencia.svg" alt="arte y resistencia" width={968} height={105} className="h-[13px] opacity-80 mt-1.5" />
@@ -23,6 +23,7 @@ export default function SectionHeader({ onBack, backSide }: SectionHeaderProps) 
         // so the button stays reachable from anywhere in the scrolled content.
         <div className="sticky top-0 h-0 z-50">
           <button
+            type="button"
             onClick={onBack}
             aria-label="Volver"
             style={
