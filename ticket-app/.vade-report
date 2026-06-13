@@ -1,0 +1,40 @@
+# Vercel Speed Insights Configuration
+
+## Summary
+Configured Vercel Speed Insights for the Next.js ticket-app project by correcting the placement of the SpeedInsights component according to the latest official documentation.
+
+## Changes Made
+
+### Modified Files:
+- **src/app/layout.tsx** - Moved the `<SpeedInsights />` component to the correct position inside the `<body>` tag
+
+## Implementation Details
+
+The project already had the `@vercel/speed-insights` package installed (v2.0.0) and the component imported. However, the component was incorrectly placed before the `<body>` tag instead of inside it.
+
+According to the official Vercel Speed Insights documentation (https://vercel.com/docs/speed-insights/quickstart), for Next.js 13.5+, the SpeedInsights component should be placed inside the body tag:
+
+```tsx
+<body>
+  {children}
+  <SpeedInsights />
+</body>
+```
+
+This placement ensures that Speed Insights can properly track performance metrics without interfering with the page rendering.
+
+## Verification
+
+- ✅ Build completed successfully with no errors
+- ✅ Tests run successfully (2 pre-existing test failures unrelated to this change)
+- ✅ SpeedInsights component is now properly positioned inside the body tag
+- ✅ All dependencies are up to date (no changes needed to package.json or lockfile)
+
+## Next Steps
+
+After deployment to Vercel:
+1. Enable Speed Insights in the Vercel dashboard for this project
+2. Monitor the Speed Insights dashboard after deployment and user visits
+3. The tracking script will automatically collect performance metrics
+
+The implementation follows the framework-specific instructions for Next.js from the official Vercel documentation.

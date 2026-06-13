@@ -85,9 +85,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`${epilogue.variable} ${spaceMono.variable}`}>
-      <SpeedInsights />
       <body className="bg-black text-white min-h-screen" style={{ fontFamily: "var(--font-epilogue), sans-serif" }}>
         {children}
+        <SpeedInsights />
       </body>
     </html>
   );
