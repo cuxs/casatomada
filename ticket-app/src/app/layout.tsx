@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Epilogue, Space_Mono } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import "./globals.css";
 
 const epilogue = Epilogue({
@@ -84,6 +85,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`${epilogue.variable} ${spaceMono.variable}`}>
+      <SpeedInsights />
       <body className="bg-black text-white min-h-screen" style={{ fontFamily: "var(--font-epilogue), sans-serif" }}>
         {children}
       </body>
