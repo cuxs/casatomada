@@ -245,7 +245,7 @@ export default function SalesPage() {
                         <td className="px-6 py-4 lg:px-4 lg:py-2.5 text-center font-bold text-gray-900">
                           {sale.ticketCount}
                         </td>
-                        <td className="px-6 py-4 lg:px-4 lg:py-2.5 text-center">
+                        <td className="px-2 py-4 lg:px-4 lg:py-2.5 text-center">
                           <button
                             type="button"
                             onClick={() => setViewSale(sale)}
@@ -258,7 +258,7 @@ export default function SalesPage() {
                             </svg>
                           </button>
                         </td>
-                        <td className="px-6 py-4 lg:px-4 lg:py-2.5 text-center">
+                        <td className="px-2 py-4 lg:px-4 lg:py-2.5 text-center">
                           <button
                             type="button"
                             onClick={() => setEditSale(sale)}
@@ -270,7 +270,7 @@ export default function SalesPage() {
                             </svg>
                           </button>
                         </td>
-                        <td className="px-6 py-4 lg:px-4 lg:py-2.5 text-center">
+                        <td className="px-2 py-4 lg:px-4 lg:py-2.5 text-center">
                           <button
                             type="button"
                             onClick={() => setQrSale(sale)}
