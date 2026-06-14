@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { checkApiAuth } from "@/lib/basic-auth";
 import { prisma } from "@/lib/prisma";
 import { v4 as uuidv4 } from "uuid";
-import QRCode from "qrcode";
+import { generateQrDataUrl } from "@/lib/qr";
 import { codeWordForIndex, TOTAL_CODE_WORDS } from "@/lib/code-words";
 import { generateMockSales } from "@/lib/mock-sales";
 
@@ -40,15 +40,9 @@ export async function POST(request: NextRequest) {
       : 1;
 
   const qrToken = uuidv4();
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const qrUrl = `${appUrl}/check-qr?token=${qrToken}`;
 
   const [qrDataUrl, salesCount] = await Promise.all([
-    QRCode.toDataURL(qrUrl, {
-      width: 300,
-      margin: 2,
-      color: { dark: "#111827", light: "#ffffff" },
-    }),
+    generateQrDataUrl(qrToken),
     prisma.sale.count(),
   ]);
 

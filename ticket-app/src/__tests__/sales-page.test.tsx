@@ -207,6 +207,50 @@ describe("SalesPage", () => {
     expect(screen.getByText("Válido")).toBeInTheDocument();
   });
 
+  it("opens the QR modal and shows the regenerated QR for a sale", async () => {
+    const mockSales = [
+      { id: "1", buyerName: "Juan Pérez", codeWord: "lombriz roja del monte", qrToken: "qr-token-001", price: 10000, ticketCount: 2, used: false, usedAt: null, createdAt: "2026-05-29T10:00:00.000Z" },
+    ];
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(tablePage({ sales: mockSales, total: 1, totalTickets: 2 })),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockSales),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            qrDataUrl: "data:image/png;base64,abc123",
+            codeWord: "lombriz roja del monte",
+            qrToken: "qr-token-001",
+            ticketCount: 2,
+          }),
+      });
+
+    render(<SalesPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Ventas Registradas")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Ver QR de Juan Pérez" }));
+
+    expect(screen.getByText("QR de la entrada")).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByAltText("QR de entrada")).toBeInTheDocument();
+    });
+
+    expect(mockFetch).toHaveBeenLastCalledWith("/api/sales/1/qr");
+    expect(screen.getByText("lombriz roja del monte")).toBeInTheDocument();
+    expect(screen.getByText("001")).toBeInTheDocument();
+  });
+
   it("edits a sale via the edit modal", async () => {
     const sale = { id: "1", buyerName: "Juan Pérez", codeWord: "lombriz roja del monte", qrToken: "qr-token-001", price: 10000, ticketCount: 2, used: false, usedAt: null, createdAt: "2026-05-29T10:00:00.000Z" };
     const updatedSale = { ...sale, buyerName: "Pedro Gómez" };

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import SaleDetailsModal from "./sale-details-modal";
 import EditSaleModal from "./edit-sale-modal";
+import SaleQrModal from "./sale-qr-modal";
 import {
   aggregateBuyers,
   downloadBuyersCSV,
@@ -35,6 +36,7 @@ export default function SalesPage() {
   const [error, setError] = useState<string | null>(null);
   const [viewSale, setViewSale] = useState<Sale | null>(null);
   const [editSale, setEditSale] = useState<Sale | null>(null);
+  const [qrSale, setQrSale] = useState<Sale | null>(null);
   const [buyersRefreshKey, setBuyersRefreshKey] = useState(0);
 
   const hasLoadedRef = useRef(false);
@@ -231,6 +233,9 @@ export default function SalesPage() {
                       <th className="px-6 py-4 lg:px-4 lg:py-2.5 w-12">
                         <span className="sr-only">Editar</span>
                       </th>
+                      <th className="px-6 py-4 lg:px-4 lg:py-2.5 w-12">
+                        <span className="sr-only">Ver QR</span>
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 text-sm text-gray-700">
@@ -262,6 +267,19 @@ export default function SalesPage() {
                           >
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                            </svg>
+                          </button>
+                        </td>
+                        <td className="px-6 py-4 lg:px-4 lg:py-2.5 text-center">
+                          <button
+                            type="button"
+                            onClick={() => setQrSale(sale)}
+                            aria-label={`Ver QR de ${sale.buyerName}`}
+                            className="text-gray-400 hover:text-gray-900 transition-colors"
+                          >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z" />
                             </svg>
                           </button>
                         </td>
@@ -301,6 +319,7 @@ export default function SalesPage() {
       {editSale && (
         <EditSaleModal key={editSale.id} sale={editSale} onClose={() => setEditSale(null)} onSaved={handleSaleSaved} />
       )}
+      {qrSale && <SaleQrModal key={qrSale.id} sale={qrSale} onClose={() => setQrSale(null)} />}
     </main>
   );
 }
