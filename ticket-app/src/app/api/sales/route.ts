@@ -1,17 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
-import { checkApiAuth } from "@/lib/basic-auth";
-import { prisma } from "@/lib/prisma";
+import { type NextRequest, NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
-import { generateQrDataUrl } from "@/lib/qr";
+import { checkApiAuth } from "@/lib/basic-auth";
 import { codeWordForIndex, TOTAL_CODE_WORDS } from "@/lib/code-words";
 import { generateMockSales } from "@/lib/mock-sales";
+import { prisma } from "@/lib/prisma";
+import { generateQrDataUrl } from "@/lib/qr";
 
 export const dynamic = "force-dynamic";
 
 // Dev-only: set MOCK_SALES=true to preview the /sales table with 500
 // generated rows instead of hitting the database.
-const MOCK_SALES = process.env.MOCK_SALES === "true" ? generateMockSales(500) : null;
+const MOCK_SALES =
+  process.env.MOCK_SALES === "true" ? generateMockSales(500) : null;
 
 const VALID_PRICES = [10000, 13000, 15000];
 
@@ -20,18 +21,28 @@ export async function POST(request: NextRequest) {
   if (authResponse) return authResponse;
 
   const body = await request.json();
-  const { buyerName, price, ticketCount: rawTicketCount } = body as {
+  const {
+    buyerName,
+    price,
+    ticketCount: rawTicketCount,
+  } = body as {
     buyerName: string;
     price: number;
     ticketCount?: number;
   };
 
   if (!buyerName?.trim()) {
-    return NextResponse.json({ error: "El nombre es requerido" }, { status: 400 });
+    return NextResponse.json(
+      { error: "El nombre es requerido" },
+      { status: 400 },
+    );
   }
 
   if (!VALID_PRICES.includes(price)) {
-    return NextResponse.json({ error: "El precio no es válido" }, { status: 400 });
+    return NextResponse.json(
+      { error: "El precio no es válido" },
+      { status: 400 },
+    );
   }
 
   const ticketCount =
@@ -75,7 +86,7 @@ export async function POST(request: NextRequest) {
   if (!created) {
     return NextResponse.json(
       { error: "No se pudo generar una palabra clave única" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
@@ -96,14 +107,16 @@ export async function GET(request: NextRequest) {
 
   if (MOCK_SALES) {
     const filtered = search
-      ? MOCK_SALES.filter((s) => s.buyerName.toLowerCase().includes(search.toLowerCase()))
+      ? MOCK_SALES.filter((s) =>
+          s.buyerName.toLowerCase().includes(search.toLowerCase()),
+        )
       : MOCK_SALES;
 
     if (pageParam !== null) {
       const page = Math.max(1, parseInt(pageParam, 10) || 1);
       const pageSize = Math.min(
         100,
-        Math.max(1, parseInt(searchParams.get("pageSize") ?? "10", 10) || 10)
+        Math.max(1, parseInt(searchParams.get("pageSize") ?? "10", 10) || 10),
       );
       const total = filtered.length;
       const totalTickets = filtered.reduce((acc, s) => acc + s.ticketCount, 0);
@@ -126,7 +139,7 @@ export async function GET(request: NextRequest) {
       const page = Math.max(1, parseInt(pageParam, 10) || 1);
       const pageSize = Math.min(
         100,
-        Math.max(1, parseInt(searchParams.get("pageSize") ?? "10", 10) || 10)
+        Math.max(1, parseInt(searchParams.get("pageSize") ?? "10", 10) || 10),
       );
 
       const [sales, total, ticketAgg] = await Promise.all([
@@ -156,6 +169,9 @@ export async function GET(request: NextRequest) {
     });
     return NextResponse.json(sales);
   } catch {
-    return NextResponse.json({ error: "Error al obtener las ventas" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Error al obtener las ventas" },
+      { status: 500 },
+    );
   }
 }

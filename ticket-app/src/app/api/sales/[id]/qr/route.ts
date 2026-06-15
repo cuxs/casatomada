@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { checkApiAuth } from "@/lib/basic-auth";
 import { prisma } from "@/lib/prisma";
 import { generateQrDataUrl } from "@/lib/qr";
@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 // GET /api/sales/[id]/qr — regenerate the QR code for an existing sale
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   const authResponse = checkApiAuth(request);
   if (authResponse) return authResponse;

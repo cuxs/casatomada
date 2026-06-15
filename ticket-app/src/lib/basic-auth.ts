@@ -5,13 +5,15 @@ export function isAuthConfigured(): boolean {
 }
 
 function parseBasicAuth(
-  authHeader: string | null
+  authHeader: string | null,
 ): { username: string; password: string } | null {
   if (!authHeader?.startsWith("Basic ")) return null;
 
   try {
     const base64Credentials = authHeader.split(" ")[1];
-    const credentials = Buffer.from(base64Credentials, "base64").toString("utf-8");
+    const credentials = Buffer.from(base64Credentials, "base64").toString(
+      "utf-8",
+    );
     const colonIndex = credentials.indexOf(":");
     if (colonIndex === -1) return null;
     return {
@@ -32,7 +34,9 @@ export function isAuthorized(authHeader: string | null): boolean {
   const parsed = parseBasicAuth(authHeader);
   if (!parsed) return false;
 
-  return parsed.username === expectedUser && parsed.password === expectedPassword;
+  return (
+    parsed.username === expectedUser && parsed.password === expectedPassword
+  );
 }
 
 export function basicAuthUnauthorized(): NextResponse {
@@ -45,7 +49,7 @@ export function basicAuthUnauthorized(): NextResponse {
 }
 
 function apiAuthUnauthorized(
-  reason: "missing" | "invalid" | "wrong"
+  reason: "missing" | "invalid" | "wrong",
 ): NextResponse {
   const messages = {
     missing: "No autorizado",
@@ -55,7 +59,9 @@ function apiAuthUnauthorized(
   return NextResponse.json({ error: messages[reason] }, { status: 401 });
 }
 
-export function checkApiAuth(request: { headers: { get(name: string): string | null } }): NextResponse | null {
+export function checkApiAuth(request: {
+  headers: { get(name: string): string | null };
+}): NextResponse | null {
   if (!isAuthConfigured()) return null;
 
   const authHeader = request.headers.get("authorization");

@@ -18,17 +18,24 @@ function formatDateTime(dateStr: string) {
   });
 }
 
-export default function SaleDetailsModal({ sale, onClose }: SaleDetailsModalProps) {
+export default function SaleDetailsModal({
+  sale,
+  onClose,
+}: SaleDetailsModalProps) {
   return (
     <Modal title="Detalle de la compra" onClose={onClose}>
       <dl className="space-y-3 text-sm">
         <div className="flex justify-between gap-4">
           <dt className="text-gray-500">Comprador</dt>
-          <dd className="font-medium text-gray-900 text-right">{sale.buyerName}</dd>
+          <dd className="font-medium text-gray-900 text-right">
+            {sale.buyerName}
+          </dd>
         </div>
         <div className="flex justify-between gap-4">
           <dt className="text-gray-500">Palabra clave</dt>
-          <dd className="font-medium text-gray-900 capitalize text-right">{sale.codeWord}</dd>
+          <dd className="font-medium text-gray-900 capitalize text-right">
+            {sale.codeWord}
+          </dd>
         </div>
         <div className="flex justify-between gap-4">
           <dt className="text-gray-500">Entradas</dt>
@@ -37,7 +44,9 @@ export default function SaleDetailsModal({ sale, onClose }: SaleDetailsModalProp
         {typeof sale.price === "number" && (
           <div className="flex justify-between gap-4">
             <dt className="text-gray-500">Precio</dt>
-            <dd className="font-medium text-gray-900">${sale.price.toLocaleString("es-AR")}</dd>
+            <dd className="font-medium text-gray-900">
+              ${sale.price.toLocaleString("es-AR")}
+            </dd>
           </div>
         )}
         <div className="flex justify-between gap-4">
@@ -56,7 +65,9 @@ export default function SaleDetailsModal({ sale, onClose }: SaleDetailsModalProp
         </div>
         <div className="flex justify-between gap-4">
           <dt className="text-gray-500">Compra</dt>
-          <dd className="text-gray-700 text-right">{formatDateTime(sale.createdAt)}</dd>
+          <dd className="text-gray-700 text-right">
+            {formatDateTime(sale.createdAt)}
+          </dd>
         </div>
         <div className="flex justify-between gap-4">
           <dt className="text-gray-500">Canjeado</dt>

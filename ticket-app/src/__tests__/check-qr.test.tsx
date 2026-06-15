@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import CheckQRPage from "../app/check-qr/page";
 
 const mockGet = vi.fn();
@@ -20,7 +20,9 @@ describe("CheckQRPage", () => {
     mockGet.mockReturnValue(null);
     render(<CheckQRPage />);
 
-    expect(screen.getByPlaceholderText("Pegá el token del QR")).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("Pegá el token del QR"),
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Validar" })).toBeDisabled();
   });
 
@@ -28,13 +30,14 @@ describe("CheckQRPage", () => {
     mockGet.mockReturnValue(null);
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve({
-        found: true,
-        used: false,
-        buyerName: "Juan Pérez",
-        ticketCount: 2,
-        usedAt: null,
-      }),
+      json: () =>
+        Promise.resolve({
+          found: true,
+          used: false,
+          buyerName: "Juan Pérez",
+          ticketCount: 2,
+          usedAt: null,
+        }),
     });
 
     render(<CheckQRPage />);
@@ -55,20 +58,23 @@ describe("CheckQRPage", () => {
 
     expect(screen.getByText("Juan Pérez")).toBeInTheDocument();
     expect(screen.getByText("2")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Marcar como usado" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Marcar como usado" }),
+    ).toBeInTheDocument();
   });
 
   it("auto-fetches when token is provided in URL", async () => {
     mockGet.mockReturnValue("url-token-abc");
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve({
-        found: true,
-        used: false,
-        buyerName: "María López",
-        ticketCount: 1,
-        usedAt: null,
-      }),
+      json: () =>
+        Promise.resolve({
+          found: true,
+          used: false,
+          buyerName: "María López",
+          ticketCount: 1,
+          usedAt: null,
+        }),
     });
 
     render(<CheckQRPage />);
@@ -87,13 +93,14 @@ describe("CheckQRPage", () => {
     mockGet.mockReturnValue("invalid-token");
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve({
-        found: false,
-        used: false,
-        buyerName: "",
-        ticketCount: 0,
-        usedAt: null,
-      }),
+      json: () =>
+        Promise.resolve({
+          found: false,
+          used: false,
+          buyerName: "",
+          ticketCount: 0,
+          usedAt: null,
+        }),
     });
 
     render(<CheckQRPage />);
@@ -101,20 +108,23 @@ describe("CheckQRPage", () => {
     await waitFor(() => {
       expect(screen.getByText("QR inválido")).toBeInTheDocument();
     });
-    expect(screen.getByText("Este código no existe en el sistema.")).toBeInTheDocument();
+    expect(
+      screen.getByText("Este código no existe en el sistema."),
+    ).toBeInTheDocument();
   });
 
   it("shows QR ya utilizado message if already used", async () => {
     mockGet.mockReturnValue("used-token");
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve({
-        found: true,
-        used: true,
-        buyerName: "Carlos Gómez",
-        ticketCount: 1,
-        usedAt: "2026-05-29T10:00:00Z",
-      }),
+      json: () =>
+        Promise.resolve({
+          found: true,
+          used: true,
+          buyerName: "Carlos Gómez",
+          ticketCount: 1,
+          usedAt: "2026-05-29T10:00:00Z",
+        }),
     });
 
     render(<CheckQRPage />);
@@ -131,29 +141,33 @@ describe("CheckQRPage", () => {
     mockFetch
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({
-          found: true,
-          used: false,
-          buyerName: "Ana Ruiz",
-          ticketCount: 3,
-          usedAt: null,
-        }),
+        json: () =>
+          Promise.resolve({
+            found: true,
+            used: false,
+            buyerName: "Ana Ruiz",
+            ticketCount: 3,
+            usedAt: null,
+          }),
       })
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({
-          found: true,
-          used: true,
-          buyerName: "Ana Ruiz",
-          ticketCount: 3,
-          usedAt: "2026-05-29T10:05:00Z",
-        }),
+        json: () =>
+          Promise.resolve({
+            found: true,
+            used: true,
+            buyerName: "Ana Ruiz",
+            ticketCount: 3,
+            usedAt: "2026-05-29T10:05:00Z",
+          }),
       });
 
     render(<CheckQRPage />);
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Marcar como usado" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Marcar como usado" }),
+      ).toBeInTheDocument();
     });
 
     const markBtn = screen.getByRole("button", { name: "Marcar como usado" });

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
 
   const sale = await prisma.sale.findUnique({ where: { codeWord } });
 
-  if (!sale || !sale.qrToken.toLowerCase().endsWith(suffix)) {
+  if (!sale?.qrToken.toLowerCase().endsWith(suffix)) {
     return NextResponse.json({ found: false });
   }
 

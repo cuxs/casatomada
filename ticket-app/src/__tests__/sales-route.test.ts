@@ -1,6 +1,6 @@
-import { POST, GET } from "../app/api/sales/route";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { GET, POST } from "../app/api/sales/route";
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
@@ -38,7 +38,7 @@ describe("POST and GET /api/sales - Auth protection", () => {
 
     const res = await POST(req);
     expect(res.status).toBe(401);
-    
+
     const body = await res.json();
     expect(body.error).toBe("No autorizado");
   });
@@ -51,14 +51,14 @@ describe("POST and GET /api/sales - Auth protection", () => {
     const req = new NextRequest("http://localhost:3000/api/sales", {
       method: "POST",
       headers: {
-        "Authorization": `Basic ${badCreds}`,
+        Authorization: `Basic ${badCreds}`,
       },
       body: JSON.stringify({ buyerName: "Test" }),
     });
 
     const res = await POST(req);
     expect(res.status).toBe(401);
-    
+
     const body = await res.json();
     expect(body.error).toBe("Credenciales incorrectas");
   });
@@ -71,7 +71,7 @@ describe("POST and GET /api/sales - Auth protection", () => {
     const req = new NextRequest("http://localhost:3000/api/sales", {
       method: "POST",
       headers: {
-        "Authorization": `Basic ${goodCreds}`,
+        Authorization: `Basic ${goodCreds}`,
       },
       body: JSON.stringify({ buyerName: "Test" }),
     });
@@ -104,7 +104,7 @@ describe("POST and GET /api/sales - Auth protection", () => {
 
     const res = await GET(req);
     expect(res.status).toBe(401);
-    
+
     const body = await res.json();
     expect(body.error).toBe("No autorizado");
   });
@@ -117,13 +117,13 @@ describe("POST and GET /api/sales - Auth protection", () => {
     const req = new NextRequest("http://localhost:3000/api/sales", {
       method: "GET",
       headers: {
-        "Authorization": `Basic ${badCreds}`,
+        Authorization: `Basic ${badCreds}`,
       },
     });
 
     const res = await GET(req);
     expect(res.status).toBe(401);
-    
+
     const body = await res.json();
     expect(body.error).toBe("Credenciales incorrectas");
   });
@@ -133,7 +133,13 @@ describe("POST and GET /api/sales - Auth protection", () => {
     process.env.PASSWORD = "casa123tomada";
 
     const mockSales = [
-      { id: "1", buyerName: "Juan", ticketCount: 2, used: false, createdAt: "2026-05-29" }
+      {
+        id: "1",
+        buyerName: "Juan",
+        ticketCount: 2,
+        used: false,
+        createdAt: "2026-05-29",
+      },
     ];
     vi.mocked(prisma.sale.findMany).mockResolvedValueOnce(mockSales as any);
 
@@ -141,7 +147,7 @@ describe("POST and GET /api/sales - Auth protection", () => {
     const req = new NextRequest("http://localhost:3000/api/sales", {
       method: "GET",
       headers: {
-        "Authorization": `Basic ${goodCreds}`,
+        Authorization: `Basic ${goodCreds}`,
       },
     });
 
@@ -156,7 +162,13 @@ describe("POST and GET /api/sales - Auth protection", () => {
     delete process.env.PASSWORD;
 
     const mockSales = [
-      { id: "2", buyerName: "María", ticketCount: 1, used: true, createdAt: "2026-05-29" }
+      {
+        id: "2",
+        buyerName: "María",
+        ticketCount: 1,
+        used: true,
+        createdAt: "2026-05-29",
+      },
     ];
     vi.mocked(prisma.sale.findMany).mockResolvedValueOnce(mockSales as any);
 
@@ -176,13 +188,23 @@ describe("POST and GET /api/sales - Auth protection", () => {
     delete process.env.PASSWORD;
 
     const mockSales = [
-      { id: "1", buyerName: "Juan", ticketCount: 2, used: false, createdAt: "2026-05-29" },
+      {
+        id: "1",
+        buyerName: "Juan",
+        ticketCount: 2,
+        used: false,
+        createdAt: "2026-05-29",
+      },
     ];
     vi.mocked(prisma.sale.findMany).mockResolvedValueOnce(mockSales as any);
     vi.mocked(prisma.sale.count).mockResolvedValueOnce(15);
-    vi.mocked(prisma.sale.aggregate).mockResolvedValueOnce({ _sum: { ticketCount: 22 } } as any);
+    vi.mocked(prisma.sale.aggregate).mockResolvedValueOnce({
+      _sum: { ticketCount: 22 },
+    } as any);
 
-    const req = new NextRequest("http://localhost:3000/api/sales?page=2&pageSize=10");
+    const req = new NextRequest(
+      "http://localhost:3000/api/sales?page=2&pageSize=10",
+    );
     const res = await GET(req);
 
     expect(res.status).toBe(200);
@@ -211,9 +233,13 @@ describe("POST and GET /api/sales - Auth protection", () => {
 
     vi.mocked(prisma.sale.findMany).mockResolvedValueOnce([] as any);
     vi.mocked(prisma.sale.count).mockResolvedValueOnce(0);
-    vi.mocked(prisma.sale.aggregate).mockResolvedValueOnce({ _sum: { ticketCount: null } } as any);
+    vi.mocked(prisma.sale.aggregate).mockResolvedValueOnce({
+      _sum: { ticketCount: null },
+    } as any);
 
-    const req = new NextRequest("http://localhost:3000/api/sales?page=1&search=ana");
+    const req = new NextRequest(
+      "http://localhost:3000/api/sales?page=1&search=ana",
+    );
     const res = await GET(req);
 
     expect(res.status).toBe(200);
@@ -221,9 +247,11 @@ describe("POST and GET /api/sales - Auth protection", () => {
     expect(body.total).toBe(0);
     expect(body.totalTickets).toBe(0);
 
-    const expectedWhere = { buyerName: { contains: "ana", mode: "insensitive" } };
+    const expectedWhere = {
+      buyerName: { contains: "ana", mode: "insensitive" },
+    };
     expect(prisma.sale.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({ where: expectedWhere })
+      expect.objectContaining({ where: expectedWhere }),
     );
     expect(prisma.sale.count).toHaveBeenCalledWith({ where: expectedWhere });
   });

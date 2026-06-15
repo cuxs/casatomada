@@ -1,6 +1,6 @@
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata, Viewport } from "next";
 import { Epilogue, Space_Mono } from "next/font/google";
-import { SpeedInsights } from "@vercel/speed-insights/next"
 import "./globals.css";
 
 const epilogue = Epilogue({
@@ -22,7 +22,9 @@ const spaceMono = Space_Mono({
 const siteUrl =
   process.env.NEXT_PUBLIC_APP_URL ??
   process.env.NEXT_PUBLIC_BASE_URL ??
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+  (process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "http://localhost:3000");
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -86,7 +88,10 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${epilogue.variable} ${spaceMono.variable}`}>
       <SpeedInsights />
-      <body className="bg-black text-white min-h-screen" style={{ fontFamily: "var(--font-epilogue), sans-serif" }}>
+      <body
+        className="bg-black text-white min-h-screen"
+        style={{ fontFamily: "var(--font-epilogue), sans-serif" }}
+      >
         {children}
       </body>
     </html>

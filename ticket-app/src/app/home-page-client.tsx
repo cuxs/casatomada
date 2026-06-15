@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { EventConfig } from "@/config";
-import EntradasSection from "./sections/tickets-section";
 import ManifiestaSection from "./sections/manifesta-section";
 import RizomaSection from "./sections/rizoma-section";
+import EntradasSection from "./sections/tickets-section";
 
 const FONT_VARIANTS: { wght: number; italic: boolean }[] = [
   { wght: 900, italic: false },
@@ -35,12 +35,30 @@ const PRICE_CHANGES = [
 
 function getPriceInfo(now: Date) {
   if (now < PRICE_CHANGES[0].at) {
-    return { currentTierIndex: 0, currentPrice: 10000, nextPrice: 13000, changeAt: PRICE_CHANGES[0].at, currentLabel: "pajarito tempranero" };
+    return {
+      currentTierIndex: 0,
+      currentPrice: 10000,
+      nextPrice: 13000,
+      changeAt: PRICE_CHANGES[0].at,
+      currentLabel: "pajarito tempranero",
+    };
   }
   if (now < PRICE_CHANGES[1].at) {
-    return { currentTierIndex: 1, currentPrice: 13000, nextPrice: 15000, changeAt: PRICE_CHANGES[1].at, currentLabel: "primera tanda" };
+    return {
+      currentTierIndex: 1,
+      currentPrice: 13000,
+      nextPrice: 15000,
+      changeAt: PRICE_CHANGES[1].at,
+      currentLabel: "primera tanda",
+    };
   }
-  return { currentTierIndex: 2, currentPrice: 15000, nextPrice: null, changeAt: null, currentLabel: "segunda tanda" };
+  return {
+    currentTierIndex: 2,
+    currentPrice: 15000,
+    nextPrice: null,
+    changeAt: null,
+    currentLabel: "segunda tanda",
+  };
 }
 
 function formatCountdown(ms: number) {
@@ -55,7 +73,11 @@ function formatCountdown(ms: number) {
 
 type Section = "hero" | "entradas" | "manifiest" | "rizoma";
 
-export default function HomePageClient({ eventConfig }: { eventConfig: EventConfig }) {
+export default function HomePageClient({
+  eventConfig,
+}: {
+  eventConfig: EventConfig;
+}) {
   const [section, setSection] = useState<Section>("hero");
   const [bgIndex, setBgIndex] = useState(0);
   const [now, setNow] = useState<Date | null>(null);
@@ -75,16 +97,21 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
   }, []);
 
   useEffect(() => {
-    const id = setInterval(() => setBgIndex((i) => (i + 1) % LANDING_IMAGES.length), 5000);
+    const id = setInterval(
+      () => setBgIndex((i) => (i + 1) % LANDING_IMAGES.length),
+      5000,
+    );
     return () => clearInterval(id);
   }, []);
 
   useEffect(() => {
     let last = 0;
     const id = setInterval(() => {
-      setFontVariant((prev) => {
-        let next;
-        do { next = Math.floor(Math.random() * FONT_VARIANTS.length); } while (next === last);
+      setFontVariant(() => {
+        let next: number;
+        do {
+          next = Math.floor(Math.random() * FONT_VARIANTS.length);
+        } while (next === last);
         last = next;
         return FONT_VARIANTS[next];
       });
@@ -108,7 +135,10 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
   }, [section]);
 
   const priceInfo = now ? getPriceInfo(now) : null;
-  const msLeft = priceInfo?.changeAt ? priceInfo.changeAt.getTime() - now!.getTime() : null;
+  const msLeft = priceInfo?.changeAt
+    ? // biome-ignore lint/style/noNonNullAssertion: priceInfo is only set when now is set
+      priceInfo.changeAt.getTime() - now!.getTime()
+    : null;
   const countdown = msLeft !== null ? formatCountdown(msLeft) : null;
 
   function copyAlias() {
@@ -129,12 +159,11 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
     section === "manifiest"
       ? "translateX(100%)"
       : section === "rizoma"
-      ? "translateX(-100%)"
-      : "translateX(0)";
+        ? "translateX(-100%)"
+        : "translateX(0)";
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-black">
-
       {/* ===== HERO ===== */}
       <div
         className={`absolute inset-0 transition-transform duration-[600ms] ease-in-out overflow-hidden ${section === "hero" || section === "entradas" ? "z-10" : "z-[5]"}`}
@@ -145,7 +174,10 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
           <div
             key={src}
             className="absolute inset-0 bg-cover bg-center transition-opacity duration-[1500ms] ease-in-out"
-            style={{ backgroundImage: `url(${src})`, opacity: i === bgIndex ? 1 : 0 }}
+            style={{
+              backgroundImage: `url(${src})`,
+              opacity: i === bgIndex ? 1 : 0,
+            }}
           />
         ))}
         <div className="absolute inset-0 bg-black/45" />
@@ -169,7 +201,10 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
             <div className="flex gap-2.5 w-full">
               {(
                 [
-                  { label: "manifiest@", onClick: () => setSection("manifiest") },
+                  {
+                    label: "manifiest@",
+                    onClick: () => setSection("manifiest"),
+                  },
                   { label: "rizoma 001", onClick: () => setSection("rizoma") },
                 ] as const
               ).map(({ label, onClick }) => (
@@ -203,7 +238,17 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
               className="bg-transparent border-0 cursor-pointer text-white/50 p-1"
               aria-label="Ver más"
             >
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="28"
+                height="28"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
                 <polyline points="6 9 12 15 18 9" />
               </svg>
             </button>
@@ -215,7 +260,10 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
       <div
         ref={entradasRef}
         className={`absolute inset-0 overflow-y-auto overflow-x-hidden transition-transform duration-[600ms] ease-in-out ${section === "entradas" ? "z-20" : "z-[5]"}`}
-        style={{ transform: section === "entradas" ? "translateY(0)" : "translateY(100%)" }}
+        style={{
+          transform:
+            section === "entradas" ? "translateY(0)" : "translateY(100%)",
+        }}
       >
         <EntradasSection
           eventConfig={eventConfig}
@@ -233,7 +281,10 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
       <div
         ref={manifiestaRef}
         className={`absolute inset-0 overflow-x-hidden overflow-y-auto transition-transform duration-[600ms] ease-in-out ${section === "manifiest" ? "z-20" : "z-[5]"}`}
-        style={{ transform: section === "manifiest" ? "translateX(0)" : "translateX(-100%)" }}
+        style={{
+          transform:
+            section === "manifiest" ? "translateX(0)" : "translateX(-100%)",
+        }}
       >
         <ManifiestaSection onBack={() => setSection("hero")} />
       </div>
@@ -242,11 +293,13 @@ export default function HomePageClient({ eventConfig }: { eventConfig: EventConf
       <div
         ref={rizomaRef}
         className={`absolute inset-0 overflow-x-hidden overflow-y-auto transition-transform duration-[600ms] ease-in-out ${section === "rizoma" ? "z-20" : "z-[5]"}`}
-        style={{ transform: section === "rizoma" ? "translateX(0)" : "translateX(100%)" }}
+        style={{
+          transform:
+            section === "rizoma" ? "translateX(0)" : "translateX(100%)",
+        }}
       >
         <RizomaSection onBack={() => setSection("hero")} />
       </div>
-
     </div>
   );
 }

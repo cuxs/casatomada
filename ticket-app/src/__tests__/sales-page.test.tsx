@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import SalesPage from "../app/sales/page";
 
 const mockFetch = vi.fn();
@@ -22,7 +22,10 @@ describe("SalesPage", () => {
   const originalCreateElement = document.createElement;
 
   beforeAll(() => {
-    document.createElement = function (tagName: string, options?: ElementCreationOptions) {
+    document.createElement = (
+      tagName: string,
+      options?: ElementCreationOptions,
+    ) => {
       const el = originalCreateElement.call(document, tagName, options);
       if (tagName === "a") {
         el.click = mockClick;
@@ -71,15 +74,48 @@ describe("SalesPage", () => {
 
   it("displays sales, aggregated buyers table, and supports downloads", async () => {
     const mockSales = [
-      { id: "1", buyerName: "Juan Pérez", codeWord: "lombriz roja del monte", qrToken: "qr-token-001", price: 10000, ticketCount: 2, used: false, usedAt: null, createdAt: "2026-05-29T10:00:00.000Z" },
-      { id: "2", buyerName: "Ana Ruiz", codeWord: "marmota azul de la esquina", qrToken: "qr-token-002", price: 10000, ticketCount: 1, used: true, usedAt: "2026-05-30T10:00:00.000Z", createdAt: "2026-05-29T11:00:00.000Z" },
-      { id: "3", buyerName: "Juan Pérez", codeWord: "capibara verde de la terraza", qrToken: "qr-token-003", price: 10000, ticketCount: 1, used: false, usedAt: null, createdAt: "2026-05-29T12:00:00.000Z" },
+      {
+        id: "1",
+        buyerName: "Juan Pérez",
+        codeWord: "lombriz roja del monte",
+        qrToken: "qr-token-001",
+        price: 10000,
+        ticketCount: 2,
+        used: false,
+        usedAt: null,
+        createdAt: "2026-05-29T10:00:00.000Z",
+      },
+      {
+        id: "2",
+        buyerName: "Ana Ruiz",
+        codeWord: "marmota azul de la esquina",
+        qrToken: "qr-token-002",
+        price: 10000,
+        ticketCount: 1,
+        used: true,
+        usedAt: "2026-05-30T10:00:00.000Z",
+        createdAt: "2026-05-29T11:00:00.000Z",
+      },
+      {
+        id: "3",
+        buyerName: "Juan Pérez",
+        codeWord: "capibara verde de la terraza",
+        qrToken: "qr-token-003",
+        price: 10000,
+        ticketCount: 1,
+        used: false,
+        usedAt: null,
+        createdAt: "2026-05-29T12:00:00.000Z",
+      },
     ];
 
     mockFetch
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(tablePage({ sales: mockSales, total: 3, totalTickets: 4 })),
+        json: () =>
+          Promise.resolve(
+            tablePage({ sales: mockSales, total: 3, totalTickets: 4 }),
+          ),
       })
       .mockResolvedValueOnce({
         ok: true,
@@ -140,19 +176,37 @@ describe("SalesPage", () => {
         const lastCall = mockFetch.mock.calls[mockFetch.mock.calls.length - 1];
         expect(String(lastCall[0])).toContain("search=Ana");
       },
-      { timeout: 2000 }
+      { timeout: 2000 },
     );
   });
 
   it("paginates results", async () => {
     const mockSales = [
-      { id: "1", buyerName: "Juan Pérez", codeWord: "lombriz roja del monte", qrToken: "qr-token-001", price: 10000, ticketCount: 2, used: false, usedAt: null, createdAt: "2026-05-29T10:00:00.000Z" },
+      {
+        id: "1",
+        buyerName: "Juan Pérez",
+        codeWord: "lombriz roja del monte",
+        qrToken: "qr-token-001",
+        price: 10000,
+        ticketCount: 2,
+        used: false,
+        usedAt: null,
+        createdAt: "2026-05-29T10:00:00.000Z",
+      },
     ];
 
     mockFetch
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(tablePage({ sales: mockSales, total: 25, totalTickets: 30, totalPages: 3 })),
+        json: () =>
+          Promise.resolve(
+            tablePage({
+              sales: mockSales,
+              total: 25,
+              totalTickets: 30,
+              totalPages: 3,
+            }),
+          ),
       })
       .mockResolvedValueOnce({
         ok: true,
@@ -160,7 +214,16 @@ describe("SalesPage", () => {
       })
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(tablePage({ sales: mockSales, total: 25, totalTickets: 30, page: 2, totalPages: 3 })),
+        json: () =>
+          Promise.resolve(
+            tablePage({
+              sales: mockSales,
+              total: 25,
+              totalTickets: 30,
+              page: 2,
+              totalPages: 3,
+            }),
+          ),
       });
 
     render(<SalesPage />);
@@ -181,13 +244,26 @@ describe("SalesPage", () => {
 
   it("opens the details modal when clicking the view icon", async () => {
     const mockSales = [
-      { id: "1", buyerName: "Juan Pérez", codeWord: "lombriz roja del monte", qrToken: "qr-token-001", price: 10000, ticketCount: 2, used: false, usedAt: null, createdAt: "2026-05-29T10:00:00.000Z" },
+      {
+        id: "1",
+        buyerName: "Juan Pérez",
+        codeWord: "lombriz roja del monte",
+        qrToken: "qr-token-001",
+        price: 10000,
+        ticketCount: 2,
+        used: false,
+        usedAt: null,
+        createdAt: "2026-05-29T10:00:00.000Z",
+      },
     ];
 
     mockFetch
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(tablePage({ sales: mockSales, total: 1, totalTickets: 2 })),
+        json: () =>
+          Promise.resolve(
+            tablePage({ sales: mockSales, total: 1, totalTickets: 2 }),
+          ),
       })
       .mockResolvedValueOnce({
         ok: true,
@@ -200,7 +276,9 @@ describe("SalesPage", () => {
       expect(screen.getByText("Ventas Registradas")).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Ver detalle de Juan Pérez" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Ver detalle de Juan Pérez" }),
+    );
 
     expect(screen.getByText("Detalle de la compra")).toBeInTheDocument();
     expect(screen.getByText("lombriz roja del monte")).toBeInTheDocument();
@@ -209,13 +287,26 @@ describe("SalesPage", () => {
 
   it("opens the QR modal and shows the regenerated QR for a sale", async () => {
     const mockSales = [
-      { id: "1", buyerName: "Juan Pérez", codeWord: "lombriz roja del monte", qrToken: "qr-token-001", price: 10000, ticketCount: 2, used: false, usedAt: null, createdAt: "2026-05-29T10:00:00.000Z" },
+      {
+        id: "1",
+        buyerName: "Juan Pérez",
+        codeWord: "lombriz roja del monte",
+        qrToken: "qr-token-001",
+        price: 10000,
+        ticketCount: 2,
+        used: false,
+        usedAt: null,
+        createdAt: "2026-05-29T10:00:00.000Z",
+      },
     ];
 
     mockFetch
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(tablePage({ sales: mockSales, total: 1, totalTickets: 2 })),
+        json: () =>
+          Promise.resolve(
+            tablePage({ sales: mockSales, total: 1, totalTickets: 2 }),
+          ),
       })
       .mockResolvedValueOnce({
         ok: true,
@@ -238,7 +329,9 @@ describe("SalesPage", () => {
       expect(screen.getByText("Ventas Registradas")).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Ver QR de Juan Pérez" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Ver QR de Juan Pérez" }),
+    );
 
     expect(screen.getByText("QR de la entrada")).toBeInTheDocument();
 
@@ -252,13 +345,26 @@ describe("SalesPage", () => {
   });
 
   it("edits a sale via the edit modal", async () => {
-    const sale = { id: "1", buyerName: "Juan Pérez", codeWord: "lombriz roja del monte", qrToken: "qr-token-001", price: 10000, ticketCount: 2, used: false, usedAt: null, createdAt: "2026-05-29T10:00:00.000Z" };
+    const sale = {
+      id: "1",
+      buyerName: "Juan Pérez",
+      codeWord: "lombriz roja del monte",
+      qrToken: "qr-token-001",
+      price: 10000,
+      ticketCount: 2,
+      used: false,
+      usedAt: null,
+      createdAt: "2026-05-29T10:00:00.000Z",
+    };
     const updatedSale = { ...sale, buyerName: "Pedro Gómez" };
 
     mockFetch
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(tablePage({ sales: [sale], total: 1, totalTickets: 2 })),
+        json: () =>
+          Promise.resolve(
+            tablePage({ sales: [sale], total: 1, totalTickets: 2 }),
+          ),
       })
       .mockResolvedValueOnce({
         ok: true,
@@ -270,7 +376,10 @@ describe("SalesPage", () => {
       })
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(tablePage({ sales: [updatedSale], total: 1, totalTickets: 2 })),
+        json: () =>
+          Promise.resolve(
+            tablePage({ sales: [updatedSale], total: 1, totalTickets: 2 }),
+          ),
       })
       .mockResolvedValueOnce({
         ok: true,
@@ -283,7 +392,9 @@ describe("SalesPage", () => {
       expect(screen.getByText("Ventas Registradas")).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Editar a Juan Pérez" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Editar a Juan Pérez" }),
+    );
 
     const nameInput = screen.getByLabelText("Nombre");
     expect(nameInput).toHaveValue("Juan Pérez");

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 // GET /api/qr/[token] — fetch sale info for a given QR token
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { token: string } }
+  { params }: { params: { token: string } },
 ) {
   const { token } = params;
 
@@ -30,7 +30,7 @@ export async function GET(
 // POST /api/qr/[token] — mark a QR as used
 export async function POST(
   _request: NextRequest,
-  { params }: { params: { token: string } }
+  { params }: { params: { token: string } },
 ) {
   const { token } = params;
 

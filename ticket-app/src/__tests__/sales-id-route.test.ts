@@ -1,7 +1,7 @@
-import { PATCH } from "../app/api/sales/[id]/route";
-import { NextRequest } from "next/server";
 import { Prisma } from "@prisma/client";
+import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { PATCH } from "../app/api/sales/[id]/route";
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
@@ -111,7 +111,7 @@ describe("PATCH /api/sales/[id]", () => {
       new Prisma.PrismaClientKnownRequestError("Not found", {
         code: "P2025",
         clientVersion: "5.10.2",
-      })
+      }),
     );
 
     const req = makeRequest({ buyerName: "Alguien" });

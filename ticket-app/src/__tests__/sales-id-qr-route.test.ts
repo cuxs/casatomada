@@ -1,6 +1,6 @@
-import { GET } from "../app/api/sales/[id]/qr/route";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { GET } from "../app/api/sales/[id]/qr/route";
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
@@ -32,7 +32,9 @@ describe("GET /api/sales/[id]/qr", () => {
     process.env.USER = "mariano";
     process.env.PASSWORD = "casa123tomada";
 
-    const res = await GET(makeRequest("abc-123"), { params: { id: "abc-123" } });
+    const res = await GET(makeRequest("abc-123"), {
+      params: { id: "abc-123" },
+    });
 
     expect(res.status).toBe(401);
   });
@@ -40,7 +42,9 @@ describe("GET /api/sales/[id]/qr", () => {
   it("returns 404 when the sale does not exist", async () => {
     vi.mocked(prisma.sale.findUnique).mockResolvedValueOnce(null);
 
-    const res = await GET(makeRequest("missing-id"), { params: { id: "missing-id" } });
+    const res = await GET(makeRequest("missing-id"), {
+      params: { id: "missing-id" },
+    });
 
     expect(res.status).toBe(404);
     const body = await res.json();
@@ -60,7 +64,9 @@ describe("GET /api/sales/[id]/qr", () => {
       createdAt: new Date("2026-05-29T10:00:00.000Z"),
     } as any);
 
-    const res = await GET(makeRequest("abc-123"), { params: { id: "abc-123" } });
+    const res = await GET(makeRequest("abc-123"), {
+      params: { id: "abc-123" },
+    });
 
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -68,6 +74,8 @@ describe("GET /api/sales/[id]/qr", () => {
     expect(body.codeWord).toBe("lombriz roja del monte");
     expect(body.ticketCount).toBe(2);
     expect(body.qrDataUrl).toMatch(/^data:image\/png;base64,/);
-    expect(prisma.sale.findUnique).toHaveBeenCalledWith({ where: { id: "abc-123" } });
+    expect(prisma.sale.findUnique).toHaveBeenCalledWith({
+      where: { id: "abc-123" },
+    });
   });
 });

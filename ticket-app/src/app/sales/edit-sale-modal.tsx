@@ -10,7 +10,11 @@ interface EditSaleModalProps {
   onSaved: (sale: Sale) => void;
 }
 
-export default function EditSaleModal({ sale, onClose, onSaved }: EditSaleModalProps) {
+export default function EditSaleModal({
+  sale,
+  onClose,
+  onSaved,
+}: EditSaleModalProps) {
   const [buyerName, setBuyerName] = useState(sale.buyerName);
   const [ticketCount, setTicketCount] = useState(sale.ticketCount);
   const [saving, setSaving] = useState(false);
@@ -47,7 +51,10 @@ export default function EditSaleModal({ sale, onClose, onSaved }: EditSaleModalP
     <Modal title="Editar compra" onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
-          <label htmlFor="edit-buyerName" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="edit-buyerName"
+            className="block text-sm font-medium text-gray-700"
+          >
             Nombre
           </label>
           <input
@@ -61,7 +68,10 @@ export default function EditSaleModal({ sale, onClose, onSaved }: EditSaleModalP
         </div>
 
         <div className="space-y-1.5">
-          <label htmlFor="edit-ticketCount" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="edit-ticketCount"
+            className="block text-sm font-medium text-gray-700"
+          >
             Entradas
           </label>
           <input
@@ -70,7 +80,9 @@ export default function EditSaleModal({ sale, onClose, onSaved }: EditSaleModalP
             min={1}
             step={1}
             value={ticketCount}
-            onChange={(e) => setTicketCount(Math.max(1, Math.floor(Number(e.target.value))))}
+            onChange={(e) =>
+              setTicketCount(Math.max(1, Math.floor(Number(e.target.value))))
+            }
             required
             className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
           />

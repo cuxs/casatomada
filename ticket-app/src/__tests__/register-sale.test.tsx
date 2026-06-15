@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import RegisterSalePage from "../app/register-sale/page";
 
 const mockFetch = vi.fn();
@@ -23,7 +23,9 @@ describe("RegisterSalePage", () => {
     expect(screen.getByText("Registrar compra")).toBeInTheDocument();
     expect(screen.getByLabelText(/Nombre/)).toHaveValue("");
     expect(screen.getByLabelText("Válido por")).toHaveValue(1);
-    expect(screen.getByRole("button", { name: "Confirmar compra" })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Confirmar compra" }),
+    ).toBeDisabled();
 
     await waitFor(() => {
       expect(screen.getByText("Compradores")).toBeInTheDocument();
@@ -54,18 +56,28 @@ describe("RegisterSalePage", () => {
       })
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({
-          qrDataUrl: "data:image/png;base64,mockqr",
-          codeWord: "lombriz roja del monte",
-          qrToken: "mock-qr-token-aaa",
-          ticketCount: 1,
-        }),
+        json: () =>
+          Promise.resolve({
+            qrDataUrl: "data:image/png;base64,mockqr",
+            codeWord: "lombriz roja del monte",
+            qrToken: "mock-qr-token-aaa",
+            ticketCount: 1,
+          }),
       })
       .mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve([
-          { id: "1", buyerName: "Pedro Gómez", codeWord: "lombriz roja del monte", qrToken: "mock-qr-token-aaa", ticketCount: 1, used: false, createdAt: "2026-05-29" },
-        ]),
+        json: () =>
+          Promise.resolve([
+            {
+              id: "1",
+              buyerName: "Pedro Gómez",
+              codeWord: "lombriz roja del monte",
+              qrToken: "mock-qr-token-aaa",
+              ticketCount: 1,
+              used: false,
+              createdAt: "2026-05-29",
+            },
+          ]),
       });
 
     render(<RegisterSalePage />);
@@ -92,7 +104,7 @@ describe("RegisterSalePage", () => {
 
     expect(screen.getByAltText("QR de entrada")).toHaveAttribute(
       "src",
-      "data:image/png;base64,mockqr"
+      "data:image/png;base64,mockqr",
     );
     expect(screen.getByText("Válido para")).toBeInTheDocument();
 
@@ -100,7 +112,9 @@ describe("RegisterSalePage", () => {
       expect(screen.getByText("Pedro Gómez")).toBeInTheDocument();
     });
 
-    const newSaleBtn = screen.getByRole("button", { name: "Registrar otra compra" });
+    const newSaleBtn = screen.getByRole("button", {
+      name: "Registrar otra compra",
+    });
     fireEvent.click(newSaleBtn);
 
     expect(screen.getByText("Registrar compra")).toBeInTheDocument();
@@ -116,12 +130,13 @@ describe("RegisterSalePage", () => {
       })
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({
-          qrDataUrl: "data:image/png;base64,mockqr",
-          codeWord: "marmota azul de la esquina",
-          qrToken: "mock-qr-token-bbb",
-          ticketCount: 3,
-        }),
+        json: () =>
+          Promise.resolve({
+            qrDataUrl: "data:image/png;base64,mockqr",
+            codeWord: "marmota azul de la esquina",
+            qrToken: "mock-qr-token-bbb",
+            ticketCount: 3,
+          }),
       })
       .mockResolvedValue({
         ok: true,
@@ -130,9 +145,15 @@ describe("RegisterSalePage", () => {
 
     render(<RegisterSalePage />);
 
-    fireEvent.change(screen.getByLabelText(/Nombre/), { target: { value: "Ana Díaz" } });
-    fireEvent.change(screen.getByLabelText("Precio"), { target: { value: "15000" } });
-    fireEvent.change(screen.getByLabelText("Válido por"), { target: { value: "3" } });
+    fireEvent.change(screen.getByLabelText(/Nombre/), {
+      target: { value: "Ana Díaz" },
+    });
+    fireEvent.change(screen.getByLabelText("Precio"), {
+      target: { value: "15000" },
+    });
+    fireEvent.change(screen.getByLabelText("Válido por"), {
+      target: { value: "3" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Confirmar compra" }));
 
     expect(mockFetch).toHaveBeenCalledWith("/api/sales", {
@@ -171,18 +192,23 @@ describe("RegisterSalePage", () => {
       })
       .mockResolvedValueOnce({
         ok: false,
-        json: () => Promise.resolve({
-          error: "El código de promo no es válido.",
-        }),
+        json: () =>
+          Promise.resolve({
+            error: "El código de promo no es válido.",
+          }),
       });
 
     render(<RegisterSalePage />);
 
-    fireEvent.change(screen.getByLabelText(/Nombre/), { target: { value: "Pedro Gómez" } });
+    fireEvent.change(screen.getByLabelText(/Nombre/), {
+      target: { value: "Pedro Gómez" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Confirmar compra" }));
 
     await waitFor(() => {
-      expect(screen.getByText("El código de promo no es válido.")).toBeInTheDocument();
+      expect(
+        screen.getByText("El código de promo no es válido."),
+      ).toBeInTheDocument();
     });
   });
 
@@ -196,11 +222,17 @@ describe("RegisterSalePage", () => {
 
     render(<RegisterSalePage />);
 
-    fireEvent.change(screen.getByLabelText(/Nombre/), { target: { value: "Pedro Gómez" } });
+    fireEvent.change(screen.getByLabelText(/Nombre/), {
+      target: { value: "Pedro Gómez" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Confirmar compra" }));
 
     await waitFor(() => {
-      expect(screen.getByText("No se pudo conectar con el servidor. Intentá de nuevo.")).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "No se pudo conectar con el servidor. Intentá de nuevo.",
+        ),
+      ).toBeInTheDocument();
     });
   });
 });

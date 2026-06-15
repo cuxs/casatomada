@@ -29,12 +29,14 @@ export default function SaleQrModal({ sale, onClose }: SaleQrModalProps) {
         const res = await fetch(`/api/sales/${sale.id}/qr`);
         const json = await res.json();
         if (!res.ok) {
-          if (!cancelled) setError(json.error ?? "Ocurrió un error al generar el QR.");
+          if (!cancelled)
+            setError(json.error ?? "Ocurrió un error al generar el QR.");
           return;
         }
         if (!cancelled) setData(json as QrData);
       } catch {
-        if (!cancelled) setError("No se pudo conectar con el servidor. Intentá de nuevo.");
+        if (!cancelled)
+          setError("No se pudo conectar con el servidor. Intentá de nuevo.");
       }
     }
 
@@ -51,7 +53,9 @@ export default function SaleQrModal({ sale, onClose }: SaleQrModalProps) {
     try {
       const res = await fetch(data.qrDataUrl);
       const blob = await res.blob();
-      const file = new File([blob], `entrada-${sale.codeWord}.png`, { type: "image/png" });
+      const file = new File([blob], `entrada-${sale.codeWord}.png`, {
+        type: "image/png",
+      });
 
       if (navigator.canShare?.({ files: [file] })) {
         await navigator.share({
@@ -91,22 +95,30 @@ export default function SaleQrModal({ sale, onClose }: SaleQrModalProps) {
       {data && (
         <div className="flex flex-col items-center gap-4">
           <p className="text-sm text-gray-500 text-center">
-            Entrada de <span className="font-medium text-gray-900">{sale.buyerName}</span>
+            Entrada de{" "}
+            <span className="font-medium text-gray-900">{sale.buyerName}</span>
           </p>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={data.qrDataUrl} alt="QR de entrada" className="w-56 h-56" />
           <p className="text-sm font-medium text-gray-700 bg-gray-100 px-4 py-2 rounded-full">
             Válido para{" "}
             <span className="font-bold">
-              {data.ticketCount} {data.ticketCount === 1 ? "entrada" : "entradas"}
+              {data.ticketCount}{" "}
+              {data.ticketCount === 1 ? "entrada" : "entradas"}
             </span>
           </p>
           <div className="w-full text-center bg-gray-900 rounded-xl px-4 py-3">
-            <p className="text-xs text-gray-300 uppercase tracking-wider">Animal</p>
-            <p className="mt-1 text-lg font-bold text-white capitalize">{data.codeWord}</p>
+            <p className="text-xs text-gray-300 uppercase tracking-wider">
+              Animal
+            </p>
+            <p className="mt-1 text-lg font-bold text-white capitalize">
+              {data.codeWord}
+            </p>
           </div>
           <div className="w-full text-center bg-gray-900 rounded-xl px-4 py-3">
-            <p className="text-xs text-gray-300 uppercase tracking-wider">Código</p>
+            <p className="text-xs text-gray-300 uppercase tracking-wider">
+              Código
+            </p>
             <p className="mt-1 text-lg font-bold text-white tracking-widest">
               {data.qrToken.slice(-3).toUpperCase()}
             </p>

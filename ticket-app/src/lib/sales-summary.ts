@@ -34,7 +34,11 @@ export function aggregateBuyers(sales: Sale[]): BuyerSummary[] {
   }
 
   return Array.from(totals.entries())
-    .map(([buyerName, { ticketCount, codes }]) => ({ buyerName, ticketCount, codes }))
+    .map(([buyerName, { ticketCount, codes }]) => ({
+      buyerName,
+      ticketCount,
+      codes,
+    }))
     .sort((a, b) => a.buyerName.localeCompare(b.buyerName, "es"));
 }
 
@@ -47,18 +51,19 @@ export function downloadBuyersCSV(buyers: BuyerSummary[]) {
   });
 
   triggerDownload(
-    "data:text/csv;charset=utf-8,\uFEFF" + csvRows.join("\n"),
-    "lista_compradores.csv"
+    `data:text/csv;charset=utf-8,\uFEFF${csvRows.join("\n")}`,
+    "lista_compradores.csv",
   );
 }
 
 export function downloadBuyersTXT(buyers: BuyerSummary[]) {
   const txtRows = buyers.map(
-    ({ buyerName, ticketCount, codes }) => `${buyerName}: ${ticketCount} \u2014 ${codes.join(" / ")}`
+    ({ buyerName, ticketCount, codes }) =>
+      `${buyerName}: ${ticketCount} \u2014 ${codes.join(" / ")}`,
   );
   triggerDownload(
-    "data:text/plain;charset=utf-8,\uFEFF" + txtRows.join("\n"),
-    "lista_compradores.txt"
+    `data:text/plain;charset=utf-8,\uFEFF${txtRows.join("\n")}`,
+    "lista_compradores.txt",
   );
 }
 

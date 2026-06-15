@@ -1,6 +1,6 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import HomePageClient from "../app/home-page-client";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { getEventConfig } from "@/config";
+import HomePageClient from "../app/home-page-client";
 
 const eventConfig = getEventConfig();
 
@@ -33,7 +33,7 @@ describe("HomePage", () => {
 
     fireEvent.click(screen.getByText("manifiest@"));
 
-    expect(screen.getByText("_maniest@")).toBeInTheDocument();
+    expect(screen.getByAltText("manifiesta")).toBeInTheDocument();
   });
 
   it("shows rizoma section when rizoma 001 button is clicked", () => {
@@ -50,20 +50,31 @@ describe("HomePage", () => {
     fireEvent.click(screen.getByText("entradas"));
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "copiar el alias" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "copiar el alias" }),
+      ).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByRole("button", { name: "copiar el alias" }));
 
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(eventConfig.alias);
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+      eventConfig.alias,
+    );
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "¡copiado!" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "¡copiado!" }),
+      ).toBeInTheDocument();
     });
 
-    await waitFor(() => {
-      expect(screen.getByRole("button", { name: "copiar el alias" })).toBeInTheDocument();
-    }, { timeout: 2500 });
+    await waitFor(
+      () => {
+        expect(
+          screen.getByRole("button", { name: "copiar el alias" }),
+        ).toBeInTheDocument();
+      },
+      { timeout: 2500 },
+    );
   });
 
   it("handles copy phone functionality", async () => {
@@ -72,20 +83,31 @@ describe("HomePage", () => {
     fireEvent.click(screen.getByText("entradas"));
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "copiar el número" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "copiar el número" }),
+      ).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByRole("button", { name: "copiar el número" }));
 
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(eventConfig.phone);
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+      eventConfig.phone,
+    );
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "¡copiado!" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "¡copiado!" }),
+      ).toBeInTheDocument();
     });
 
-    await waitFor(() => {
-      expect(screen.getByRole("button", { name: "copiar el número" })).toBeInTheDocument();
-    }, { timeout: 2500 });
+    await waitFor(
+      () => {
+        expect(
+          screen.getByRole("button", { name: "copiar el número" }),
+        ).toBeInTheDocument();
+      },
+      { timeout: 2500 },
+    );
   });
 
   it("shows sold out state when soldOut is true", () => {
@@ -94,7 +116,9 @@ describe("HomePage", () => {
     fireEvent.click(screen.getByText("entradas"));
 
     expect(screen.getByText("sold out")).toBeInTheDocument();
-    expect(screen.getByText("gracias, nos vemos en la pista we")).toBeInTheDocument();
+    expect(
+      screen.getByText("gracias, nos vemos en la pista we"),
+    ).toBeInTheDocument();
   });
 
   it("shows price tiers when not sold out", async () => {
@@ -113,9 +137,11 @@ describe("HomePage", () => {
 
     fireEvent.click(screen.getByText("entradas"));
 
-    expect(screen.getByText(/Enviá el comprobante a este número/)).toBeInTheDocument();
     expect(
-      screen.getByText(/te va a llegar un QR con la entrada a tu whatsapp/)
+      screen.getByText(/Enviá el comprobante a este número/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/te va a llegar un QR con la entrada a tu whatsapp/),
     ).toBeInTheDocument();
   });
 });
@@ -126,7 +152,7 @@ describe("manifiest@ section", () => {
 
     fireEvent.click(screen.getByText("manifiest@"));
 
-    expect(screen.getByText("_maniest@")).toBeInTheDocument();
+    expect(screen.getByAltText("manifiesta")).toBeInTheDocument();
     expect(screen.getByText(/no es una fiesta/)).toBeInTheDocument();
     expect(screen.getByText(/la salida es colectiva/)).toBeInTheDocument();
   });
@@ -141,7 +167,7 @@ describe("rizoma section", () => {
     const link = screen.getByText("full video").closest("a");
     expect(link).toHaveAttribute(
       "href",
-      "https://www.youtube.com/watch?v=H_Fp5Mc9hc0&list=RDH_Fp5Mc9hc0"
+      "https://www.youtube.com/watch?v=H_Fp5Mc9hc0&list=RDH_Fp5Mc9hc0",
     );
     expect(link).toHaveAttribute("target", "_blank");
     expect(screen.getByAltText("participantes")).toBeInTheDocument();
@@ -152,7 +178,9 @@ describe("section navigation", () => {
   it("exposes a back control in each section", () => {
     render(<HomePageClient eventConfig={eventConfig} />);
 
-    expect(screen.getAllByRole("button", { name: "Volver" }).length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByRole("button", { name: "Volver" }).length,
+    ).toBeGreaterThan(0);
   });
 });
 

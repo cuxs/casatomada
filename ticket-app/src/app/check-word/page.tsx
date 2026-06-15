@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { ANIMALS, COLORS, PLACES } from "@/lib/code-words";
 
 function focusAndOpen(el: HTMLSelectElement | HTMLInputElement | null) {
@@ -58,7 +58,9 @@ export default function CheckWordPage() {
     setCodeResult(null);
     setCodeJustMarked(false);
 
-    fetch(`/api/qr/lookup?codeWord=${encodeURIComponent(codeWord)}&suffix=${encodeURIComponent(tokenSuffix)}`)
+    fetch(
+      `/api/qr/lookup?codeWord=${encodeURIComponent(codeWord)}&suffix=${encodeURIComponent(tokenSuffix)}`,
+    )
       .then((res) => res.json())
       .then((data) => {
         if (!cancelled) setCodeResult(data);
@@ -82,12 +84,17 @@ export default function CheckWordPage() {
     if (!codeResult?.qrToken) return;
     setCodeMarking(true);
     try {
-      const res = await fetch(`/api/qr/${encodeURIComponent(codeResult.qrToken)}`, {
-        method: "POST",
-      });
+      const res = await fetch(
+        `/api/qr/${encodeURIComponent(codeResult.qrToken)}`,
+        {
+          method: "POST",
+        },
+      );
       const data = await res.json();
       if (res.ok) {
-        setCodeResult((prev) => (prev ? { ...prev, used: data.used, usedAt: data.usedAt } : prev));
+        setCodeResult((prev) =>
+          prev ? { ...prev, used: data.used, usedAt: data.usedAt } : prev,
+        );
         setCodeJustMarked(true);
       }
     } finally {
@@ -109,10 +116,15 @@ export default function CheckWordPage() {
     <main className="min-h-screen bg-white flex flex-col items-center px-4 py-12">
       <div className="w-full max-w-md space-y-6">
         <div>
-          <Link href="/check-qr" className="text-sm text-gray-500 hover:text-gray-800 transition-colors">
+          <Link
+            href="/check-qr"
+            className="text-sm text-gray-500 hover:text-gray-800 transition-colors"
+          >
             ← Volver
           </Link>
-          <h1 className="mt-4 text-3xl font-bold text-gray-900">Validar por palabra clave</h1>
+          <h1 className="mt-4 text-3xl font-bold text-gray-900">
+            Validar por palabra clave
+          </h1>
         </div>
 
         <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 space-y-4">
@@ -186,56 +198,59 @@ export default function CheckWordPage() {
             </div>
           )}
 
-          {!codeLoading && codeChecked && codeResult && (
-            <>
-              {codeResult.found && (!codeResult.used || codeJustMarked) ? (
-                <div className="space-y-3 text-center">
-                  <div className="bg-green-50 border border-green-100 rounded-xl px-4 py-3 space-y-1">
-                    <p className="text-sm text-gray-500">Nombre</p>
-                    <p className="font-semibold text-gray-900">{codeResult.buyerName}</p>
-                    <p className="text-sm text-gray-500 mt-2">Entradas</p>
-                    <p className="font-bold text-xl text-gray-900">{codeResult.ticketCount}</p>
-                  </div>
+          {!codeLoading &&
+            codeChecked &&
+            codeResult &&
+            (codeResult.found && (!codeResult.used || codeJustMarked) ? (
+              <div className="space-y-3 text-center">
+                <div className="bg-green-50 border border-green-100 rounded-xl px-4 py-3 space-y-1">
+                  <p className="text-sm text-gray-500">Nombre</p>
+                  <p className="font-semibold text-gray-900">
+                    {codeResult.buyerName}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-2">Entradas</p>
+                  <p className="font-bold text-xl text-gray-900">
+                    {codeResult.ticketCount}
+                  </p>
+                </div>
 
-                  {codeJustMarked ? (
-                    <p className="text-2xl text-black">✅ Entrada validada</p>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={markCodeAsUsed}
-                      disabled={codeMarking}
-                      className="w-full py-4 bg-green-50 border border-green-200 rounded-xl hover:bg-green-100 disabled:opacity-50 transition-colors"
-                    >
-                      {codeMarking ? (
-                        <span className="w-6 h-6 border-2 border-green-700 border-t-transparent rounded-full animate-spin inline-block" />
-                      ) : (
-                        <span className="text-4xl text-black">Validar ✅</span>
-                      )}
-                    </button>
-                  )}
-
+                {codeJustMarked ? (
+                  <p className="text-2xl text-black">✅ Entrada validada</p>
+                ) : (
                   <button
                     type="button"
-                    onClick={resetCodeSearch}
-                    className="text-black p-2 border border-gray-300 rounded-xl"
+                    onClick={markCodeAsUsed}
+                    disabled={codeMarking}
+                    className="w-full py-4 bg-green-50 border border-green-200 rounded-xl hover:bg-green-100 disabled:opacity-50 transition-colors"
                   >
-                    Validar otra entrada
+                    {codeMarking ? (
+                      <span className="w-6 h-6 border-2 border-green-700 border-t-transparent rounded-full animate-spin inline-block" />
+                    ) : (
+                      <span className="text-4xl text-black">Validar ✅</span>
+                    )}
                   </button>
-                </div>
-              ) : (
-                <div className="space-y-3 text-center">
-                  <p className="text-4xl">❌</p>
-                  <button
-                    type="button"
-                    onClick={resetCodeSearch}
-                    className="text-sm text-gray-500 hover:text-gray-800 transition-colors"
-                  >
-                    Validar otra entrada
-                  </button>
-                </div>
-              )}
-            </>
-          )}
+                )}
+
+                <button
+                  type="button"
+                  onClick={resetCodeSearch}
+                  className="text-black p-2 border border-gray-300 rounded-xl"
+                >
+                  Validar otra entrada
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3 text-center">
+                <p className="text-4xl">❌</p>
+                <button
+                  type="button"
+                  onClick={resetCodeSearch}
+                  className="text-sm text-gray-500 hover:text-gray-800 transition-colors"
+                >
+                  Validar otra entrada
+                </button>
+              </div>
+            ))}
         </div>
       </div>
     </main>

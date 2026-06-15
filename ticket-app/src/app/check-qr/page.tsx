@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
-import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 
 interface SaleInfo {
   found: boolean;
@@ -64,9 +63,12 @@ function CheckQRContent() {
     if (!tokenRef.current) return;
     setMarking(true);
     try {
-      const res = await fetch(`/api/qr/${encodeURIComponent(tokenRef.current.trim())}`, {
-        method: "POST",
-      });
+      const res = await fetch(
+        `/api/qr/${encodeURIComponent(tokenRef.current.trim())}`,
+        {
+          method: "POST",
+        },
+      );
       const data = await res.json();
       if (res.ok) {
         setSale(data);
@@ -87,15 +89,23 @@ function CheckQRContent() {
     <main className="min-h-screen bg-white flex flex-col items-center px-4 py-12">
       <div className="w-full max-w-md space-y-6">
         <div>
-          <Link href="/" className="text-sm text-gray-500 hover:text-gray-800 transition-colors">
+          <Link
+            href="/"
+            className="text-sm text-gray-500 hover:text-gray-800 transition-colors"
+          >
             ← Volver
           </Link>
-          <h1 className="mt-4 text-3xl font-bold text-gray-900">Validar entrada</h1>
+          <h1 className="mt-4 text-3xl font-bold text-gray-900">
+            Validar entrada
+          </h1>
         </div>
 
         {/* Manual token input — shown if no token in URL or to check a different one */}
         {(!tokenFromUrl || checked) && (
-          <form onSubmit={handleManualSubmit} className="flex flex-col sm:flex-row gap-2">
+          <form
+            onSubmit={handleManualSubmit}
+            className="flex flex-col sm:flex-row gap-2"
+          >
             <input
               type="text"
               value={manualInput}
@@ -129,7 +139,9 @@ function CheckQRContent() {
               <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-center space-y-2">
                 <div className="text-4xl">❌</div>
                 <p className="font-bold text-red-700 text-lg">QR inválido</p>
-                <p className="text-red-600 text-sm">Este código no existe en el sistema.</p>
+                <p className="text-red-600 text-sm">
+                  Este código no existe en el sistema.
+                </p>
               </div>
             )}
 
@@ -137,15 +149,21 @@ function CheckQRContent() {
             {sale.found && sale.used && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 space-y-3">
                 <div className="text-4xl text-center">⚠️</div>
-                <p className="text-center font-bold text-yellow-800 text-lg">QR ya utilizado</p>
+                <p className="text-center font-bold text-yellow-800 text-lg">
+                  QR ya utilizado
+                </p>
                 <div className="bg-white border border-yellow-100 rounded-xl px-4 py-3 space-y-1">
                   <p className="text-sm text-gray-500">Nombre</p>
-                  <p className="font-semibold text-gray-900">{sale.buyerName}</p>
+                  <p className="font-semibold text-gray-900">
+                    {sale.buyerName}
+                  </p>
                 </div>
                 {sale.usedAt && (
                   <div className="bg-white border border-yellow-100 rounded-xl px-4 py-3 space-y-1">
                     <p className="text-sm text-gray-500">Usado el</p>
-                    <p className="font-semibold text-gray-900">{formatDate(sale.usedAt)}</p>
+                    <p className="font-semibold text-gray-900">
+                      {formatDate(sale.usedAt)}
+                    </p>
                   </div>
                 )}
               </div>
@@ -155,16 +173,22 @@ function CheckQRContent() {
             {sale.found && !sale.used && (
               <div className="bg-green-50 border border-green-200 rounded-2xl p-6 space-y-4">
                 <div className="text-4xl text-center">✅</div>
-                <p className="text-center font-bold text-green-800 text-lg">QR válido</p>
+                <p className="text-center font-bold text-green-800 text-lg">
+                  QR válido
+                </p>
 
                 <div className="bg-white border border-green-100 rounded-xl px-4 py-3 space-y-1">
                   <p className="text-sm text-gray-500">Nombre</p>
-                  <p className="font-semibold text-gray-900">{sale.buyerName}</p>
+                  <p className="font-semibold text-gray-900">
+                    {sale.buyerName}
+                  </p>
                 </div>
 
                 <div className="bg-white border border-green-100 rounded-xl px-4 py-3 space-y-1">
                   <p className="text-sm text-gray-500">Entradas</p>
-                  <p className="font-bold text-2xl text-gray-900">{sale.ticketCount}</p>
+                  <p className="font-bold text-2xl text-gray-900">
+                    {sale.ticketCount}
+                  </p>
                 </div>
 
                 <button
@@ -199,11 +223,13 @@ function CheckQRContent() {
 
 export default function CheckQRPage() {
   return (
-    <Suspense fallback={
-      <main className="min-h-screen bg-white flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-gray-300 border-t-gray-700 rounded-full animate-spin" />
-      </main>
-    }>
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-white flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-gray-300 border-t-gray-700 rounded-full animate-spin" />
+        </main>
+      }
+    >
       <CheckQRContent />
     </Suspense>
   );

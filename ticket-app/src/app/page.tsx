@@ -3,8 +3,16 @@ import { getEventConfig } from "@/config";
 import HomePageClient from "./home-page-client";
 
 const PRICE_CHANGES = [
-  { at: new Date("2026-06-24T03:00:00Z"), label: "Pajarito tempranero", price: 10000 },
-  { at: new Date("2026-07-01T03:00:00Z"), label: "Primera tanda", price: 13000 },
+  {
+    at: new Date("2026-06-24T03:00:00Z"),
+    label: "Pajarito tempranero",
+    price: 10000,
+  },
+  {
+    at: new Date("2026-07-01T03:00:00Z"),
+    label: "Primera tanda",
+    price: 13000,
+  },
 ];
 
 function getCurrentTierDescription(): string {

@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
-import EntradasSection from "../app/sections/tickets-section";
 import { getEventConfig } from "@/config";
+import EntradasSection from "../app/sections/tickets-section";
 
 const eventConfig = getEventConfig();
 
@@ -23,7 +23,7 @@ function renderEntradas(priceInfo: {
       onCopyAlias={noop}
       onCopyPhone={noop}
       onBack={noop}
-    />
+    />,
   );
 }
 
@@ -38,7 +38,9 @@ describe("EntradasSection price tiers", () => {
     });
 
     expect(document.querySelectorAll("p.line-through")).toHaveLength(0);
-    expect(screen.getByRole("button", { name: /pajarito tempranero/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /pajarito tempranero/i }),
+    ).toBeInTheDocument();
   });
 
   it("shows the first tier strikethrough when the second tier is active", () => {
@@ -52,9 +54,13 @@ describe("EntradasSection price tiers", () => {
 
     const pastTier = screen.getByText(/pajarito tempranero \$10\.000/);
     expect(pastTier).toHaveClass("line-through");
-    expect(screen.getByRole("button", { name: /primera tanda/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /primera tanda/i }),
+    ).toBeInTheDocument();
     expect(screen.getByText(/segunda tanda \$15\.000/)).toBeInTheDocument();
-    expect(screen.getByText(/entradas en puerta \$20\.000/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/entradas en puerta \$20\.000/),
+    ).toBeInTheDocument();
   });
 
   it("shows all past tiers strikethrough when the third tier is active", () => {
@@ -66,9 +72,17 @@ describe("EntradasSection price tiers", () => {
       currentLabel: "segunda tanda",
     });
 
-    expect(screen.getByText(/pajarito tempranero \$10\.000/)).toHaveClass("line-through");
-    expect(screen.getByText(/primera tanda \$13\.000/)).toHaveClass("line-through");
-    expect(screen.getByRole("button", { name: /segunda tanda/i })).toBeInTheDocument();
-    expect(screen.getByText(/entradas en puerta \$20\.000/)).not.toHaveClass("line-through");
+    expect(screen.getByText(/pajarito tempranero \$10\.000/)).toHaveClass(
+      "line-through",
+    );
+    expect(screen.getByText(/primera tanda \$13\.000/)).toHaveClass(
+      "line-through",
+    );
+    expect(
+      screen.getByRole("button", { name: /segunda tanda/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/entradas en puerta \$20\.000/)).not.toHaveClass(
+      "line-through",
+    );
   });
 });

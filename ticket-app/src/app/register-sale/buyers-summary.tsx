@@ -3,9 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   aggregateBuyers,
+  type BuyerSummary,
   downloadBuyersCSV,
   downloadBuyersTXT,
-  type BuyerSummary,
   type Sale,
 } from "@/lib/sales-summary";
 
@@ -14,9 +14,12 @@ interface BuyersSummaryProps {
   sales?: Sale[] | null;
 }
 
-export default function BuyersSummary({ refreshKey = 0, sales: salesProp }: BuyersSummaryProps) {
+export default function BuyersSummary({
+  refreshKey = 0,
+  sales: salesProp,
+}: BuyersSummaryProps) {
   const [buyers, setBuyers] = useState<BuyerSummary[] | null>(
-    salesProp ? aggregateBuyers(salesProp) : null
+    salesProp ? aggregateBuyers(salesProp) : null,
   );
   const [loading, setLoading] = useState(salesProp === undefined);
   const [error, setError] = useState<string | null>(null);
@@ -51,6 +54,7 @@ export default function BuyersSummary({ refreshKey = 0, sales: salesProp }: Buye
     }
   }, [salesProp]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: refreshKey is a trigger to re-run loadBuyers
   useEffect(() => {
     loadBuyers();
   }, [loadBuyers, refreshKey]);
@@ -64,8 +68,8 @@ export default function BuyersSummary({ refreshKey = 0, sales: salesProp }: Buye
           <h2 className="text-lg font-semibold text-gray-900">Compradores</h2>
           {buyers && (
             <p className="text-sm text-gray-500 mt-0.5">
-              {buyers.length} {buyers.length === 1 ? "persona" : "personas"} • {totalTickets}{" "}
-              {totalTickets === 1 ? "entrada" : "entradas"}
+              {buyers.length} {buyers.length === 1 ? "persona" : "personas"} •{" "}
+              {totalTickets} {totalTickets === 1 ? "entrada" : "entradas"}
             </p>
           )}
         </div>
@@ -121,8 +125,13 @@ export default function BuyersSummary({ refreshKey = 0, sales: salesProp }: Buye
             </thead>
             <tbody className="divide-y divide-gray-100 text-sm text-gray-700">
               {buyers.map((buyer) => (
-                <tr key={buyer.buyerName} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-3 font-medium text-gray-900">{buyer.buyerName}</td>
+                <tr
+                  key={buyer.buyerName}
+                  className="hover:bg-gray-50/50 transition-colors"
+                >
+                  <td className="px-6 py-3 font-medium text-gray-900">
+                    {buyer.buyerName}
+                  </td>
                   <td className="px-6 py-3 text-center font-bold text-gray-900">
                     {buyer.ticketCount}
                   </td>

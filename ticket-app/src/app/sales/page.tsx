@@ -1,17 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import SaleDetailsModal from "./sale-details-modal";
-import EditSaleModal from "./edit-sale-modal";
-import SaleQrModal from "./sale-qr-modal";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   aggregateBuyers,
+  type BuyerSummary,
   downloadBuyersCSV,
   downloadBuyersTXT,
-  type BuyerSummary,
   type Sale,
 } from "@/lib/sales-summary";
+import EditSaleModal from "./edit-sale-modal";
+import SaleDetailsModal from "./sale-details-modal";
+import SaleQrModal from "./sale-qr-modal";
 
 const PAGE_SIZE = 10;
 
@@ -41,43 +41,48 @@ export default function SalesPage() {
 
   const hasLoadedRef = useRef(false);
 
-  const loadSales = useCallback(async (targetPage: number, searchTerm: string) => {
-    if (!hasLoadedRef.current) {
-      setLoading(true);
-    } else {
-      setTableLoading(true);
-    }
-    setError(null);
-
-    try {
-      const params = new URLSearchParams({
-        page: String(targetPage),
-        pageSize: String(PAGE_SIZE),
-      });
-      if (searchTerm) params.set("search", searchTerm);
-
-      const res = await fetch(`/api/sales?${params.toString()}`, { method: "GET" });
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error ?? "Ocurrió un error al cargar las ventas.");
-        setSales(null);
-        return;
+  const loadSales = useCallback(
+    async (targetPage: number, searchTerm: string) => {
+      if (!hasLoadedRef.current) {
+        setLoading(true);
+      } else {
+        setTableLoading(true);
       }
+      setError(null);
 
-      const result = data as SalesResponse;
-      setSales(result.sales);
-      setTotalPages(result.totalPages);
-      setPage(result.page);
-    } catch {
-      setError("No se pudo conectar con el servidor. Intentá de nuevo.");
-      setSales(null);
-    } finally {
-      hasLoadedRef.current = true;
-      setLoading(false);
-      setTableLoading(false);
-    }
-  }, []);
+      try {
+        const params = new URLSearchParams({
+          page: String(targetPage),
+          pageSize: String(PAGE_SIZE),
+        });
+        if (searchTerm) params.set("search", searchTerm);
+
+        const res = await fetch(`/api/sales?${params.toString()}`, {
+          method: "GET",
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          setError(data.error ?? "Ocurrió un error al cargar las ventas.");
+          setSales(null);
+          return;
+        }
+
+        const result = data as SalesResponse;
+        setSales(result.sales);
+        setTotalPages(result.totalPages);
+        setPage(result.page);
+      } catch {
+        setError("No se pudo conectar con el servidor. Intentá de nuevo.");
+        setSales(null);
+      } finally {
+        hasLoadedRef.current = true;
+        setLoading(false);
+        setTableLoading(false);
+      }
+    },
+    [],
+  );
 
   const isFirstSearchRun = useRef(true);
   useEffect(() => {
@@ -108,6 +113,7 @@ export default function SalesPage() {
     }
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: buyersRefreshKey is a trigger to re-run loadBuyers
   useEffect(() => {
     loadBuyers();
   }, [loadBuyers, buyersRefreshKey]);
@@ -140,7 +146,10 @@ export default function SalesPage() {
           >
             Reintentar
           </button>
-          <Link href="/register-sale" className="block text-sm text-gray-500 hover:text-gray-800 transition-colors">
+          <Link
+            href="/register-sale"
+            className="block text-sm text-gray-500 hover:text-gray-800 transition-colors"
+          >
             ← Registrar compra
           </Link>
         </div>
@@ -158,7 +167,9 @@ export default function SalesPage() {
           >
             ← Registrar compra
           </Link>
-          <h1 className="mt-2 text-3xl font-bold text-gray-900">Ventas Registradas</h1>
+          <h1 className="mt-2 text-3xl font-bold text-gray-900">
+            Ventas Registradas
+          </h1>
         </div>
 
         <section className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
@@ -170,7 +181,8 @@ export default function SalesPage() {
                 </h2>
                 {buyers && (
                   <p className="text-sm text-gray-500 mt-0.5">
-                    {buyers.length} {buyers.length === 1 ? "persona" : "personas"} •{" "}
+                    {buyers.length}{" "}
+                    {buyers.length === 1 ? "persona" : "personas"} •{" "}
                     {buyers.reduce((acc, b) => acc + b.ticketCount, 0)} entradas
                   </p>
                 )}
@@ -226,7 +238,9 @@ export default function SalesPage() {
                   <thead>
                     <tr className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                       <th className="px-6 py-4 lg:px-4 lg:py-2.5">Nombre</th>
-                      <th className="px-6 py-4 lg:px-4 lg:py-2.5 text-center">Entradas</th>
+                      <th className="px-6 py-4 lg:px-4 lg:py-2.5 text-center">
+                        Entradas
+                      </th>
                       <th className="px-6 py-4 lg:px-4 lg:py-2.5 w-12">
                         <span className="sr-only">Ver detalle</span>
                       </th>
@@ -240,8 +254,13 @@ export default function SalesPage() {
                   </thead>
                   <tbody className="divide-y divide-gray-100 text-sm text-gray-700">
                     {sales.map((sale) => (
-                      <tr key={sale.id} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="px-6 py-4 lg:px-4 lg:py-2.5 font-medium text-gray-900">{sale.buyerName}</td>
+                      <tr
+                        key={sale.id}
+                        className="hover:bg-gray-50/50 transition-colors"
+                      >
+                        <td className="px-6 py-4 lg:px-4 lg:py-2.5 font-medium text-gray-900">
+                          {sale.buyerName}
+                        </td>
                         <td className="px-6 py-4 lg:px-4 lg:py-2.5 text-center font-bold text-gray-900">
                           {sale.ticketCount}
                         </td>
@@ -252,9 +271,24 @@ export default function SalesPage() {
                             aria-label={`Ver detalle de ${sale.buyerName}`}
                             className="text-gray-400 hover:text-gray-900 transition-colors"
                           >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                            <svg
+                              className="w-5 h-5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              strokeWidth={2}
+                              stroke="currentColor"
+                              aria-hidden="true"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                              />
                             </svg>
                           </button>
                         </td>
@@ -265,8 +299,19 @@ export default function SalesPage() {
                             aria-label={`Editar a ${sale.buyerName}`}
                             className="text-gray-400 hover:text-gray-900 transition-colors"
                           >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                            <svg
+                              className="w-5 h-5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              strokeWidth={2}
+                              stroke="currentColor"
+                              aria-hidden="true"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
+                              />
                             </svg>
                           </button>
                         </td>
@@ -277,9 +322,24 @@ export default function SalesPage() {
                             aria-label={`Ver QR de ${sale.buyerName}`}
                             className="text-gray-400 hover:text-gray-900 transition-colors"
                           >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z" />
+                            <svg
+                              className="w-5 h-5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              strokeWidth={1.5}
+                              stroke="currentColor"
+                              aria-hidden="true"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z"
+                              />
                             </svg>
                           </button>
                         </td>
@@ -315,11 +375,24 @@ export default function SalesPage() {
         </section>
       </div>
 
-      {viewSale && <SaleDetailsModal sale={viewSale} onClose={() => setViewSale(null)} />}
-      {editSale && (
-        <EditSaleModal key={editSale.id} sale={editSale} onClose={() => setEditSale(null)} onSaved={handleSaleSaved} />
+      {viewSale && (
+        <SaleDetailsModal sale={viewSale} onClose={() => setViewSale(null)} />
       )}
-      {qrSale && <SaleQrModal key={qrSale.id} sale={qrSale} onClose={() => setQrSale(null)} />}
+      {editSale && (
+        <EditSaleModal
+          key={editSale.id}
+          sale={editSale}
+          onClose={() => setEditSale(null)}
+          onSaved={handleSaleSaved}
+        />
+      )}
+      {qrSale && (
+        <SaleQrModal
+          key={qrSale.id}
+          sale={qrSale}
+          onClose={() => setQrSale(null)}
+        />
+      )}
     </main>
   );
 }

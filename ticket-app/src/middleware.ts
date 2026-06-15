@@ -1,5 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
-import { basicAuthUnauthorized, isAuthConfigured, isAuthorized } from "@/lib/basic-auth";
+import { type NextRequest, NextResponse } from "next/server";
+import {
+  basicAuthUnauthorized,
+  isAuthConfigured,
+  isAuthorized,
+} from "@/lib/basic-auth";
 
 export function middleware(request: NextRequest) {
   if (!isAuthConfigured()) {
@@ -14,5 +18,12 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/sales", "/register-sale", "/check-word", "/api/sales", "/api/sales/:path*", "/api/qr/lookup"],
+  matcher: [
+    "/sales",
+    "/register-sale",
+    "/check-word",
+    "/api/sales",
+    "/api/sales/:path*",
+    "/api/qr/lookup",
+  ],
 };

@@ -7,18 +7,52 @@ import {
 
 describe("sales-summary", () => {
   const sales: Sale[] = [
-    { id: "1", buyerName: "Juan Pérez", codeWord: "lombriz roja del monte", qrToken: "aaaa-111", ticketCount: 2, used: false, usedAt: null, createdAt: "2026-05-29" },
-    { id: "2", buyerName: "Ana Ruiz", codeWord: "marmota azul de la esquina", qrToken: "bbbb-222", ticketCount: 1, used: true, usedAt: "2026-05-30", createdAt: "2026-05-29" },
-    { id: "3", buyerName: "Juan Pérez", codeWord: "capibara verde de la terraza", qrToken: "cccc-333", ticketCount: 1, used: false, usedAt: null, createdAt: "2026-05-30" },
+    {
+      id: "1",
+      buyerName: "Juan Pérez",
+      codeWord: "lombriz roja del monte",
+      qrToken: "aaaa-111",
+      ticketCount: 2,
+      used: false,
+      usedAt: null,
+      createdAt: "2026-05-29",
+    },
+    {
+      id: "2",
+      buyerName: "Ana Ruiz",
+      codeWord: "marmota azul de la esquina",
+      qrToken: "bbbb-222",
+      ticketCount: 1,
+      used: true,
+      usedAt: "2026-05-30",
+      createdAt: "2026-05-29",
+    },
+    {
+      id: "3",
+      buyerName: "Juan Pérez",
+      codeWord: "capibara verde de la terraza",
+      qrToken: "cccc-333",
+      ticketCount: 1,
+      used: false,
+      usedAt: null,
+      createdAt: "2026-05-30",
+    },
   ];
 
   it("aggregates ticket counts and validation codes by buyer name", () => {
     expect(aggregateBuyers(sales)).toEqual([
-      { buyerName: "Ana Ruiz", ticketCount: 1, codes: ["marmota azul de la esquina 222"] },
+      {
+        buyerName: "Ana Ruiz",
+        ticketCount: 1,
+        codes: ["marmota azul de la esquina 222"],
+      },
       {
         buyerName: "Juan Pérez",
         ticketCount: 3,
-        codes: ["lombriz roja del monte 111", "capibara verde de la terraza 333"],
+        codes: [
+          "lombriz roja del monte 111",
+          "capibara verde de la terraza 333",
+        ],
       },
     ]);
   });
@@ -30,13 +64,22 @@ describe("sales-summary", () => {
       click: mockClick,
     };
 
-    vi.spyOn(document, "createElement").mockReturnValue(mockLink as unknown as HTMLElement);
-    vi.spyOn(document.body, "appendChild").mockImplementation(() => mockLink as unknown as Node);
-    vi.spyOn(document.body, "removeChild").mockImplementation(() => mockLink as unknown as Node);
+    vi.spyOn(document, "createElement").mockReturnValue(
+      mockLink as unknown as HTMLElement,
+    );
+    vi.spyOn(document.body, "appendChild").mockImplementation(
+      () => mockLink as unknown as Node,
+    );
+    vi.spyOn(document.body, "removeChild").mockImplementation(
+      () => mockLink as unknown as Node,
+    );
 
     downloadBuyersCSV(aggregateBuyers(sales));
 
-    expect(mockLink.setAttribute).toHaveBeenCalledWith("download", "lista_compradores.csv");
+    expect(mockLink.setAttribute).toHaveBeenCalledWith(
+      "download",
+      "lista_compradores.csv",
+    );
     expect(mockClick).toHaveBeenCalled();
   });
 
@@ -47,13 +90,22 @@ describe("sales-summary", () => {
       click: mockClick,
     };
 
-    vi.spyOn(document, "createElement").mockReturnValue(mockLink as unknown as HTMLElement);
-    vi.spyOn(document.body, "appendChild").mockImplementation(() => mockLink as unknown as Node);
-    vi.spyOn(document.body, "removeChild").mockImplementation(() => mockLink as unknown as Node);
+    vi.spyOn(document, "createElement").mockReturnValue(
+      mockLink as unknown as HTMLElement,
+    );
+    vi.spyOn(document.body, "appendChild").mockImplementation(
+      () => mockLink as unknown as Node,
+    );
+    vi.spyOn(document.body, "removeChild").mockImplementation(
+      () => mockLink as unknown as Node,
+    );
 
     downloadBuyersTXT(aggregateBuyers(sales));
 
-    expect(mockLink.setAttribute).toHaveBeenCalledWith("download", "lista_compradores.txt");
+    expect(mockLink.setAttribute).toHaveBeenCalledWith(
+      "download",
+      "lista_compradores.txt",
+    );
     expect(mockClick).toHaveBeenCalled();
   });
 
@@ -61,7 +113,10 @@ describe("sales-summary", () => {
     it("keeps total entradas (sum of ticketCount) equal across all sales", () => {
       const totalEntradasIn = sales.reduce((acc, s) => acc + s.ticketCount, 0);
       const buyers = aggregateBuyers(sales);
-      const totalEntradasOut = buyers.reduce((acc, b) => acc + b.ticketCount, 0);
+      const totalEntradasOut = buyers.reduce(
+        (acc, b) => acc + b.ticketCount,
+        0,
+      );
 
       expect(totalEntradasOut).toBe(totalEntradasIn);
     });
@@ -93,7 +148,9 @@ describe("sales-summary", () => {
 
       expect(buyers).toHaveLength(17);
       expect(totalEntradas).toBe(18);
-      expect(buyers.find((b) => b.buyerName === "Persona 1")?.ticketCount).toBe(2);
+      expect(buyers.find((b) => b.buyerName === "Persona 1")?.ticketCount).toBe(
+        2,
+      );
     });
   });
 });

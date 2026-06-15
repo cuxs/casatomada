@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef } from "react";
 import Image from "next/image";
+import { useRef } from "react";
 import type { EventConfig } from "@/config";
 import SectionHeader from "./section-header";
 
@@ -78,16 +78,28 @@ export default function EntradasSection({
           {eventConfig.soldOut ? (
             <SoldOutDisplay />
           ) : (
-            <PriceDisplay priceInfo={priceInfo} countdown={countdown} onBuyNow={scrollToPayment} />
+            <PriceDisplay
+              priceInfo={priceInfo}
+              countdown={countdown}
+              onBuyNow={scrollToPayment}
+            />
           )}
         </div>
       </div>
 
       {/* ── Screen 2: Payment instructions ── */}
-      <div ref={paymentRef} className="relative flex flex-col justify-center min-h-screen pt-[100px] px-7 pb-[60px]">
+      <div
+        ref={paymentRef}
+        className="relative flex flex-col justify-center min-h-screen pt-[100px] px-7 pb-[60px]"
+      >
         <div
           className="absolute inset-0"
-          style={{ backgroundImage: "url('/comprar-entradas/03E.webp')", backgroundSize: "290% auto", backgroundPosition: "50% 55%", backgroundRepeat: "no-repeat" }}
+          style={{
+            backgroundImage: "url('/comprar-entradas/03E.webp')",
+            backgroundSize: "290% auto",
+            backgroundPosition: "50% 55%",
+            backgroundRepeat: "no-repeat",
+          }}
         />
         <div className="absolute inset-0 bg-black/[0.62]" />
 
@@ -129,7 +141,8 @@ export default function EntradasSection({
           </button>
 
           <p className="font-epilogue font-medium text-[clamp(16px,4vw,30px)] tracking-[-0.01em] text-white/70 leading-[1.4] text-center">
-            Una vez completados los pasos te va a llegar un QR con la entrada a tu whatsapp
+            Una vez completados los pasos te va a llegar un QR con la entrada a
+            tu whatsapp
           </p>
 
           <button
@@ -137,7 +150,17 @@ export default function EntradasSection({
             onClick={onBack}
             className="mt-12 mx-auto flex items-center gap-2.5 font-epilogue font-medium text-base tracking-[-0.01em] text-white/60 bg-white/[0.16] border border-white/25 rounded-full py-3 px-7 cursor-pointer hover:bg-white/25 hover:text-white/80 transition-colors"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
               <polyline points="18 15 12 9 6 15" />
             </svg>
             volver al inicio
@@ -186,15 +209,23 @@ function PriceDisplay({
         {countdown && (
           <div className="mt-2.5">
             <p className="font-epilogue text-xs text-white/45 m-0 mb-1.5 tracking-[-0.01em]">
+              {/* biome-ignore lint/style/noNonNullAssertion: countdown is only set when nextPrice is set */}
               sube a ${priceInfo.nextPrice!.toLocaleString("es-AR")} en:
             </p>
             <div className="flex justify-center gap-3.5">
-              {[{ v: countdown.days, l: "días" }, { v: countdown.hours, l: "hs" }, { v: countdown.minutes, l: "min" }, { v: countdown.seconds, l: "seg" }].map(({ v, l }) => (
+              {[
+                { v: countdown.days, l: "días" },
+                { v: countdown.hours, l: "hs" },
+                { v: countdown.minutes, l: "min" },
+                { v: countdown.seconds, l: "seg" },
+              ].map(({ v, l }) => (
                 <div key={l} className="flex flex-col items-center">
                   <span className="font-epilogue font-bold text-xl text-white tabular-nums min-w-7 text-center">
                     {String(v).padStart(2, "0")}
                   </span>
-                  <span className="font-epilogue text-[10px] text-white/35">{l}</span>
+                  <span className="font-epilogue text-[10px] text-white/35">
+                    {l}
+                  </span>
                 </div>
               ))}
             </div>

@@ -46,6 +46,7 @@ export function codeWordForIndex(index: number): string {
   const i = ((index % TOTAL_CODE_WORDS) + TOTAL_CODE_WORDS) % TOTAL_CODE_WORDS;
   const animal = ANIMALS[i % ANIMALS.length];
   const color = COLORS[Math.floor(i / ANIMALS.length) % COLORS.length];
-  const place = PLACES[Math.floor(i / (ANIMALS.length * COLORS.length)) % PLACES.length];
+  const place =
+    PLACES[Math.floor(i / (ANIMALS.length * COLORS.length)) % PLACES.length];
   return `${animal} ${color} ${place}`;
 }

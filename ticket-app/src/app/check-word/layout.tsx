@@ -5,6 +5,10 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function CheckWordLayout({ children }: { children: React.ReactNode }) {
+export default function CheckWordLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return children;
 }
