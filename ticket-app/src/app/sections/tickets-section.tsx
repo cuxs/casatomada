@@ -71,7 +71,7 @@ export default function EntradasSection({
           alt="evento"
           width={760}
           height={950}
-          className="relative z-[1] w-[min(86vw,380px)] block mb-7 mix-blend-lighten"
+          className="relative z-[1] w-[min(86vw,380px)] block mb-7"
         />
 
         <div className="relative z-[1] w-[min(86vw,380px)]">
