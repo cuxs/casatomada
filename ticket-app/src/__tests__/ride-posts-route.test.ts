@@ -26,14 +26,14 @@ function makePost(body: unknown) {
 describe("GET /api/ride-posts", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("returns all posts with comments", async () => {
+  it("returns all posts ordered by createdAt desc", async () => {
     const mockPosts = [
       {
         id: "1",
         authorName: "Juan",
         content: "Voy desde Palermo",
+        phone: null,
         createdAt: "2026-06-30T00:00:00.000Z",
-        comments: [],
       },
     ];
     vi.mocked(prisma.ridePost.findMany).mockResolvedValueOnce(mockPosts as any);
@@ -43,7 +43,6 @@ describe("GET /api/ride-posts", () => {
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual(mockPosts);
     expect(prisma.ridePost.findMany).toHaveBeenCalledWith({
-      include: { comments: { orderBy: { createdAt: "asc" } } },
       orderBy: { createdAt: "desc" },
     });
   });
@@ -61,13 +60,13 @@ describe("GET /api/ride-posts", () => {
 describe("POST /api/ride-posts", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("creates a post and returns 201", async () => {
+  it("creates a post without phone and returns 201", async () => {
     const mockPost = {
       id: "abc",
       authorName: "Juan",
       content: "Voy desde Palermo",
+      phone: null,
       createdAt: "2026-06-30T00:00:00.000Z",
-      comments: [],
     };
     vi.mocked(prisma.ridePost.create).mockResolvedValueOnce(mockPost as any);
 
@@ -76,18 +75,47 @@ describe("POST /api/ride-posts", () => {
     expect(res.status).toBe(201);
     expect(await res.json()).toEqual(mockPost);
     expect(prisma.ridePost.create).toHaveBeenCalledWith({
-      data: { authorName: "Juan", content: "Voy desde Palermo" },
-      include: { comments: true },
+      data: { authorName: "Juan", content: "Voy desde Palermo", phone: null },
     });
   });
 
-  it("trims whitespace from authorName and content", async () => {
-    vi.mocked(prisma.ridePost.create).mockResolvedValueOnce({ id: "1", comments: [] } as any);
+  it("creates a post with phone and returns 201", async () => {
+    const mockPost = {
+      id: "abc",
+      authorName: "Juan",
+      content: "Voy desde Palermo",
+      phone: "+54 9 11 1234-5678",
+      createdAt: "2026-06-30T00:00:00.000Z",
+    };
+    vi.mocked(prisma.ridePost.create).mockResolvedValueOnce(mockPost as any);
 
-    await POST(makePost({ authorName: "  Juan  ", content: "  Hola  " }));
+    const res = await POST(
+      makePost({ authorName: "Juan", content: "Voy desde Palermo", phone: "+54 9 11 1234-5678" }),
+    );
+
+    expect(res.status).toBe(201);
+    expect(prisma.ridePost.create).toHaveBeenCalledWith({
+      data: { authorName: "Juan", content: "Voy desde Palermo", phone: "+54 9 11 1234-5678" },
+    });
+  });
+
+  it("stores null when phone is empty string", async () => {
+    vi.mocked(prisma.ridePost.create).mockResolvedValueOnce({ id: "1" } as any);
+
+    await POST(makePost({ authorName: "Juan", content: "Hola", phone: "" }));
 
     expect(prisma.ridePost.create).toHaveBeenCalledWith(
-      expect.objectContaining({ data: { authorName: "Juan", content: "Hola" } }),
+      expect.objectContaining({ data: expect.objectContaining({ phone: null }) }),
+    );
+  });
+
+  it("trims whitespace from fields", async () => {
+    vi.mocked(prisma.ridePost.create).mockResolvedValueOnce({ id: "1" } as any);
+
+    await POST(makePost({ authorName: "  Juan  ", content: "  Hola  ", phone: "  123  " }));
+
+    expect(prisma.ridePost.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: { authorName: "Juan", content: "Hola", phone: "123" } }),
     );
   });
 
@@ -120,6 +148,14 @@ describe("POST /api/ride-posts", () => {
     const res = await POST(makePost({ authorName: "Juan", content: "x".repeat(1001) }));
     expect(res.status).toBe(400);
     expect((await res.json()).error).toBe("Mensaje demasiado largo");
+  });
+
+  it("rejects phone over 30 chars with 400", async () => {
+    const res = await POST(
+      makePost({ authorName: "Juan", content: "Hola", phone: "1".repeat(31) }),
+    );
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("Número demasiado largo");
   });
 
   it("returns 400 when turnstile verification fails", async () => {

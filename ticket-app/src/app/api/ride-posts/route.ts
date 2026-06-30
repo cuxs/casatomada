@@ -7,7 +7,6 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const posts = await prisma.ridePost.findMany({
-      include: { comments: { orderBy: { createdAt: "asc" } } },
       orderBy: { createdAt: "desc" },
     });
     return NextResponse.json(posts);
@@ -21,9 +20,10 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}));
-  const { authorName, content, turnstileToken } = body as {
+  const { authorName, content, phone, turnstileToken } = body as {
     authorName: string;
     content: string;
+    phone?: string;
     turnstileToken?: string;
   };
 
@@ -39,6 +39,9 @@ export async function POST(request: NextRequest) {
   if (content.trim().length > 1000) {
     return NextResponse.json({ error: "Mensaje demasiado largo" }, { status: 400 });
   }
+  if (phone && phone.trim().length > 30) {
+    return NextResponse.json({ error: "Número demasiado largo" }, { status: 400 });
+  }
 
   const valid = await verifyTurnstile(turnstileToken ?? "");
   if (!valid) {
@@ -50,8 +53,11 @@ export async function POST(request: NextRequest) {
 
   try {
     const post = await prisma.ridePost.create({
-      data: { authorName: authorName.trim(), content: content.trim() },
-      include: { comments: true },
+      data: {
+        authorName: authorName.trim(),
+        content: content.trim(),
+        phone: phone?.trim() || null,
+      },
     });
     return NextResponse.json(post, { status: 201 });
   } catch {

@@ -20,18 +20,9 @@ model Sale {
 }
 
 model RidePost {
-  id         String        @id @default(uuid())
-  authorName String
-  content    String
-  createdAt  DateTime      @default(now())
-  comments   RideComment[]
-}
-
-model RideComment {
   id         String   @id @default(uuid())
-  postId     String
   authorName String
   content    String
+  phone      String?
   createdAt  DateTime @default(now())
-  post       RidePost @relation(fields: [postId], references: [id], onDelete: Cascade)
 }

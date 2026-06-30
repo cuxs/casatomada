@@ -5,20 +5,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import SectionHeader from "@/app/sections/section-header";
 
-interface RideComment {
-  id: string;
-  postId: string;
-  authorName: string;
-  content: string;
-  createdAt: string;
-}
-
 interface RidePost {
   id: string;
   authorName: string;
   content: string;
+  phone: string | null;
   createdAt: string;
-  comments: RideComment[];
 }
 
 const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
@@ -33,38 +25,15 @@ function formatDate(dateStr: string) {
   });
 }
 
-interface PostCardProps {
-  post: RidePost;
-  isReplyOpen: boolean;
-  onToggleReply: () => void;
-  replyAuthor: string;
-  replyContent: string;
-  onReplyAuthorChange: (v: string) => void;
-  onReplyContentChange: (v: string) => void;
-  onSubmitReply: (token: string) => void;
-  submittingReply: boolean;
-  replyError: string | undefined;
-}
-
 function PostCard({
   post,
-  isReplyOpen,
-  onToggleReply,
-  replyAuthor,
-  replyContent,
-  onReplyAuthorChange,
-  onReplyContentChange,
-  onSubmitReply,
-  submittingReply,
-  replyError,
-}: PostCardProps) {
-  const [replyToken, setReplyToken] = useState("");
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (replyToken) onSubmitReply(replyToken);
-  }
-
+  phoneRevealed,
+  onRevealPhone,
+}: {
+  post: RidePost;
+  phoneRevealed: boolean;
+  onRevealPhone: () => void;
+}) {
   return (
     <div className="bg-white/[0.05] border border-white/10 rounded-xl px-4 pt-4 pb-3 mb-4">
       <div className="flex items-baseline justify-between gap-2 mb-2">
@@ -75,81 +44,28 @@ function PostCard({
           {formatDate(post.createdAt)}
         </span>
       </div>
-      <p className="text-white/75 text-sm whitespace-pre-wrap leading-relaxed mb-3">
+      <p className="text-white/75 text-sm whitespace-pre-wrap leading-relaxed">
         {post.content}
       </p>
-
-      {post.comments.length > 0 && (
-        <div className="space-y-2 mb-3">
-          {post.comments.map((c) => (
-            <div
-              key={c.id}
-              className="bg-white/[0.04] border border-white/[0.07] rounded-lg px-3 py-2"
+      {post.phone && (
+        <div className="mt-3">
+          {phoneRevealed ? (
+            <a
+              href={`tel:${post.phone}`}
+              className="text-white/70 text-sm font-epilogue font-medium hover:text-white transition-colors"
             >
-              <div className="flex items-baseline justify-between gap-2 mb-1">
-                <span className="font-epilogue font-medium text-white/80 text-xs">
-                  {c.authorName}
-                </span>
-                <span className="text-white/30 text-[11px] shrink-0">
-                  {formatDate(c.createdAt)}
-                </span>
-              </div>
-              <p className="text-white/65 text-xs whitespace-pre-wrap leading-relaxed">
-                {c.content}
-              </p>
-            </div>
-          ))}
+              📞 {post.phone}
+            </a>
+          ) : (
+            <button
+              type="button"
+              onClick={onRevealPhone}
+              className="text-white/40 text-xs hover:text-white/65 transition-colors"
+            >
+              Ver número
+            </button>
+          )}
         </div>
-      )}
-
-      <button
-        type="button"
-        onClick={onToggleReply}
-        className="text-white/40 text-xs hover:text-white/65 transition-colors"
-      >
-        {isReplyOpen ? "Cancelar" : "Responder"}
-      </button>
-
-      {isReplyOpen && (
-        <form onSubmit={handleSubmit} className="mt-3 space-y-2">
-          <input
-            type="text"
-            placeholder="Tu nombre"
-            value={replyAuthor}
-            onChange={(e) => onReplyAuthorChange(e.target.value)}
-            className="w-full bg-white/[0.08] border border-white/15 rounded-lg px-3 py-2 text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-white/30 font-epilogue text-xs"
-          />
-          <textarea
-            placeholder="Tu respuesta..."
-            value={replyContent}
-            onChange={(e) => onReplyContentChange(e.target.value)}
-            rows={2}
-            className="w-full bg-white/[0.08] border border-white/15 rounded-lg px-3 py-2 text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-white/30 font-epilogue text-xs resize-none"
-          />
-          {SITE_KEY && (
-            <Turnstile
-              siteKey={SITE_KEY}
-              onSuccess={(token) => setReplyToken(token)}
-              onExpire={() => setReplyToken("")}
-              options={{ size: "flexible", theme: "dark" }}
-            />
-          )}
-          {replyError && (
-            <p className="text-red-400 text-xs">{replyError}</p>
-          )}
-          <button
-            type="submit"
-            disabled={
-              submittingReply ||
-              !replyAuthor.trim() ||
-              !replyContent.trim() ||
-              (!!SITE_KEY && !replyToken)
-            }
-            className="w-full font-epilogue font-medium text-xs text-white/80 bg-white/[0.12] border border-white/20 rounded-full py-2 hover:bg-white/[0.2] disabled:opacity-40 transition-colors"
-          >
-            {submittingReply ? "Enviando..." : "Enviar respuesta"}
-          </button>
-        </form>
       )}
     </div>
   );
@@ -161,19 +77,15 @@ export default function ComoLlegarPage() {
   const [posts, setPosts] = useState<RidePost[] | null>(null);
   const [boardLoading, setBoardLoading] = useState(true);
   const [boardError, setBoardError] = useState<string | null>(null);
+  const [revealedPhones, setRevealedPhones] = useState<Set<string>>(new Set());
 
   const [newAuthor, setNewAuthor] = useState("");
   const [newContent, setNewContent] = useState("");
+  const [newPhone, setNewPhone] = useState("");
   const [newToken, setNewToken] = useState("");
   const [submittingPost, setSubmittingPost] = useState(false);
   const [newPostError, setNewPostError] = useState<string | null>(null);
   const newTurnstileRef = useRef<TurnstileInstance | undefined>(undefined);
-
-  const [openReplyId, setOpenReplyId] = useState<string | null>(null);
-  const [replyAuthor, setReplyAuthor] = useState<Record<string, string>>({});
-  const [replyContent, setReplyContent] = useState<Record<string, string>>({});
-  const [submittingReply, setSubmittingReply] = useState<string | null>(null);
-  const [replyErrors, setReplyErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     async function loadPosts() {
@@ -210,6 +122,7 @@ export default function ComoLlegarPage() {
         body: JSON.stringify({
           authorName: newAuthor,
           content: newContent,
+          phone: newPhone || undefined,
           turnstileToken: newToken,
         }),
       });
@@ -224,6 +137,7 @@ export default function ComoLlegarPage() {
 
       setNewAuthor("");
       setNewContent("");
+      setNewPhone("");
       setNewToken("");
       newTurnstileRef.current?.reset();
       setPosts((prev) => [data as RidePost, ...(prev ?? [])]);
@@ -231,50 +145,6 @@ export default function ComoLlegarPage() {
       setNewPostError("No se pudo conectar con el servidor");
     } finally {
       setSubmittingPost(false);
-    }
-  }
-
-  async function handleReply(postId: string, token: string) {
-    setSubmittingReply(postId);
-    setReplyErrors((prev) => ({ ...prev, [postId]: "" }));
-
-    try {
-      const res = await fetch(`/api/ride-posts/${postId}/comments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          authorName: replyAuthor[postId] ?? "",
-          content: replyContent[postId] ?? "",
-          turnstileToken: token,
-        }),
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        setReplyErrors((prev) => ({
-          ...prev,
-          [postId]: data.error ?? "Error",
-        }));
-        return;
-      }
-
-      setPosts((prev) =>
-        prev?.map((p) =>
-          p.id === postId
-            ? { ...p, comments: [...p.comments, data as RideComment] }
-            : p,
-        ) ?? null,
-      );
-      setReplyAuthor((prev) => ({ ...prev, [postId]: "" }));
-      setReplyContent((prev) => ({ ...prev, [postId]: "" }));
-      setOpenReplyId(null);
-    } catch {
-      setReplyErrors((prev) => ({
-        ...prev,
-        [postId]: "No se pudo conectar",
-      }));
-    } finally {
-      setSubmittingReply(null);
     }
   }
 
@@ -297,22 +167,35 @@ export default function ComoLlegarPage() {
               Dirección
             </p>
             <p className="font-epilogue font-medium text-white/85 text-lg tracking-[-0.03em]">
-              [Dirección , Ciudad]
+              Carril Rodríguez Peña 2815, Godoy Cruz, Mendoza
             </p>
           </div>
 
           <div className="bg-white/[0.06] border border-white/10 rounded-xl px-5 py-4 mb-3">
             <p className="text-xs text-white/40 uppercase tracking-wider mb-3">
-              Cómo llegar
+              Transporte público
             </p>
-            <div className="space-y-2 text-white/70 font-epilogue text-sm leading-relaxed">
-              <p>🚌 [Transporte público — líneas disponibles]</p>
-              <p>🚗 [Estacionamiento — indicaciones]</p>
+            <div className="flex items-center gap-2 text-white/70 font-epilogue text-sm">
+              <svg height="15" width="15" viewBox="0 0 24 24" fill="white" aria-label="Bus" className="shrink-0 opacity-70">
+                <path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/>
+              </svg>
+              <span
+                style={{ backgroundColor: "rgb(137, 123, 38)", color: "rgb(255, 255, 255)" }}
+                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold"
+              >
+                945
+              </span>
+              <span
+                style={{ backgroundColor: "rgb(137, 123, 38)", color: "rgb(255, 255, 255)" }}
+                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold"
+              >
+                920
+              </span>
             </div>
           </div>
 
           <a
-            href="https://maps.google.com/?q=[DIRECCIÓN]"
+            href="https://maps.app.goo.gl/2CWk9seZS6uiAVuMA"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 w-full bg-white/[0.08] border border-white/15 rounded-xl py-4 font-epilogue font-medium text-white/60 hover:text-white/85 hover:bg-white/[0.12] transition-colors"
@@ -368,6 +251,14 @@ export default function ComoLlegarPage() {
               rows={3}
               className="w-full bg-white/[0.08] border border-white/15 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-white/30 font-epilogue text-sm resize-none"
             />
+            <input
+              type="text"
+              placeholder="Tu número (opcional)"
+              value={newPhone}
+              onChange={(e) => setNewPhone(e.target.value)}
+              autoComplete="off"
+              className="w-full bg-white/[0.08] border border-white/15 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-white/30 font-epilogue text-sm"
+            />
             {SITE_KEY && (
               <Turnstile
                 ref={newTurnstileRef}
@@ -407,7 +298,7 @@ export default function ComoLlegarPage() {
 
           {!boardLoading && posts?.length === 0 && (
             <p className="text-white/35 text-sm text-center py-8">
-              Todavía no hay publicaciones. Te toca romper el hielo :) 
+              Todavía no hay publicaciones. Te toca romper el hielo :)
             </p>
           )}
 
@@ -415,21 +306,10 @@ export default function ComoLlegarPage() {
             <PostCard
               key={post.id}
               post={post}
-              isReplyOpen={openReplyId === post.id}
-              onToggleReply={() =>
-                setOpenReplyId((id) => (id === post.id ? null : post.id))
+              phoneRevealed={revealedPhones.has(post.id)}
+              onRevealPhone={() =>
+                setRevealedPhones((prev) => new Set([...prev, post.id]))
               }
-              replyAuthor={replyAuthor[post.id] ?? ""}
-              replyContent={replyContent[post.id] ?? ""}
-              onReplyAuthorChange={(v) =>
-                setReplyAuthor((prev) => ({ ...prev, [post.id]: v }))
-              }
-              onReplyContentChange={(v) =>
-                setReplyContent((prev) => ({ ...prev, [post.id]: v }))
-              }
-              onSubmitReply={(token) => handleReply(post.id, token)}
-              submittingReply={submittingReply === post.id}
-              replyError={replyErrors[post.id]}
             />
           ))}
         </section>
