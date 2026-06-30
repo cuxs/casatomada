@@ -229,7 +229,7 @@ export default function ComoLlegarPage() {
             Viajes compartidos
           </h2>
           <p className="font-epilogue text-white/45 text-sm mb-6 tracking-[-0.02em]">
-            Publicá si tenés lugar en tu auto o si buscás con quien ir 🚗
+            Entra al <a className="text-white/80 hover:text-white underline" href="https://chat.whatsapp.com/B8yuh8Y99YhB5m3XjOXVtE?mode=gi_t" target="_blank" rel="noopener noreferrer">grupo</a> o publicá si tenés lugar en tu auto o si buscás con quien ir 🚗
           </p>
 
           {/* New post form */}
