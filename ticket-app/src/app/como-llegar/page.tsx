@@ -297,7 +297,7 @@ export default function ComoLlegarPage() {
               Dirección
             </p>
             <p className="font-epilogue font-medium text-white/85 text-lg tracking-[-0.03em]">
-              [Dirección del venue, Ciudad]
+              [Dirección , Ciudad]
             </p>
           </div>
 
@@ -308,7 +308,6 @@ export default function ComoLlegarPage() {
             <div className="space-y-2 text-white/70 font-epilogue text-sm leading-relaxed">
               <p>🚌 [Transporte público — líneas disponibles]</p>
               <p>🚗 [Estacionamiento — indicaciones]</p>
-              <p>🚕 [Remís / Uber — recomendaciones]</p>
             </div>
           </div>
 
@@ -347,7 +346,7 @@ export default function ComoLlegarPage() {
             Viajes compartidos
           </h2>
           <p className="font-epilogue text-white/45 text-sm mb-6 tracking-[-0.02em]">
-            Publicá si tenés lugar en tu auto o buscás colgarte de alguien
+            Publicá si tenés lugar en tu auto o si buscás con quien ir 🚗
           </p>
 
           {/* New post form */}
@@ -408,7 +407,7 @@ export default function ComoLlegarPage() {
 
           {!boardLoading && posts?.length === 0 && (
             <p className="text-white/35 text-sm text-center py-8">
-              Todavía no hay publicaciones. ¡Sé el primero!
+              Todavía no hay publicaciones. Te toca romper el hielo :) 
             </p>
           )}
 

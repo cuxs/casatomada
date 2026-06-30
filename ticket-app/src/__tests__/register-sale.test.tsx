@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import RegisterSalePage from "../app/register-sale/page";
+import RegisterSalePage from "../app/admin/register-sale/page";
 
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
@@ -93,7 +93,7 @@ describe("RegisterSalePage", () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         buyerName: "Pedro Gómez",
-        price: 10000,
+        price: 13000,
         ticketCount: 1,
       }),
     });

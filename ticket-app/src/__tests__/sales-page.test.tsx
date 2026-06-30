@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import SalesPage from "../app/sales/page";
+import SalesPage from "../app/admin/sales/page";
 
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
@@ -68,7 +68,7 @@ describe("SalesPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "Reintentar" }));
 
     await waitFor(() => {
-      expect(screen.getByText("Ventas Registradas")).toBeInTheDocument();
+      expect(screen.getByText("Ventas registradas")).toBeInTheDocument();
     });
   });
 
@@ -125,7 +125,7 @@ describe("SalesPage", () => {
     render(<SalesPage />);
 
     await waitFor(() => {
-      expect(screen.getByText("Ventas Registradas")).toBeInTheDocument();
+      expect(screen.getByText("Ventas registradas")).toBeInTheDocument();
     });
 
     expect(screen.getByText("Detalle de ventas")).toBeInTheDocument();
@@ -164,7 +164,7 @@ describe("SalesPage", () => {
     render(<SalesPage />);
 
     await waitFor(() => {
-      expect(screen.getByText("Ventas Registradas")).toBeInTheDocument();
+      expect(screen.getByText("Ventas registradas")).toBeInTheDocument();
     });
 
     fireEvent.change(screen.getByLabelText("Buscar por nombre"), {
@@ -273,7 +273,7 @@ describe("SalesPage", () => {
     render(<SalesPage />);
 
     await waitFor(() => {
-      expect(screen.getByText("Ventas Registradas")).toBeInTheDocument();
+      expect(screen.getByText("Ventas registradas")).toBeInTheDocument();
     });
 
     fireEvent.click(
@@ -326,7 +326,7 @@ describe("SalesPage", () => {
     render(<SalesPage />);
 
     await waitFor(() => {
-      expect(screen.getByText("Ventas Registradas")).toBeInTheDocument();
+      expect(screen.getByText("Ventas registradas")).toBeInTheDocument();
     });
 
     fireEvent.click(
@@ -389,7 +389,7 @@ describe("SalesPage", () => {
     render(<SalesPage />);
 
     await waitFor(() => {
-      expect(screen.getByText("Ventas Registradas")).toBeInTheDocument();
+      expect(screen.getByText("Ventas registradas")).toBeInTheDocument();
     });
 
     fireEvent.click(
