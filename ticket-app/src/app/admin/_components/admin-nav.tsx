@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Car,
   KeyRound,
   LayoutDashboard,
   ListIcon,
@@ -25,6 +26,12 @@ const NAV_ITEMS = [
     label: "Validar palabra clave",
     icon: KeyRound,
     href: "/admin/check-word",
+    exact: false,
+  },
+  {
+    label: "Viajes compartidos",
+    icon: Car,
+    href: "/admin/ride-posts",
     exact: false,
   },
 ];

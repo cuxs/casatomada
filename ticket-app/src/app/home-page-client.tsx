@@ -232,6 +232,13 @@ export default function HomePageClient({
               entradas
             </button>
 
+            <a
+              href="/como-llegar"
+              className="font-epilogue text-sm text-white/45 hover:text-white/65 transition-colors tracking-[-0.02em]"
+            >
+              ¿cómo llegar al evento?
+            </a>
+
             <button
               type="button"
               onClick={() => setSection("entradas")}
