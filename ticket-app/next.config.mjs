@@ -1,6 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // No additional config needed for this project
+  async redirects() {
+    return [
+      { source: "/sales", destination: "/admin/sales", permanent: true },
+      {
+        source: "/register-sale",
+        destination: "/admin/register-sale",
+        permanent: true,
+      },
+      {
+        source: "/check-word",
+        destination: "/admin/check-word",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -19,9 +19,8 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/sales",
-    "/register-sale",
-    "/check-word",
+    "/admin",
+    "/admin/:path*",
     "/api/sales",
     "/api/sales/:path*",
     "/api/qr/lookup",

@@ -211,7 +211,7 @@ function CheckQRContent() {
           </>
         )}
         <Link
-          href="/check-word"
+          href="/admin/check-word"
           className="block w-full text-center px-4 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
         >
           Validar por palabra clave →
