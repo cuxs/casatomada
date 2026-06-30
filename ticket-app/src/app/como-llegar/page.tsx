@@ -308,7 +308,7 @@ export default function ComoLlegarPage() {
               post={post}
               phoneRevealed={revealedPhones.has(post.id)}
               onRevealPhone={() =>
-                setRevealedPhones((prev) => new Set([...prev, post.id]))
+                setRevealedPhones((prev) => { const next = new Set(prev); next.add(post.id); return next; })
               }
             />
           ))}
