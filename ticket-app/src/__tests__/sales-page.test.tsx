@@ -136,6 +136,7 @@ describe("SalesPage", () => {
       expect(document.body.textContent).toContain("2 personas");
     });
     expect(document.body.textContent).toContain("4 entradas");
+    expect(document.body.textContent).toContain("30.000 recaudados");
 
     const csvBtn = screen.getByRole("button", { name: "Descargar CSV" });
     fireEvent.click(csvBtn);
@@ -144,6 +145,65 @@ describe("SalesPage", () => {
     const txtBtn = screen.getByRole("button", { name: "Descargar TXT" });
     fireEvent.click(txtBtn);
     expect(mockClick).toHaveBeenCalledTimes(2);
+  });
+
+  it("shows price column with formatted price, Gratis for 0, and dash for missing", async () => {
+    const mockSales = [
+      {
+        id: "1",
+        buyerName: "Juan Pérez",
+        codeWord: "lombriz",
+        qrToken: "tok-001",
+        price: 13000,
+        ticketCount: 1,
+        used: false,
+        usedAt: null,
+        createdAt: "2026-07-01T10:00:00.000Z",
+      },
+      {
+        id: "2",
+        buyerName: "Ana Ruiz",
+        codeWord: "marmota",
+        qrToken: "tok-002",
+        price: 0,
+        ticketCount: 1,
+        used: false,
+        usedAt: null,
+        createdAt: "2026-07-01T11:00:00.000Z",
+      },
+      {
+        id: "3",
+        buyerName: "Luis Sosa",
+        codeWord: "capibara",
+        qrToken: "tok-003",
+        price: undefined,
+        ticketCount: 1,
+        used: false,
+        usedAt: null,
+        createdAt: "2026-07-01T12:00:00.000Z",
+      },
+    ];
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve(tablePage({ sales: mockSales, total: 3, totalTickets: 3 })),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockSales),
+      });
+
+    render(<SalesPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Juan Pérez")).toBeInTheDocument();
+    });
+
+    expect(document.body.textContent).toContain("13.000");
+    expect(screen.getByText("Gratis")).toBeInTheDocument();
+    expect(screen.getByText("—")).toBeInTheDocument();
   });
 
   it("sends the search term to the backend after typing", async () => {
@@ -406,7 +466,7 @@ describe("SalesPage", () => {
       expect(mockFetch).toHaveBeenCalledWith("/api/sales/1", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ buyerName: "Pedro Gómez", ticketCount: 2 }),
+        body: JSON.stringify({ buyerName: "Pedro Gómez", ticketCount: 2, price: 10000 }),
       });
     });
 
@@ -416,6 +476,69 @@ describe("SalesPage", () => {
 
     await waitFor(() => {
       expect(screen.getAllByText("Pedro Gómez").length).toBeGreaterThan(0);
+    });
+  });
+
+  it("can change the price of a sale via the edit modal", async () => {
+    const sale = {
+      id: "1",
+      buyerName: "Juan Pérez",
+      codeWord: "lombriz roja del monte",
+      qrToken: "qr-token-001",
+      price: 13000,
+      ticketCount: 1,
+      used: false,
+      usedAt: null,
+      createdAt: "2026-07-01T10:00:00.000Z",
+    };
+    const updatedSale = { ...sale, price: 0 };
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(tablePage({ sales: [sale], total: 1, totalTickets: 1 })),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([sale]),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(updatedSale),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(tablePage({ sales: [updatedSale], total: 1, totalTickets: 1 })),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([updatedSale]),
+      });
+
+    render(<SalesPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Juan Pérez")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Editar a Juan Pérez" }));
+
+    const priceSelect = screen.getByLabelText("Precio");
+    expect(priceSelect).toHaveValue("13000");
+
+    fireEvent.change(priceSelect, { target: { value: "0" } });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
+
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith("/api/sales/1", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ buyerName: "Juan Pérez", ticketCount: 1, price: 0 }),
+      });
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByText("Editar compra")).not.toBeInTheDocument();
     });
   });
 });

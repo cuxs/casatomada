@@ -106,6 +106,30 @@ describe("PATCH /api/sales/[id]", () => {
     expect(body.error).toBe("No hay cambios para guardar");
   });
 
+  it("updates the price", async () => {
+    const updated = { id: "abc-123", buyerName: "Juan", ticketCount: 1, price: 0 };
+    vi.mocked(prisma.sale.update).mockResolvedValueOnce(updated as any);
+
+    const req = makeRequest({ price: 0 });
+    const res = await PATCH(req, { params: { id: "abc-123" } });
+
+    expect(res.status).toBe(200);
+    expect(prisma.sale.update).toHaveBeenCalledWith({
+      where: { id: "abc-123" },
+      data: { price: 0 },
+    });
+  });
+
+  it("rejects an invalid price", async () => {
+    const req = makeRequest({ price: 9999 });
+    const res = await PATCH(req, { params: { id: "abc-123" } });
+
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe("El precio no es válido");
+    expect(prisma.sale.update).not.toHaveBeenCalled();
+  });
+
   it("returns 404 when the sale does not exist", async () => {
     vi.mocked(prisma.sale.update).mockRejectedValueOnce(
       new Prisma.PrismaClientKnownRequestError("Not found", {

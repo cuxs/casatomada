@@ -11,7 +11,7 @@ interface SaleResult {
   ticketCount: number;
 }
 
-const PRICES = [10000, 13000, 15000];
+const PRICES = [0, 10000, 13000, 15000];
 
 function getCurrentPrice(): number {
   const now = new Date();
@@ -195,7 +195,7 @@ export default function RegisterSalePage() {
           >
             {PRICES.map((p) => (
               <option key={p} value={p}>
-                ${p.toLocaleString("es-AR")}
+                {p === 0 ? "Gratis" : `$${p.toLocaleString("es-AR")}`}
               </option>
             ))}
           </select>

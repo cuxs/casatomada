@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 const MOCK_SALES =
   process.env.MOCK_SALES === "true" ? generateMockSales(500) : null;
 
-const VALID_PRICES = [10000, 13000, 15000];
+const VALID_PRICES = [0, 10000, 13000, 15000];
 
 export async function POST(request: NextRequest) {
   const authResponse = checkApiAuth(request);

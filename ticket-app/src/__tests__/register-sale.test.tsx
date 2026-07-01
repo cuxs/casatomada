@@ -172,6 +172,49 @@ describe("RegisterSalePage", () => {
     expect(screen.getByText(/3 entradas/)).toBeInTheDocument();
   });
 
+  it("shows Gratis option in the price dropdown and can submit with price 0", async () => {
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            qrDataUrl: "data:image/png;base64,mockqr",
+            codeWord: "lombriz roja del monte",
+            qrToken: "mock-qr-token-ccc",
+            ticketCount: 1,
+          }),
+      })
+      .mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve([]),
+      });
+
+    render(<RegisterSalePage />);
+
+    const priceSelect = screen.getByLabelText("Precio");
+    expect(screen.getByRole("option", { name: "Gratis" })).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText(/Nombre/), {
+      target: { value: "Invitado VIP" },
+    });
+    fireEvent.change(priceSelect, { target: { value: "0" } });
+    fireEvent.click(screen.getByRole("button", { name: "Confirmar compra" }));
+
+    expect(mockFetch).toHaveBeenCalledWith("/api/sales", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ buyerName: "Invitado VIP", price: 0, ticketCount: 1 }),
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("¡Listo!")).toBeInTheDocument();
+    });
+  });
+
   it("clamps the ticket count to a minimum of 1", () => {
     mockBuyersFetch();
     render(<RegisterSalePage />);

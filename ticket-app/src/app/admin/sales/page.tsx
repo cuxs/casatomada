@@ -37,6 +37,7 @@ export default function SalesPage() {
   const [editSale, setEditSale] = useState<Sale | null>(null);
   const [qrSale, setQrSale] = useState<Sale | null>(null);
   const [buyersRefreshKey, setBuyersRefreshKey] = useState(0);
+  const [totalRevenue, setTotalRevenue] = useState<number | null>(null);
 
   const hasLoadedRef = useRef(false);
 
@@ -105,7 +106,11 @@ export default function SalesPage() {
       const res = await fetch("/api/sales", { method: "GET" });
       const data = await res.json();
       if (res.ok) {
-        setBuyers(aggregateBuyers(data as Sale[]));
+        const allSales = data as Sale[];
+        setBuyers(aggregateBuyers(allSales));
+        setTotalRevenue(
+          allSales.reduce((sum, s) => sum + (s.price ?? 0), 0),
+        );
       }
     } catch {
       // Totals and downloads stay unavailable; the main table still works.
@@ -163,6 +168,9 @@ export default function SalesPage() {
                 <p className="text-sm text-gray-500 mt-0.5">
                   {buyers.length} {buyers.length === 1 ? "persona" : "personas"}{" "}
                   • {buyers.reduce((acc, b) => acc + b.ticketCount, 0)} entradas
+                  {totalRevenue !== null && (
+                    <> • ${totalRevenue.toLocaleString("es-AR")} recaudados</>
+                  )}
                 </p>
               )}
             </div>
@@ -220,6 +228,9 @@ export default function SalesPage() {
                     <th className="px-6 py-4 lg:px-4 lg:py-2.5 text-center">
                       Entradas
                     </th>
+                    <th className="px-6 py-4 lg:px-4 lg:py-2.5 text-right">
+                      Precio
+                    </th>
                     <th className="px-6 py-4 lg:px-4 lg:py-2.5 w-12">
                       <span className="sr-only">Ver detalle</span>
                     </th>
@@ -242,6 +253,13 @@ export default function SalesPage() {
                       </td>
                       <td className="px-6 py-4 lg:px-4 lg:py-2.5 text-center font-bold text-gray-900">
                         {sale.ticketCount}
+                      </td>
+                      <td className="px-6 py-4 lg:px-4 lg:py-2.5 text-right text-gray-700">
+                        {sale.price != null
+                          ? sale.price === 0
+                            ? "Gratis"
+                            : `$${sale.price.toLocaleString("es-AR")}`
+                          : "—"}
                       </td>
                       <td className="px-2 py-4 lg:px-4 lg:py-2.5 text-center">
                         <button

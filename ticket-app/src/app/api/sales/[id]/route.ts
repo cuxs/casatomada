@@ -5,7 +5,9 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-// PATCH /api/sales/[id] — update a sale's buyer name and/or ticket count
+const VALID_PRICES = [0, 10000, 13000, 15000];
+
+// PATCH /api/sales/[id] — update a sale's buyer name, ticket count, and/or price
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } },
@@ -14,9 +16,10 @@ export async function PATCH(
   if (authResponse) return authResponse;
 
   const body = await request.json();
-  const { buyerName, ticketCount } = body as {
+  const { buyerName, ticketCount, price } = body as {
     buyerName?: string;
     ticketCount?: number;
+    price?: number;
   };
 
   const data: Prisma.SaleUpdateInput = {};
@@ -43,6 +46,16 @@ export async function PATCH(
       );
     }
     data.ticketCount = ticketCount;
+  }
+
+  if (price !== undefined) {
+    if (!VALID_PRICES.includes(price)) {
+      return NextResponse.json(
+        { error: "El precio no es válido" },
+        { status: 400 },
+      );
+    }
+    data.price = price;
   }
 
   if (Object.keys(data).length === 0) {
