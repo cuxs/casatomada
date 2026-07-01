@@ -48,7 +48,7 @@ describe("EntradasSection price tiers", () => {
       currentTierIndex: 1,
       currentPrice: 13000,
       nextPrice: 15000,
-      changeAt: new Date("2026-07-01T03:00:00Z"),
+      changeAt: new Date("2026-07-02T03:00:00Z"),
       currentLabel: "primera tanda",
     });
 

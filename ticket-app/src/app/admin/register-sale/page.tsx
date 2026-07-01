@@ -16,7 +16,7 @@ const PRICES = [10000, 13000, 15000];
 function getCurrentPrice(): number {
   const now = new Date();
   if (now < new Date("2026-06-24T03:00:00Z")) return 10000;
-  if (now < new Date("2026-07-01T03:00:00Z")) return 13000;
+  if (now < new Date("2026-07-02T03:00:00Z")) return 13000;
   return 15000;
 }
 

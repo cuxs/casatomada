@@ -30,7 +30,7 @@ const LANDING_IMAGES = [
 
 const PRICE_CHANGES = [
   { at: new Date("2026-06-24T03:00:00Z"), toPrice: 13000 },
-  { at: new Date("2026-07-01T03:00:00Z"), toPrice: 15000 },
+  { at: new Date("2026-07-02T03:00:00Z"), toPrice: 15000 },
 ];
 
 function getPriceInfo(now: Date) {

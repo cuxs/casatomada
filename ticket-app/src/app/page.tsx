@@ -9,7 +9,7 @@ const PRICE_CHANGES = [
     price: 10000,
   },
   {
-    at: new Date("2026-07-01T03:00:00Z"),
+    at: new Date("2026-07-02T03:00:00Z"),
     label: "Primera tanda",
     price: 13000,
   },
