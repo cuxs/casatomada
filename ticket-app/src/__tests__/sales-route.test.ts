@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { GET, POST } from "../app/api/sales/route";
@@ -254,5 +255,182 @@ describe("POST and GET /api/sales - Auth protection", () => {
       expect.objectContaining({ where: expectedWhere }),
     );
     expect(prisma.sale.count).toHaveBeenCalledWith({ where: expectedWhere });
+  });
+});
+
+describe("POST /api/sales - creating sales and distinct QRs", () => {
+  const originalEnv = process.env;
+
+  function makeRequest(body: unknown) {
+    return new NextRequest("http://localhost:3000/api/sales", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    process.env = { ...originalEnv };
+    delete process.env.USER;
+    delete process.env.PASSWORD;
+  });
+
+  afterAll(() => {
+    process.env = originalEnv;
+  });
+
+  it("creates a single sale when ticketCount is 1", async () => {
+    vi.mocked(prisma.sale.count).mockResolvedValueOnce(0);
+    vi.mocked(prisma.sale.create).mockResolvedValueOnce({} as any);
+
+    const res = await POST(
+      makeRequest({ buyerName: "Juan", price: 10000, ticketCount: 1 }),
+    );
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.ticketCount).toBe(1);
+    expect(body.qrToken).toBeTruthy();
+    expect(body.codeWord).toBeTruthy();
+    expect(body.qrDataUrl).toMatch(/^data:image\/png;base64,/);
+    expect(body.tickets).toBeUndefined();
+    expect(prisma.sale.create).toHaveBeenCalledTimes(1);
+    expect(prisma.sale.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        buyerName: "Juan",
+        price: 10000,
+        ticketCount: 1,
+      }),
+    });
+  });
+
+  it("keeps a single QR for the whole group when ticketCount > 1 and distinctQrs is not set", async () => {
+    vi.mocked(prisma.sale.count).mockResolvedValueOnce(0);
+    vi.mocked(prisma.sale.create).mockResolvedValueOnce({} as any);
+
+    const res = await POST(
+      makeRequest({ buyerName: "Ana", price: 15000, ticketCount: 4 }),
+    );
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.ticketCount).toBe(4);
+    expect(body.tickets).toBeUndefined();
+    expect(prisma.sale.create).toHaveBeenCalledTimes(1);
+    expect(prisma.sale.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({ ticketCount: 4 }),
+    });
+  });
+
+  it("ignores distinctQrs when ticketCount is 1", async () => {
+    vi.mocked(prisma.sale.count).mockResolvedValueOnce(0);
+    vi.mocked(prisma.sale.create).mockResolvedValueOnce({} as any);
+
+    const res = await POST(
+      makeRequest({
+        buyerName: "Solo",
+        price: 10000,
+        ticketCount: 1,
+        distinctQrs: true,
+      }),
+    );
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.tickets).toBeUndefined();
+    expect(prisma.sale.create).toHaveBeenCalledTimes(1);
+  });
+
+  it("creates one sale per ticket, each valid for a single person, when distinctQrs is true", async () => {
+    vi.mocked(prisma.sale.count).mockResolvedValueOnce(0);
+    vi.mocked(prisma.sale.create).mockResolvedValue({} as any);
+
+    const res = await POST(
+      makeRequest({
+        buyerName: "Grupo",
+        price: 13000,
+        ticketCount: 3,
+        distinctQrs: true,
+      }),
+    );
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+
+    expect(body.ticketCount).toBe(3);
+    expect(body.qrToken).toBeUndefined();
+    expect(body.tickets).toHaveLength(3);
+
+    expect(prisma.sale.create).toHaveBeenCalledTimes(3);
+    const calls = vi.mocked(prisma.sale.create).mock.calls;
+    calls.forEach((call, index) => {
+      expect((call[0] as any).data).toMatchObject({
+        buyerName: `Grupo QR ${index + 1}`,
+        price: 13000,
+        ticketCount: 1,
+      });
+    });
+
+    const qrTokens = body.tickets.map((t: { qrToken: string }) => t.qrToken);
+    const codeWords = body.tickets.map(
+      (t: { codeWord: string }) => t.codeWord,
+    );
+    expect(new Set(qrTokens).size).toBe(3);
+    expect(new Set(codeWords).size).toBe(3);
+    for (const ticket of body.tickets) {
+      expect(ticket.qrDataUrl).toMatch(/^data:image\/png;base64,/);
+    }
+  });
+
+  it("retries with a new code word on a codeWord collision while generating distinct QRs", async () => {
+    vi.mocked(prisma.sale.count).mockResolvedValueOnce(0);
+    vi.mocked(prisma.sale.create)
+      .mockRejectedValueOnce(
+        new Prisma.PrismaClientKnownRequestError("Unique constraint failed", {
+          code: "P2002",
+          clientVersion: "5.10.2",
+          meta: { target: ["codeWord"] },
+        }),
+      )
+      .mockResolvedValue({} as any);
+
+    const res = await POST(
+      makeRequest({
+        buyerName: "Grupo",
+        price: 13000,
+        ticketCount: 2,
+        distinctQrs: true,
+      }),
+    );
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.tickets).toHaveLength(2);
+    expect(prisma.sale.create).toHaveBeenCalledTimes(3);
+
+    const codeWords = body.tickets.map(
+      (t: { codeWord: string }) => t.codeWord,
+    );
+    expect(new Set(codeWords).size).toBe(2);
+  });
+
+  it("returns 500 if a unique code word cannot be found", async () => {
+    vi.mocked(prisma.sale.count).mockResolvedValueOnce(0);
+    vi.mocked(prisma.sale.create).mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError("Unique constraint failed", {
+        code: "P2002",
+        clientVersion: "5.10.2",
+        meta: { target: ["codeWord"] },
+      }),
+    );
+
+    const res = await POST(
+      makeRequest({ buyerName: "Nadie", price: 10000, ticketCount: 1 }),
+    );
+
+    expect(res.status).toBe(500);
+    const body = await res.json();
+    expect(body.error).toBe("No se pudo generar una palabra clave única");
   });
 });

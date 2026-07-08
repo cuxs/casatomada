@@ -4,11 +4,15 @@ import Link from "next/link";
 import { useState } from "react";
 import BuyersSummary from "./buyers-summary";
 
-interface SaleResult {
+interface Ticket {
   qrDataUrl: string;
   codeWord: string;
   qrToken: string;
+}
+
+interface SaleResult {
   ticketCount: number;
+  tickets: Ticket[];
 }
 
 const PRICES = [0, 10000, 13000, 15000];
@@ -24,6 +28,7 @@ export default function RegisterSalePage() {
   const [buyerName, setBuyerName] = useState("");
   const [price, setPrice] = useState<number>(getCurrentPrice);
   const [ticketCount, setTicketCount] = useState(1);
+  const [distinctQrs, setDistinctQrs] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<SaleResult | null>(null);
@@ -38,7 +43,7 @@ export default function RegisterSalePage() {
       const res = await fetch("/api/sales", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ buyerName, price, ticketCount }),
+        body: JSON.stringify({ buyerName, price, ticketCount, distinctQrs }),
       });
 
       const data = await res.json();
@@ -48,12 +53,15 @@ export default function RegisterSalePage() {
         return;
       }
 
-      setResult({
-        qrDataUrl: data.qrDataUrl,
-        codeWord: data.codeWord,
-        qrToken: data.qrToken,
-        ticketCount: data.ticketCount,
-      });
+      const tickets: Ticket[] = data.tickets ?? [
+        {
+          qrDataUrl: data.qrDataUrl,
+          codeWord: data.codeWord,
+          qrToken: data.qrToken,
+        },
+      ];
+
+      setResult({ ticketCount: data.ticketCount, tickets });
       setBuyersRefreshKey((key) => key + 1);
     } catch {
       setError("No se pudo conectar con el servidor. Intentá de nuevo.");
@@ -66,6 +74,7 @@ export default function RegisterSalePage() {
     setBuyerName("");
     setPrice(getCurrentPrice());
     setTicketCount(1);
+    setDistinctQrs(false);
     setError(null);
     setResult(null);
   }
@@ -92,41 +101,55 @@ export default function RegisterSalePage() {
           </div>
           <h1 className="text-2xl font-bold text-gray-900">¡Listo!</h1>
           <p className="mt-1 text-gray-500 text-sm">
-            Guardá este QR — te lo van a pedir en la entrada
+            {result.tickets.length > 1
+              ? "Guardá estos QRs — se los van a pedir en la entrada"
+              : "Guardá este QR — te lo van a pedir en la entrada"}
           </p>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 flex flex-col items-center gap-4">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={result.qrDataUrl}
-            alt="QR de entrada"
-            className="w-56 h-56"
-          />
-          <p className="text-sm font-medium text-gray-700 bg-gray-100 px-4 py-2 rounded-full">
-            Válido para{" "}
-            <span className="font-bold">
-              {result.ticketCount}{" "}
-              {result.ticketCount === 1 ? "entrada" : "entradas"}
-            </span>
-          </p>
-          <div className="w-full text-center bg-gray-900 rounded-xl px-4 py-3">
-            <p className="text-xs text-gray-300 uppercase tracking-wider">
-              Tu animal
+        {result.tickets.map((ticket, index) => (
+          <div
+            key={ticket.qrToken}
+            className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 flex flex-col items-center gap-4"
+          >
+            {result.tickets.length > 1 && (
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                Entrada {index + 1} de {result.tickets.length}
+              </p>
+            )}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={ticket.qrDataUrl}
+              alt="QR de entrada"
+              className="w-56 h-56"
+            />
+            <p className="text-sm font-medium text-gray-700 bg-gray-100 px-4 py-2 rounded-full">
+              Válido para{" "}
+              <span className="font-bold">
+                {result.tickets.length > 1 ? 1 : result.ticketCount}{" "}
+                {(result.tickets.length > 1 ? 1 : result.ticketCount) === 1
+                  ? "entrada"
+                  : "entradas"}
+              </span>
             </p>
-            <p className="mt-1 text-lg font-bold text-white capitalize">
-              {result.codeWord}
-            </p>
+            <div className="w-full text-center bg-gray-900 rounded-xl px-4 py-3">
+              <p className="text-xs text-gray-300 uppercase tracking-wider">
+                Tu animal
+              </p>
+              <p className="mt-1 text-lg font-bold text-white capitalize">
+                {ticket.codeWord}
+              </p>
+            </div>
+            <div className="w-full text-center bg-gray-900 rounded-xl px-4 py-3">
+              <p className="text-xs text-gray-300 uppercase tracking-wider">
+                Tu código
+              </p>
+              <p className="mt-1 text-lg font-bold text-white tracking-widest">
+                {ticket.qrToken.slice(-3).toUpperCase()}
+              </p>
+            </div>
           </div>
-          <div className="w-full text-center bg-gray-900 rounded-xl px-4 py-3">
-            <p className="text-xs text-gray-300 uppercase tracking-wider">
-              Tu código
-            </p>
-            <p className="mt-1 text-lg font-bold text-white tracking-widest">
-              {result.qrToken.slice(-3).toUpperCase()}
-            </p>
-          </div>
-        </div>
+        ))}
 
         <div className="flex flex-col gap-3">
           <button
@@ -214,12 +237,39 @@ export default function RegisterSalePage() {
             min={1}
             step={1}
             value={ticketCount}
-            onChange={(e) =>
-              setTicketCount(Math.max(1, Math.floor(Number(e.target.value))))
-            }
+            onChange={(e) => {
+              const next = Math.max(1, Math.floor(Number(e.target.value)));
+              setTicketCount(next);
+              if (next <= 1) setDistinctQrs(false);
+            }}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
           />
         </div>
+
+        <label
+          htmlFor="distinctQrs"
+          className={`flex items-start gap-2.5 ${
+            ticketCount > 1
+              ? "cursor-pointer"
+              : "cursor-not-allowed opacity-50"
+          }`}
+        >
+          <input
+            id="distinctQrs"
+            type="checkbox"
+            checked={distinctQrs}
+            disabled={ticketCount <= 1}
+            onChange={(e) => setDistinctQrs(e.target.checked)}
+            className="mt-0.5 h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900 disabled:cursor-not-allowed"
+          />
+          <span className="text-sm text-gray-700">
+            Generar QRs distintos
+            <span className="block text-xs text-gray-500">
+              Genera {ticketCount} QRs, cada uno válido para 1 sola persona,
+              en vez de un único QR para las {ticketCount} entradas.
+            </span>
+          </span>
+        </label>
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">

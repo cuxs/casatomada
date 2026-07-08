@@ -4,6 +4,15 @@ import RegisterSalePage from "../app/admin/register-sale/page";
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
+// Mirrors getCurrentPrice() in the component so this test doesn't go stale
+// as real time crosses the pricing-tier thresholds.
+function getCurrentDefaultPrice(): number {
+  const now = new Date();
+  if (now < new Date("2026-06-24T03:00:00Z")) return 10000;
+  if (now < new Date("2026-07-02T03:00:00Z")) return 13000;
+  return 15000;
+}
+
 describe("RegisterSalePage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -93,8 +102,9 @@ describe("RegisterSalePage", () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         buyerName: "Pedro Gómez",
-        price: 13000,
+        price: getCurrentDefaultPrice(),
         ticketCount: 1,
+        distinctQrs: false,
       }),
     });
 
@@ -163,6 +173,7 @@ describe("RegisterSalePage", () => {
         buyerName: "Ana Díaz",
         price: 15000,
         ticketCount: 3,
+        distinctQrs: false,
       }),
     });
 
@@ -207,7 +218,12 @@ describe("RegisterSalePage", () => {
     expect(mockFetch).toHaveBeenCalledWith("/api/sales", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ buyerName: "Invitado VIP", price: 0, ticketCount: 1 }),
+      body: JSON.stringify({
+        buyerName: "Invitado VIP",
+        price: 0,
+        ticketCount: 1,
+        distinctQrs: false,
+      }),
     });
 
     await waitFor(() => {
@@ -225,6 +241,113 @@ describe("RegisterSalePage", () => {
 
     fireEvent.change(ticketInput, { target: { value: "-5" } });
     expect(ticketInput).toHaveValue(1);
+  });
+
+  it("always shows the 'Generar QRs distintos' checkbox, disabled when ticket count is 1", () => {
+    mockBuyersFetch();
+    render(<RegisterSalePage />);
+
+    expect(screen.getByLabelText(/Generar QRs distintos/)).toBeDisabled();
+
+    fireEvent.change(screen.getByLabelText("Válido por"), {
+      target: { value: "2" },
+    });
+    expect(screen.getByLabelText(/Generar QRs distintos/)).toBeEnabled();
+
+    fireEvent.change(screen.getByLabelText("Válido por"), {
+      target: { value: "1" },
+    });
+    expect(screen.getByLabelText(/Generar QRs distintos/)).toBeDisabled();
+  });
+
+  it("unchecks 'Generar QRs distintos' when ticket count drops back to 1", () => {
+    mockBuyersFetch();
+    render(<RegisterSalePage />);
+
+    fireEvent.change(screen.getByLabelText("Válido por"), {
+      target: { value: "3" },
+    });
+    const checkbox = screen.getByLabelText(/Generar QRs distintos/);
+    fireEvent.click(checkbox);
+    expect(checkbox).toBeChecked();
+
+    fireEvent.change(screen.getByLabelText("Válido por"), {
+      target: { value: "1" },
+    });
+    fireEvent.change(screen.getByLabelText("Válido por"), {
+      target: { value: "2" },
+    });
+    expect(screen.getByLabelText(/Generar QRs distintos/)).not.toBeChecked();
+  });
+
+  it("sends distinctQrs true and renders one card per generated QR", async () => {
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            ticketCount: 3,
+            tickets: [
+              {
+                qrDataUrl: "data:image/png;base64,mockqr1",
+                codeWord: "lombriz roja del monte",
+                qrToken: "mock-qr-token-111",
+              },
+              {
+                qrDataUrl: "data:image/png;base64,mockqr2",
+                codeWord: "marmota azul de la esquina",
+                qrToken: "mock-qr-token-222",
+              },
+              {
+                qrDataUrl: "data:image/png;base64,mockqr3",
+                codeWord: "capibara verde de la terraza",
+                qrToken: "mock-qr-token-333",
+              },
+            ],
+          }),
+      })
+      .mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve([]),
+      });
+
+    render(<RegisterSalePage />);
+
+    fireEvent.change(screen.getByLabelText(/Nombre/), {
+      target: { value: "Grupo Grande" },
+    });
+    fireEvent.change(screen.getByLabelText("Precio"), {
+      target: { value: "15000" },
+    });
+    fireEvent.change(screen.getByLabelText("Válido por"), {
+      target: { value: "3" },
+    });
+    fireEvent.click(screen.getByLabelText(/Generar QRs distintos/));
+    fireEvent.click(screen.getByRole("button", { name: "Confirmar compra" }));
+
+    expect(mockFetch).toHaveBeenCalledWith("/api/sales", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        buyerName: "Grupo Grande",
+        price: 15000,
+        ticketCount: 3,
+        distinctQrs: true,
+      }),
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("¡Listo!")).toBeInTheDocument();
+    });
+
+    expect(screen.getAllByAltText("QR de entrada")).toHaveLength(3);
+    expect(screen.getByText("Entrada 1 de 3")).toBeInTheDocument();
+    expect(screen.getByText("Entrada 3 de 3")).toBeInTheDocument();
+    expect(screen.getByText("marmota azul de la esquina")).toBeInTheDocument();
   });
 
   it("displays error message if the API call fails", async () => {

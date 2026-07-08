@@ -25,10 +25,12 @@ export async function POST(request: NextRequest) {
     buyerName,
     price,
     ticketCount: rawTicketCount,
+    distinctQrs,
   } = body as {
     buyerName: string;
     price: number;
     ticketCount?: number;
+    distinctQrs?: boolean;
   };
 
   if (!buyerName?.trim()) {
@@ -50,47 +52,70 @@ export async function POST(request: NextRequest) {
       ? Math.floor(rawTicketCount)
       : 1;
 
-  const qrToken = uuidv4();
+  // "Generar QRs distintos" splits a multi-ticket sale into one Sale row per
+  // ticket, each valid for exactly one person, instead of a single QR that
+  // covers the whole group.
+  const salesToCreate = distinctQrs === true && ticketCount > 1 ? ticketCount : 1;
+  const ticketCountPerSale = salesToCreate > 1 ? 1 : ticketCount;
 
-  const [qrDataUrl, salesCount] = await Promise.all([
-    generateQrDataUrl(qrToken),
-    prisma.sale.count(),
-  ]);
+  let nextCodeIndex = await prisma.sale.count();
+  const created: { qrToken: string; qrDataUrl: string; codeWord: string }[] =
+    [];
 
-  let codeWord = "";
-  let created = false;
-  for (let attempt = 0; attempt < TOTAL_CODE_WORDS; attempt++) {
-    codeWord = codeWordForIndex(salesCount + attempt);
-    try {
-      await prisma.sale.create({
-        data: {
-          buyerName: buyerName.trim(),
-          price,
-          qrToken,
-          codeWord,
-          ticketCount,
-        },
-      });
-      created = true;
-      break;
-    } catch (err) {
-      const isCodeWordCollision =
-        err instanceof Prisma.PrismaClientKnownRequestError &&
-        err.code === "P2002" &&
-        (err.meta?.target as string[] | undefined)?.includes("codeWord");
+  for (let i = 0; i < salesToCreate; i++) {
+    const qrToken = uuidv4();
+    const qrDataUrl = await generateQrDataUrl(qrToken);
+    const saleBuyerName =
+      salesToCreate > 1
+        ? `${buyerName.trim()} QR ${i + 1}`
+        : buyerName.trim();
 
-      if (!isCodeWordCollision) throw err;
+    let codeWord = "";
+    let saved = false;
+    for (let attempt = 0; attempt < TOTAL_CODE_WORDS; attempt++) {
+      codeWord = codeWordForIndex(nextCodeIndex + attempt);
+      try {
+        await prisma.sale.create({
+          data: {
+            buyerName: saleBuyerName,
+            price,
+            qrToken,
+            codeWord,
+            ticketCount: ticketCountPerSale,
+          },
+        });
+        nextCodeIndex += attempt + 1;
+        saved = true;
+        break;
+      } catch (err) {
+        const isCodeWordCollision =
+          err instanceof Prisma.PrismaClientKnownRequestError &&
+          err.code === "P2002" &&
+          (err.meta?.target as string[] | undefined)?.includes("codeWord");
+
+        if (!isCodeWordCollision) throw err;
+      }
     }
+
+    if (!saved) {
+      return NextResponse.json(
+        { error: "No se pudo generar una palabra clave única" },
+        { status: 500 },
+      );
+    }
+
+    created.push({ qrToken, qrDataUrl, codeWord });
   }
 
-  if (!created) {
-    return NextResponse.json(
-      { error: "No se pudo generar una palabra clave única" },
-      { status: 500 },
-    );
+  if (salesToCreate === 1) {
+    const [{ qrToken, qrDataUrl, codeWord }] = created;
+    return NextResponse.json({ qrToken, qrDataUrl, codeWord, ticketCount });
   }
 
-  return NextResponse.json({ qrToken, qrDataUrl, codeWord, ticketCount });
+  return NextResponse.json({
+    tickets: created.map((sale) => ({ ...sale, ticketCount: 1 })),
+    ticketCount,
+  });
 }
 
 export async function GET(request: NextRequest) {
