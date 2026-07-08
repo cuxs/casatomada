@@ -23,12 +23,6 @@ const NAV_ITEMS = [
     exact: false,
   },
   {
-    label: "Validar palabra clave",
-    icon: KeyRound,
-    href: "/admin/check-word",
-    exact: false,
-  },
-  {
     label: "Viajes compartidos",
     icon: Car,
     href: "/admin/ride-posts",
@@ -77,6 +71,14 @@ export default function AdminNav() {
         >
           <QrCode className="h-4 w-4 shrink-0" />
           Validar QR
+        </a>
+
+        <a
+          href="/check-word"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+        >
+          <KeyRound className="h-4 w-4 shrink-0" />
+          Validar palabra clave
         </a>
       </nav>
 

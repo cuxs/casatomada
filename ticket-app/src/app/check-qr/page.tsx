@@ -1,8 +1,10 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 
 interface SaleInfo {
   found: boolean;
@@ -114,13 +116,13 @@ function CheckQRContent() {
               aria-label="Token del QR"
               className="w-full sm:flex-1 px-4 py-3 border border-gray-300 rounded-lg text-sm font-mono text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 transition"
             />
-            <button
+            <Button
               type="submit"
               disabled={!manualInput.trim() || loading}
-              className="w-full sm:w-auto px-6 py-3 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 disabled:opacity-40 transition-colors whitespace-nowrap"
+              className="w-full sm:w-auto whitespace-nowrap"
             >
               Validar
-            </button>
+            </Button>
           </form>
         )}
 
@@ -191,31 +193,29 @@ function CheckQRContent() {
                   </p>
                 </div>
 
-                <button
+                <Button
                   type="button"
                   onClick={markAsUsed}
                   disabled={marking}
-                  className="w-full px-4 py-4 bg-green-700 text-white font-bold text-lg rounded-xl hover:bg-green-600 disabled:opacity-50 transition-colors"
+                  size="lg"
+                  className="w-full h-auto py-4 text-lg font-bold bg-green-700 hover:bg-green-600"
                 >
                   {marking ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <>
+                      <Loader2 className="size-5 animate-spin" />
                       Marcando...
-                    </span>
+                    </>
                   ) : (
                     "Marcar como usado"
                   )}
-                </button>
+                </Button>
               </div>
             )}
           </>
         )}
-        <Link
-          href="/admin/check-word"
-          className="block w-full text-center px-4 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
-        >
-          Validar por palabra clave →
-        </Link>
+        <Button variant="outline" className="w-full text-gray-700" asChild>
+          <Link href="/check-word">Validar por palabra clave →</Link>
+        </Button>
       </div>
     </main>
   );

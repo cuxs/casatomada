@@ -33,7 +33,7 @@ const SECTIONS = [
     label: "Validar palabra clave",
     description: "Validar entrada por código de animal sin QR",
     icon: KeyRound,
-    href: "/admin/check-word",
+    href: "/check-word",
   },
 ];
 

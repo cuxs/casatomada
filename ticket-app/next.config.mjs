@@ -8,11 +8,6 @@ const nextConfig = {
         destination: "/admin/register-sale",
         permanent: true,
       },
-      {
-        source: "/check-word",
-        destination: "/admin/check-word",
-        permanent: true,
-      },
     ];
   },
 };
