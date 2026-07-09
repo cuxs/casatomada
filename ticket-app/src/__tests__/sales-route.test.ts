@@ -373,9 +373,7 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
     });
 
     const qrTokens = body.tickets.map((t: { qrToken: string }) => t.qrToken);
-    const codeWords = body.tickets.map(
-      (t: { codeWord: string }) => t.codeWord,
-    );
+    const codeWords = body.tickets.map((t: { codeWord: string }) => t.codeWord);
     expect(new Set(qrTokens).size).toBe(3);
     expect(new Set(codeWords).size).toBe(3);
     for (const ticket of body.tickets) {
@@ -409,9 +407,7 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
     expect(body.tickets).toHaveLength(2);
     expect(prisma.sale.create).toHaveBeenCalledTimes(3);
 
-    const codeWords = body.tickets.map(
-      (t: { codeWord: string }) => t.codeWord,
-    );
+    const codeWords = body.tickets.map((t: { codeWord: string }) => t.codeWord);
     expect(new Set(codeWords).size).toBe(2);
   });
 

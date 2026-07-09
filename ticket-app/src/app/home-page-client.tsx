@@ -125,14 +125,18 @@ export default function HomePageClient({
     return () => clearInterval(id);
   }, []);
 
-  useEffect(() => {
-    const scrollTop = (el: HTMLDivElement | null) => {
-      if (el && typeof el.scrollTo === "function") el.scrollTo(0, 0);
-    };
-    if (section === "entradas") scrollTop(entradasRef.current);
-    if (section === "manifiest") scrollTop(manifiestaRef.current);
-    if (section === "rizoma") scrollTop(rizomaRef.current);
-  }, [section]);
+  function goToSection(next: Section) {
+    setSection(next);
+    const el =
+      next === "entradas"
+        ? entradasRef.current
+        : next === "manifiest"
+          ? manifiestaRef.current
+          : next === "rizoma"
+            ? rizomaRef.current
+            : null;
+    if (el && typeof el.scrollTo === "function") el.scrollTo(0, 0);
+  }
 
   const priceInfo = now ? getPriceInfo(now) : null;
   const msLeft = priceInfo?.changeAt
@@ -203,9 +207,9 @@ export default function HomePageClient({
                 [
                   {
                     label: "manifiest@",
-                    onClick: () => setSection("manifiest"),
+                    onClick: () => goToSection("manifiest"),
                   },
-                  { label: "rizoma 001", onClick: () => setSection("rizoma") },
+                  { label: "rizoma 001", onClick: () => goToSection("rizoma") },
                 ] as const
               ).map(({ label, onClick }) => (
                 <button
@@ -221,7 +225,7 @@ export default function HomePageClient({
 
             <button
               type="button"
-              onClick={() => setSection("entradas")}
+              onClick={() => goToSection("entradas")}
               className="font-epilogue tracking-[-0.05em] text-white/90 bg-[rgba(10,10,10,0.75)] border-2 border-white/35 rounded-3xl py-[14px] cursor-pointer backdrop-blur-sm w-full block"
               style={{
                 fontSize: "clamp(36px, 9.5vw, 46px)",
@@ -241,7 +245,7 @@ export default function HomePageClient({
 
             <button
               type="button"
-              onClick={() => setSection("entradas")}
+              onClick={() => goToSection("entradas")}
               className="bg-transparent border-0 cursor-pointer text-white/50 p-1"
               aria-label="Ver más"
             >
@@ -280,7 +284,7 @@ export default function HomePageClient({
           phoneCopied={phoneCopied}
           onCopyAlias={copyAlias}
           onCopyPhone={copyPhone}
-          onBack={() => setSection("hero")}
+          onBack={() => goToSection("hero")}
         />
       </div>
 
@@ -293,7 +297,7 @@ export default function HomePageClient({
             section === "manifiest" ? "translateX(0)" : "translateX(-100%)",
         }}
       >
-        <ManifiestaSection onBack={() => setSection("hero")} />
+        <ManifiestaSection onBack={() => goToSection("hero")} />
       </div>
 
       {/* ===== RIZOMA ===== */}
@@ -305,7 +309,7 @@ export default function HomePageClient({
             section === "rizoma" ? "translateX(0)" : "translateX(100%)",
         }}
       >
-        <RizomaSection onBack={() => setSection("hero")} />
+        <RizomaSection onBack={() => goToSection("hero")} />
       </div>
     </div>
   );

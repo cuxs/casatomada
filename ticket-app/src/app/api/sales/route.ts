@@ -55,7 +55,8 @@ export async function POST(request: NextRequest) {
   // "Generar QRs distintos" splits a multi-ticket sale into one Sale row per
   // ticket, each valid for exactly one person, instead of a single QR that
   // covers the whole group.
-  const salesToCreate = distinctQrs === true && ticketCount > 1 ? ticketCount : 1;
+  const salesToCreate =
+    distinctQrs === true && ticketCount > 1 ? ticketCount : 1;
   const ticketCountPerSale = salesToCreate > 1 ? 1 : ticketCount;
 
   let nextCodeIndex = await prisma.sale.count();
@@ -66,9 +67,7 @@ export async function POST(request: NextRequest) {
     const qrToken = uuidv4();
     const qrDataUrl = await generateQrDataUrl(qrToken);
     const saleBuyerName =
-      salesToCreate > 1
-        ? `${buyerName.trim()} QR ${i + 1}`
-        : buyerName.trim();
+      salesToCreate > 1 ? `${buyerName.trim()} QR ${i + 1}` : buyerName.trim();
 
     let codeWord = "";
     let saved = false;

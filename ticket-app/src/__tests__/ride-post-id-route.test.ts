@@ -38,7 +38,9 @@ describe("DELETE /api/ride-posts/[id]", () => {
     const res = await DELETE(makeRequest(), { params: { id: "post-1" } });
 
     expect(res.status).toBe(204);
-    expect(prisma.ridePost.delete).toHaveBeenCalledWith({ where: { id: "post-1" } });
+    expect(prisma.ridePost.delete).toHaveBeenCalledWith({
+      where: { id: "post-1" },
+    });
   });
 
   it("blocks request with 401 when auth is configured but missing", async () => {
@@ -91,7 +93,9 @@ describe("DELETE /api/ride-posts/[id]", () => {
   });
 
   it("returns 500 on unexpected db error", async () => {
-    vi.mocked(prisma.ridePost.delete).mockRejectedValueOnce(new Error("db error"));
+    vi.mocked(prisma.ridePost.delete).mockRejectedValueOnce(
+      new Error("db error"),
+    );
 
     const res = await DELETE(makeRequest(), { params: { id: "post-1" } });
 

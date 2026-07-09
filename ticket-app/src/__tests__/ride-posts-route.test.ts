@@ -48,7 +48,9 @@ describe("GET /api/ride-posts", () => {
   });
 
   it("returns 500 when the db throws", async () => {
-    vi.mocked(prisma.ridePost.findMany).mockRejectedValueOnce(new Error("db error"));
+    vi.mocked(prisma.ridePost.findMany).mockRejectedValueOnce(
+      new Error("db error"),
+    );
 
     const res = await GET();
 
@@ -70,7 +72,9 @@ describe("POST /api/ride-posts", () => {
     };
     vi.mocked(prisma.ridePost.create).mockResolvedValueOnce(mockPost as any);
 
-    const res = await POST(makePost({ authorName: "Juan", content: "Voy desde Palermo" }));
+    const res = await POST(
+      makePost({ authorName: "Juan", content: "Voy desde Palermo" }),
+    );
 
     expect(res.status).toBe(201);
     expect(await res.json()).toEqual(mockPost);
@@ -90,12 +94,20 @@ describe("POST /api/ride-posts", () => {
     vi.mocked(prisma.ridePost.create).mockResolvedValueOnce(mockPost as any);
 
     const res = await POST(
-      makePost({ authorName: "Juan", content: "Voy desde Palermo", phone: "+54 9 11 1234-5678" }),
+      makePost({
+        authorName: "Juan",
+        content: "Voy desde Palermo",
+        phone: "+54 9 11 1234-5678",
+      }),
     );
 
     expect(res.status).toBe(201);
     expect(prisma.ridePost.create).toHaveBeenCalledWith({
-      data: { authorName: "Juan", content: "Voy desde Palermo", phone: "+54 9 11 1234-5678" },
+      data: {
+        authorName: "Juan",
+        content: "Voy desde Palermo",
+        phone: "+54 9 11 1234-5678",
+      },
     });
   });
 
@@ -105,17 +117,27 @@ describe("POST /api/ride-posts", () => {
     await POST(makePost({ authorName: "Juan", content: "Hola", phone: "" }));
 
     expect(prisma.ridePost.create).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ phone: null }) }),
+      expect.objectContaining({
+        data: expect.objectContaining({ phone: null }),
+      }),
     );
   });
 
   it("trims whitespace from fields", async () => {
     vi.mocked(prisma.ridePost.create).mockResolvedValueOnce({ id: "1" } as any);
 
-    await POST(makePost({ authorName: "  Juan  ", content: "  Hola  ", phone: "  123  " }));
+    await POST(
+      makePost({
+        authorName: "  Juan  ",
+        content: "  Hola  ",
+        phone: "  123  ",
+      }),
+    );
 
     expect(prisma.ridePost.create).toHaveBeenCalledWith(
-      expect.objectContaining({ data: { authorName: "Juan", content: "Hola", phone: "123" } }),
+      expect.objectContaining({
+        data: { authorName: "Juan", content: "Hola", phone: "123" },
+      }),
     );
   });
 
@@ -139,13 +161,17 @@ describe("POST /api/ride-posts", () => {
   });
 
   it("rejects authorName over 100 chars with 400", async () => {
-    const res = await POST(makePost({ authorName: "a".repeat(101), content: "Hola" }));
+    const res = await POST(
+      makePost({ authorName: "a".repeat(101), content: "Hola" }),
+    );
     expect(res.status).toBe(400);
     expect((await res.json()).error).toBe("Nombre demasiado largo");
   });
 
   it("rejects content over 1000 chars with 400", async () => {
-    const res = await POST(makePost({ authorName: "Juan", content: "x".repeat(1001) }));
+    const res = await POST(
+      makePost({ authorName: "Juan", content: "x".repeat(1001) }),
+    );
     expect(res.status).toBe(400);
     expect((await res.json()).error).toBe("Mensaje demasiado largo");
   });
@@ -162,14 +188,20 @@ describe("POST /api/ride-posts", () => {
     const { verifyTurnstile } = await import("@/lib/turnstile");
     vi.mocked(verifyTurnstile).mockResolvedValueOnce(false);
 
-    const res = await POST(makePost({ authorName: "Juan", content: "Hola", turnstileToken: "bad" }));
+    const res = await POST(
+      makePost({ authorName: "Juan", content: "Hola", turnstileToken: "bad" }),
+    );
     expect(res.status).toBe(400);
-    expect((await res.json()).error).toBe("Verificación de seguridad fallida. Intentá de nuevo.");
+    expect((await res.json()).error).toBe(
+      "Verificación de seguridad fallida. Intentá de nuevo.",
+    );
     expect(prisma.ridePost.create).not.toHaveBeenCalled();
   });
 
   it("returns 500 when the db throws", async () => {
-    vi.mocked(prisma.ridePost.create).mockRejectedValueOnce(new Error("db error"));
+    vi.mocked(prisma.ridePost.create).mockRejectedValueOnce(
+      new Error("db error"),
+    );
 
     const res = await POST(makePost({ authorName: "Juan", content: "Hola" }));
     expect(res.status).toBe(500);

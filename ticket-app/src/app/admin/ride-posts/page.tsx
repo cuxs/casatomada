@@ -27,22 +27,27 @@ export default function AdminRidePostsPage() {
   const [deleting, setDeleting] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     async function load() {
       try {
         const res = await fetch("/api/ride-posts");
         const data = await res.json();
+        if (cancelled) return;
         if (!res.ok) {
           setError(data.error ?? "Error al cargar");
           return;
         }
         setPosts(data as RidePost[]);
       } catch {
-        setError("No se pudo conectar con el servidor");
+        if (!cancelled) setError("No se pudo conectar con el servidor");
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
     load();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   async function deletePost(id: string) {

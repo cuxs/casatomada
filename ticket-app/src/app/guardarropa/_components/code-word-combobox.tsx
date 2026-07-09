@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronsUpDown } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -27,25 +27,50 @@ interface CodeWordComboboxProps {
   onSelect: (result: CodeWordResult) => void;
 }
 
+interface SearchState {
+  status: "idle" | "loading" | "done";
+  results: CodeWordResult[];
+  error: string | null;
+}
+
+type SearchAction =
+  | { type: "reset" }
+  | { type: "start" }
+  | { type: "success"; results: CodeWordResult[] }
+  | { type: "failure"; error: string };
+
+const initialSearchState: SearchState = {
+  status: "idle",
+  results: [],
+  error: null,
+};
+
+function searchReducer(_state: SearchState, action: SearchAction): SearchState {
+  switch (action.type) {
+    case "reset":
+      return initialSearchState;
+    case "start":
+      return { status: "loading", results: [], error: null };
+    case "success":
+      return { status: "done", results: action.results, error: null };
+    case "failure":
+      return { status: "done", results: [], error: action.error };
+  }
+}
+
 export default function CodeWordCombobox({ onSelect }: CodeWordComboboxProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<CodeWordResult[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [searched, setSearched] = useState(false);
+  const [search, dispatch] = useReducer(searchReducer, initialSearchState);
 
   useEffect(() => {
     const trimmed = query.trim();
     if (!trimmed) {
-      setResults([]);
-      setLoading(false);
-      setError(null);
-      setSearched(false);
+      dispatch({ type: "reset" });
       return;
     }
 
-    setLoading(true);
+    dispatch({ type: "start" });
     const controller = new AbortController();
     const timeout = setTimeout(async () => {
       try {
@@ -56,20 +81,19 @@ export default function CodeWordCombobox({ onSelect }: CodeWordComboboxProps) {
         const data = await res.json();
 
         if (!res.ok) {
-          setError(data.error ?? "Ocurrió un error. Intentá de nuevo.");
-          setResults([]);
+          dispatch({
+            type: "failure",
+            error: data.error ?? "Ocurrió un error. Intentá de nuevo.",
+          });
         } else {
-          setError(null);
-          setResults(data.results);
+          dispatch({ type: "success", results: data.results });
         }
-        setSearched(true);
-        setLoading(false);
       } catch (err) {
         if (err instanceof DOMException && err.name === "AbortError") return;
-        setError("No se pudo conectar con el servidor. Intentá de nuevo.");
-        setResults([]);
-        setSearched(true);
-        setLoading(false);
+        dispatch({
+          type: "failure",
+          error: "No se pudo conectar con el servidor. Intentá de nuevo.",
+        });
       }
     }, 300);
 
@@ -122,34 +146,36 @@ export default function CodeWordCombobox({ onSelect }: CodeWordComboboxProps) {
               className="text-base"
             />
             <CommandList>
-              {loading && (
+              {search.status === "loading" && (
                 <div className="flex items-center justify-center gap-2 py-6 text-sm text-gray-500">
                   <span className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
                   Buscando…
                 </div>
               )}
 
-              {error && !loading && (
+              {search.status === "done" && search.error && (
                 <p className="py-6 px-4 text-center text-sm text-red-700">
-                  {error}
+                  {search.error}
                 </p>
               )}
 
-              {!loading && !error && !searched && (
+              {search.status === "idle" && (
                 <p className="py-6 px-4 text-center text-sm text-gray-500">
                   Escribí el animal del ticket
                 </p>
               )}
 
-              {!loading && !error && searched && results.length === 0 && (
-                <p className="py-6 px-4 text-center text-sm text-gray-500">
-                  No se encontró ningún ticket con ese animal.
-                </p>
-              )}
+              {search.status === "done" &&
+                !search.error &&
+                search.results.length === 0 && (
+                  <p className="py-6 px-4 text-center text-sm text-gray-500">
+                    No se encontró ningún ticket con ese animal.
+                  </p>
+                )}
 
-              {!loading && results.length > 0 && (
+              {search.status === "done" && search.results.length > 0 && (
                 <CommandGroup>
-                  {results.map((result) => (
+                  {search.results.map((result) => (
                     <CommandItem
                       key={result.saleId}
                       value={result.saleId}

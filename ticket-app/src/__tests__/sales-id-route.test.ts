@@ -107,7 +107,12 @@ describe("PATCH /api/sales/[id]", () => {
   });
 
   it("updates the price", async () => {
-    const updated = { id: "abc-123", buyerName: "Juan", ticketCount: 1, price: 0 };
+    const updated = {
+      id: "abc-123",
+      buyerName: "Juan",
+      ticketCount: 1,
+      price: 0,
+    };
     vi.mocked(prisma.sale.update).mockResolvedValueOnce(updated as any);
 
     const req = makeRequest({ price: 0 });

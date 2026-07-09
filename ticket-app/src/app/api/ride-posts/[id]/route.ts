@@ -20,8 +20,14 @@ export async function DELETE(
       err instanceof Prisma.PrismaClientKnownRequestError &&
       err.code === "P2025"
     ) {
-      return NextResponse.json({ error: "Post no encontrado" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Post no encontrado" },
+        { status: 404 },
+      );
     }
-    return NextResponse.json({ error: "Error al eliminar el post" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Error al eliminar el post" },
+      { status: 500 },
+    );
   }
 }

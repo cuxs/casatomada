@@ -2,7 +2,7 @@
 
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import SectionHeader from "@/app/sections/section-header";
 
 interface RidePost {
@@ -71,6 +71,60 @@ function PostCard({
   );
 }
 
+interface NewPostState {
+  author: string;
+  content: string;
+  phone: string;
+  token: string;
+  submitting: boolean;
+  error: string | null;
+}
+
+type NewPostAction =
+  | { type: "setAuthor"; value: string }
+  | { type: "setContent"; value: string }
+  | { type: "setPhone"; value: string }
+  | { type: "setToken"; value: string }
+  | { type: "submitStart" }
+  | { type: "submitSuccess" }
+  | { type: "submitFailure"; error: string; clearToken?: boolean };
+
+const initialNewPostState: NewPostState = {
+  author: "",
+  content: "",
+  phone: "",
+  token: "",
+  submitting: false,
+  error: null,
+};
+
+function newPostReducer(
+  state: NewPostState,
+  action: NewPostAction,
+): NewPostState {
+  switch (action.type) {
+    case "setAuthor":
+      return { ...state, author: action.value };
+    case "setContent":
+      return { ...state, content: action.value };
+    case "setPhone":
+      return { ...state, phone: action.value };
+    case "setToken":
+      return { ...state, token: action.value };
+    case "submitStart":
+      return { ...state, submitting: true, error: null };
+    case "submitSuccess":
+      return initialNewPostState;
+    case "submitFailure":
+      return {
+        ...state,
+        submitting: false,
+        error: action.error,
+        token: action.clearToken ? "" : state.token,
+      };
+  }
+}
+
 export default function ComoLlegarPage() {
   const router = useRouter();
 
@@ -79,19 +133,22 @@ export default function ComoLlegarPage() {
   const [boardError, setBoardError] = useState<string | null>(null);
   const [revealedPhones, setRevealedPhones] = useState<Set<string>>(new Set());
 
-  const [newAuthor, setNewAuthor] = useState("");
-  const [newContent, setNewContent] = useState("");
-  const [newPhone, setNewPhone] = useState("");
-  const [newToken, setNewToken] = useState("");
-  const [submittingPost, setSubmittingPost] = useState(false);
-  const [newPostError, setNewPostError] = useState<string | null>(null);
+  const [newPost, dispatchNewPost] = useReducer(
+    newPostReducer,
+    initialNewPostState,
+  );
   const newTurnstileRef = useRef<TurnstileInstance | undefined>(undefined);
 
   useEffect(() => {
+    let cancelled = false;
+    let requestId = 0;
+
     async function loadPosts() {
+      const thisRequest = ++requestId;
       try {
         const res = await fetch("/api/ride-posts");
         const data = await res.json();
+        if (cancelled || thisRequest !== requestId) return;
         if (!res.ok) {
           setBoardError(data.error ?? "Error al cargar");
           return;
@@ -99,52 +156,57 @@ export default function ComoLlegarPage() {
         setPosts(data as RidePost[]);
         setBoardError(null);
       } catch {
-        setBoardError("No se pudo conectar con el servidor");
+        if (!cancelled && thisRequest === requestId) {
+          setBoardError("No se pudo conectar con el servidor");
+        }
       } finally {
-        setBoardLoading(false);
+        if (!cancelled && thisRequest === requestId) setBoardLoading(false);
       }
     }
 
     loadPosts();
     const interval = setInterval(loadPosts, 30_000);
-    return () => clearInterval(interval);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, []);
 
   async function handleNewPost(e: React.FormEvent) {
     e.preventDefault();
-    setSubmittingPost(true);
-    setNewPostError(null);
+    dispatchNewPost({ type: "submitStart" });
 
     try {
       const res = await fetch("/api/ride-posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          authorName: newAuthor,
-          content: newContent,
-          phone: newPhone || undefined,
-          turnstileToken: newToken,
+          authorName: newPost.author,
+          content: newPost.content,
+          phone: newPost.phone || undefined,
+          turnstileToken: newPost.token,
         }),
       });
       const data = await res.json();
 
       if (!res.ok) {
-        setNewPostError(data.error ?? "Ocurrió un error");
+        dispatchNewPost({
+          type: "submitFailure",
+          error: data.error ?? "Ocurrió un error",
+          clearToken: true,
+        });
         newTurnstileRef.current?.reset();
-        setNewToken("");
         return;
       }
 
-      setNewAuthor("");
-      setNewContent("");
-      setNewPhone("");
-      setNewToken("");
+      dispatchNewPost({ type: "submitSuccess" });
       newTurnstileRef.current?.reset();
       setPosts((prev) => [data as RidePost, ...(prev ?? [])]);
     } catch {
-      setNewPostError("No se pudo conectar con el servidor");
-    } finally {
-      setSubmittingPost(false);
+      dispatchNewPost({
+        type: "submitFailure",
+        error: "No se pudo conectar con el servidor",
+      });
     }
   }
 
@@ -176,17 +238,30 @@ export default function ComoLlegarPage() {
               Transporte público
             </p>
             <div className="flex items-center gap-2 text-white/70 font-epilogue text-sm">
-              <svg height="15" width="15" viewBox="0 0 24 24" fill="white" aria-label="Bus" className="shrink-0 opacity-70">
-                <path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/>
+              <svg
+                height="15"
+                width="15"
+                viewBox="0 0 24 24"
+                fill="white"
+                aria-label="Bus"
+                className="shrink-0 opacity-70"
+              >
+                <path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z" />
               </svg>
               <span
-                style={{ backgroundColor: "rgb(137, 123, 38)", color: "rgb(255, 255, 255)" }}
+                style={{
+                  backgroundColor: "rgb(137, 123, 38)",
+                  color: "rgb(255, 255, 255)",
+                }}
                 className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold"
               >
                 945
               </span>
               <span
-                style={{ backgroundColor: "rgb(137, 123, 38)", color: "rgb(255, 255, 255)" }}
+                style={{
+                  backgroundColor: "rgb(137, 123, 38)",
+                  color: "rgb(255, 255, 255)",
+                }}
                 className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold"
               >
                 920
@@ -229,7 +304,16 @@ export default function ComoLlegarPage() {
             Viajes compartidos
           </h2>
           <p className="font-epilogue text-white/45 text-sm mb-6 tracking-[-0.02em]">
-            Entra al <a className="text-white/80 hover:text-white underline" href="https://chat.whatsapp.com/B8yuh8Y99YhB5m3XjOXVtE?mode=gi_t" target="_blank" rel="noopener noreferrer">grupo</a> o publicá si tenés lugar en tu auto o si buscás con quien ir 🚗
+            Entra al{" "}
+            <a
+              className="text-white/80 hover:text-white underline"
+              href="https://chat.whatsapp.com/B8yuh8Y99YhB5m3XjOXVtE?mode=gi_t"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              grupo
+            </a>{" "}
+            o publicá si tenés lugar en tu auto o si buscás con quien ir 🚗
           </p>
 
           {/* New post form */}
@@ -240,22 +324,28 @@ export default function ComoLlegarPage() {
             <input
               type="text"
               placeholder="Tu nombre"
-              value={newAuthor}
-              onChange={(e) => setNewAuthor(e.target.value)}
+              value={newPost.author}
+              onChange={(e) =>
+                dispatchNewPost({ type: "setAuthor", value: e.target.value })
+              }
               className="w-full bg-white/[0.08] border border-white/15 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-white/30 font-epilogue text-sm"
             />
             <textarea
               placeholder='Ej: "Salgo de San Jose a las 21:00, tengo 2 lugares"'
-              value={newContent}
-              onChange={(e) => setNewContent(e.target.value)}
+              value={newPost.content}
+              onChange={(e) =>
+                dispatchNewPost({ type: "setContent", value: e.target.value })
+              }
               rows={3}
               className="w-full bg-white/[0.08] border border-white/15 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-white/30 font-epilogue text-sm resize-none"
             />
             <input
               type="text"
               placeholder="Tu número (opcional)"
-              value={newPhone}
-              onChange={(e) => setNewPhone(e.target.value)}
+              value={newPost.phone}
+              onChange={(e) =>
+                dispatchNewPost({ type: "setPhone", value: e.target.value })
+              }
               autoComplete="off"
               className="w-full bg-white/[0.08] border border-white/15 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-white/30 font-epilogue text-sm"
             />
@@ -263,25 +353,29 @@ export default function ComoLlegarPage() {
               <Turnstile
                 ref={newTurnstileRef}
                 siteKey={SITE_KEY}
-                onSuccess={(token) => setNewToken(token)}
-                onExpire={() => setNewToken("")}
+                onSuccess={(token) =>
+                  dispatchNewPost({ type: "setToken", value: token })
+                }
+                onExpire={() =>
+                  dispatchNewPost({ type: "setToken", value: "" })
+                }
                 options={{ size: "flexible", theme: "dark" }}
               />
             )}
-            {newPostError && (
-              <p className="text-red-400 text-xs">{newPostError}</p>
+            {newPost.error && (
+              <p className="text-red-400 text-xs">{newPost.error}</p>
             )}
             <button
               type="submit"
               disabled={
-                submittingPost ||
-                !newAuthor.trim() ||
-                !newContent.trim() ||
-                (!!SITE_KEY && !newToken)
+                newPost.submitting ||
+                !newPost.author.trim() ||
+                !newPost.content.trim() ||
+                (!!SITE_KEY && !newPost.token)
               }
               className="w-full font-epilogue font-medium text-sm text-white/80 bg-white/[0.14] border border-white/25 rounded-full py-2.5 hover:bg-white/[0.22] disabled:opacity-40 transition-colors"
             >
-              {submittingPost ? "Publicando..." : "Publicar oferta"}
+              {newPost.submitting ? "Publicando..." : "Publicar oferta"}
             </button>
           </form>
 
@@ -293,7 +387,9 @@ export default function ComoLlegarPage() {
           )}
 
           {boardError && !boardLoading && (
-            <p className="text-red-400 text-sm text-center py-8">{boardError}</p>
+            <p className="text-red-400 text-sm text-center py-8">
+              {boardError}
+            </p>
           )}
 
           {!boardLoading && posts?.length === 0 && (
@@ -308,7 +404,11 @@ export default function ComoLlegarPage() {
               post={post}
               phoneRevealed={revealedPhones.has(post.id)}
               onRevealPhone={() =>
-                setRevealedPhones((prev) => { const next = new Set(prev); next.add(post.id); return next; })
+                setRevealedPhones((prev) => {
+                  const next = new Set(prev);
+                  next.add(post.id);
+                  return next;
+                })
               }
             />
           ))}

@@ -28,19 +28,34 @@ export async function POST(request: NextRequest) {
   };
 
   if (!authorName?.trim()) {
-    return NextResponse.json({ error: "El nombre es requerido" }, { status: 400 });
+    return NextResponse.json(
+      { error: "El nombre es requerido" },
+      { status: 400 },
+    );
   }
   if (!content?.trim()) {
-    return NextResponse.json({ error: "El mensaje es requerido" }, { status: 400 });
+    return NextResponse.json(
+      { error: "El mensaje es requerido" },
+      { status: 400 },
+    );
   }
   if (authorName.trim().length > 100) {
-    return NextResponse.json({ error: "Nombre demasiado largo" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Nombre demasiado largo" },
+      { status: 400 },
+    );
   }
   if (content.trim().length > 1000) {
-    return NextResponse.json({ error: "Mensaje demasiado largo" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Mensaje demasiado largo" },
+      { status: 400 },
+    );
   }
   if (phone && phone.trim().length > 30) {
-    return NextResponse.json({ error: "Número demasiado largo" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Número demasiado largo" },
+      { status: 400 },
+    );
   }
 
   const valid = await verifyTurnstile(turnstileToken ?? "");
@@ -61,6 +76,9 @@ export async function POST(request: NextRequest) {
     });
     return NextResponse.json(post, { status: 201 });
   } catch {
-    return NextResponse.json({ error: "Error al crear el post" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Error al crear el post" },
+      { status: 500 },
+    );
   }
 }

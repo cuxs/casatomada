@@ -116,9 +116,7 @@ export default function SalesPage() {
       if (res.ok) {
         const allSales = data as Sale[];
         setBuyers(aggregateBuyers(allSales));
-        setTotalRevenue(
-          allSales.reduce((sum, s) => sum + (s.price ?? 0), 0),
-        );
+        setTotalRevenue(allSales.reduce((sum, s) => sum + (s.price ?? 0), 0));
       }
     } catch {
       // Totals and downloads stay unavailable; the main table still works.

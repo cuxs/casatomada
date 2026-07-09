@@ -188,7 +188,9 @@ describe("SalesPage", () => {
       .mockResolvedValueOnce({
         ok: true,
         json: () =>
-          Promise.resolve(tablePage({ sales: mockSales, total: 3, totalTickets: 3 })),
+          Promise.resolve(
+            tablePage({ sales: mockSales, total: 3, totalTickets: 3 }),
+          ),
       })
       .mockResolvedValueOnce({
         ok: true,
@@ -466,7 +468,11 @@ describe("SalesPage", () => {
       expect(mockFetch).toHaveBeenCalledWith("/api/sales/1", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ buyerName: "Pedro Gómez", ticketCount: 2, price: 10000 }),
+        body: JSON.stringify({
+          buyerName: "Pedro Gómez",
+          ticketCount: 2,
+          price: 10000,
+        }),
       });
     });
 
@@ -496,7 +502,10 @@ describe("SalesPage", () => {
     mockFetch
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(tablePage({ sales: [sale], total: 1, totalTickets: 1 })),
+        json: () =>
+          Promise.resolve(
+            tablePage({ sales: [sale], total: 1, totalTickets: 1 }),
+          ),
       })
       .mockResolvedValueOnce({
         ok: true,
@@ -508,7 +517,10 @@ describe("SalesPage", () => {
       })
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(tablePage({ sales: [updatedSale], total: 1, totalTickets: 1 })),
+        json: () =>
+          Promise.resolve(
+            tablePage({ sales: [updatedSale], total: 1, totalTickets: 1 }),
+          ),
       })
       .mockResolvedValueOnce({
         ok: true,
@@ -521,7 +533,9 @@ describe("SalesPage", () => {
       expect(screen.getByText("Juan Pérez")).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Editar a Juan Pérez" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Editar a Juan Pérez" }),
+    );
 
     const priceSelect = screen.getByLabelText("Precio");
     expect(priceSelect).toHaveValue("13000");
@@ -533,7 +547,11 @@ describe("SalesPage", () => {
       expect(mockFetch).toHaveBeenCalledWith("/api/sales/1", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ buyerName: "Juan Pérez", ticketCount: 1, price: 0 }),
+        body: JSON.stringify({
+          buyerName: "Juan Pérez",
+          ticketCount: 1,
+          price: 0,
+        }),
       });
     });
 
