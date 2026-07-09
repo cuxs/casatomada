@@ -17,6 +17,20 @@ model Sale {
   used        Boolean   @default(false)
   usedAt      DateTime?
   createdAt   DateTime  @default(now())
+
+  guardarropaChecks GuardarropaCheck[]
+}
+
+model GuardarropaCheck {
+  id          String    @id @default(uuid())
+  saleId      String
+  sale        Sale      @relation(fields: [saleId], references: [id])
+  itemCount   Int
+  description String    @default("")
+  createdAt   DateTime  @default(now())
+  retrievedAt DateTime?
+
+  @@index([saleId])
 }
 
 model RidePost {

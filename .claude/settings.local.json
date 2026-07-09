@@ -11,7 +11,11 @@
       "Bash(npm install *)",
       "Bash(npx vitest *)",
       "Bash(npx tsc *)",
-      "Bash(npx prisma *)"
+      "Bash(npx prisma *)",
+      "Bash(curl -s http://localhost:3000/check-word)",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(pkill -f \"next-server\")",
+      "Bash(git stash *)"
     ]
   }
 }

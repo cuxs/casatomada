@@ -90,17 +90,7 @@ function CheckQRContent() {
   return (
     <main className="min-h-screen bg-white flex flex-col items-center px-4 py-12">
       <div className="w-full max-w-md space-y-6">
-        <div>
-          <Link
-            href="/"
-            className="text-sm text-gray-500 hover:text-gray-800 transition-colors"
-          >
-            ← Volver
-          </Link>
-          <h1 className="mt-4 text-3xl font-bold text-gray-900">
-            Validar entrada
-          </h1>
-        </div>
+        <h1 className="text-3xl font-bold text-gray-900">Validar entrada</h1>
 
         {/* Manual token input — shown if no token in URL or to check a different one */}
         {(!tokenFromUrl || checked) && (
