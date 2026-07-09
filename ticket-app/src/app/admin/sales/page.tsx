@@ -40,9 +40,12 @@ export default function SalesPage() {
   const [totalRevenue, setTotalRevenue] = useState<number | null>(null);
 
   const hasLoadedRef = useRef(false);
+  const requestIdRef = useRef(0);
 
   const loadSales = useCallback(
     async (targetPage: number, searchTerm: string) => {
+      const requestId = ++requestIdRef.current;
+
       if (!hasLoadedRef.current) {
         setLoading(true);
       } else {
@@ -62,6 +65,8 @@ export default function SalesPage() {
         });
         const data = await res.json();
 
+        if (requestId !== requestIdRef.current) return;
+
         if (!res.ok) {
           setError(data.error ?? "Ocurrió un error al cargar las ventas.");
           setSales(null);
@@ -73,12 +78,15 @@ export default function SalesPage() {
         setTotalPages(result.totalPages);
         setPage(result.page);
       } catch {
+        if (requestId !== requestIdRef.current) return;
         setError("No se pudo conectar con el servidor. Intentá de nuevo.");
         setSales(null);
       } finally {
-        hasLoadedRef.current = true;
-        setLoading(false);
-        setTableLoading(false);
+        if (requestId === requestIdRef.current) {
+          hasLoadedRef.current = true;
+          setLoading(false);
+          setTableLoading(false);
+        }
       }
     },
     [],
