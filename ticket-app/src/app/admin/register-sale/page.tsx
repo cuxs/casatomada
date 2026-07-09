@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useReducer, useState } from "react";
-import BuyersSummary from "./buyers-summary";
+import { useReducer } from "react";
 
 interface Ticket {
   qrDataUrl: string;
@@ -87,7 +86,6 @@ export default function RegisterSalePage() {
     undefined,
     createInitialPageState,
   );
-  const [buyersRefreshKey, setBuyersRefreshKey] = useState(0);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -127,7 +125,6 @@ export default function RegisterSalePage() {
         type: "submitSuccess",
         result: { ticketCount: data.ticketCount, tickets },
       });
-      setBuyersRefreshKey((key) => key + 1);
     } catch {
       dispatch({
         type: "submitFailure",
@@ -225,11 +222,9 @@ export default function RegisterSalePage() {
             href="/admin/sales"
             className="block w-full text-center px-4 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
           >
-            Ver todas las ventas
+            Ir a las ventas
           </Link>
         </div>
-
-        <BuyersSummary refreshKey={buyersRefreshKey} />
       </div>
     );
   }
@@ -361,13 +356,11 @@ export default function RegisterSalePage() {
         </button>
       </form>
 
-      <BuyersSummary refreshKey={buyersRefreshKey} />
-
       <Link
         href="/admin/sales"
         className="block w-full text-center text-sm text-gray-500 hover:text-gray-800 transition-colors"
       >
-        Ver detalle de todas las ventas →
+        Ir a las ventas →
       </Link>
     </div>
   );

@@ -18,15 +18,7 @@ describe("RegisterSalePage", () => {
     vi.clearAllMocks();
   });
 
-  function mockBuyersFetch(sales: unknown[] = []) {
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve(sales),
-    });
-  }
-
-  it("renders the form initially with default values", async () => {
-    mockBuyersFetch();
+  it("renders the form initially with default values", () => {
     render(<RegisterSalePage />);
 
     expect(screen.getByText("Registrar compra")).toBeInTheDocument();
@@ -35,14 +27,12 @@ describe("RegisterSalePage", () => {
     expect(
       screen.getByRole("button", { name: "Confirmar compra" }),
     ).toBeDisabled();
-
-    await waitFor(() => {
-      expect(screen.getByText("Compradores")).toBeInTheDocument();
-    });
+    expect(
+      screen.getByRole("link", { name: "Ir a las ventas →" }),
+    ).toHaveAttribute("href", "/admin/sales");
   });
 
   it("enables the submit button only when name is filled", () => {
-    mockBuyersFetch();
     render(<RegisterSalePage />);
 
     const nameInput = screen.getByLabelText(/Nombre/);
@@ -58,36 +48,16 @@ describe("RegisterSalePage", () => {
   });
 
   it("submits the form successfully and displays the QR code", async () => {
-    mockFetch
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve([]),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            qrDataUrl: "data:image/png;base64,mockqr",
-            codeWord: "lombriz roja del monte",
-            qrToken: "mock-qr-token-aaa",
-            ticketCount: 1,
-          }),
-      })
-      .mockResolvedValue({
-        ok: true,
-        json: () =>
-          Promise.resolve([
-            {
-              id: "1",
-              buyerName: "Pedro Gómez",
-              codeWord: "lombriz roja del monte",
-              qrToken: "mock-qr-token-aaa",
-              ticketCount: 1,
-              used: false,
-              createdAt: "2026-05-29",
-            },
-          ]),
-      });
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          qrDataUrl: "data:image/png;base64,mockqr",
+          codeWord: "lombriz roja del monte",
+          qrToken: "mock-qr-token-aaa",
+          ticketCount: 1,
+        }),
+    });
 
     render(<RegisterSalePage />);
 
@@ -117,10 +87,9 @@ describe("RegisterSalePage", () => {
       "data:image/png;base64,mockqr",
     );
     expect(screen.getByText("Válido para")).toBeInTheDocument();
-
-    await waitFor(() => {
-      expect(screen.getByText("Pedro Gómez")).toBeInTheDocument();
-    });
+    expect(
+      screen.getByRole("link", { name: "Ir a las ventas" }),
+    ).toHaveAttribute("href", "/admin/sales");
 
     const newSaleBtn = screen.getByRole("button", {
       name: "Registrar otra compra",
@@ -133,25 +102,16 @@ describe("RegisterSalePage", () => {
   });
 
   it("submits the selected price and ticket count", async () => {
-    mockFetch
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve([]),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            qrDataUrl: "data:image/png;base64,mockqr",
-            codeWord: "marmota azul de la esquina",
-            qrToken: "mock-qr-token-bbb",
-            ticketCount: 3,
-          }),
-      })
-      .mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve([]),
-      });
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          qrDataUrl: "data:image/png;base64,mockqr",
+          codeWord: "marmota azul de la esquina",
+          qrToken: "mock-qr-token-bbb",
+          ticketCount: 3,
+        }),
+    });
 
     render(<RegisterSalePage />);
 
@@ -184,25 +144,16 @@ describe("RegisterSalePage", () => {
   });
 
   it("shows Gratis option in the price dropdown and can submit with price 0", async () => {
-    mockFetch
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve([]),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            qrDataUrl: "data:image/png;base64,mockqr",
-            codeWord: "lombriz roja del monte",
-            qrToken: "mock-qr-token-ccc",
-            ticketCount: 1,
-          }),
-      })
-      .mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve([]),
-      });
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          qrDataUrl: "data:image/png;base64,mockqr",
+          codeWord: "lombriz roja del monte",
+          qrToken: "mock-qr-token-ccc",
+          ticketCount: 1,
+        }),
+    });
 
     render(<RegisterSalePage />);
 
@@ -232,7 +183,6 @@ describe("RegisterSalePage", () => {
   });
 
   it("clamps the ticket count to a minimum of 1", () => {
-    mockBuyersFetch();
     render(<RegisterSalePage />);
 
     const ticketInput = screen.getByLabelText("Válido por");
@@ -244,7 +194,6 @@ describe("RegisterSalePage", () => {
   });
 
   it("always shows the 'Generar QRs distintos' checkbox, disabled when ticket count is 1", () => {
-    mockBuyersFetch();
     render(<RegisterSalePage />);
 
     expect(screen.getByLabelText(/Generar QRs distintos/)).toBeDisabled();
@@ -261,7 +210,6 @@ describe("RegisterSalePage", () => {
   });
 
   it("unchecks 'Generar QRs distintos' when ticket count drops back to 1", () => {
-    mockBuyersFetch();
     render(<RegisterSalePage />);
 
     fireEvent.change(screen.getByLabelText("Válido por"), {
@@ -281,39 +229,30 @@ describe("RegisterSalePage", () => {
   });
 
   it("sends distinctQrs true and renders one card per generated QR", async () => {
-    mockFetch
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve([]),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            ticketCount: 3,
-            tickets: [
-              {
-                qrDataUrl: "data:image/png;base64,mockqr1",
-                codeWord: "lombriz roja del monte",
-                qrToken: "mock-qr-token-111",
-              },
-              {
-                qrDataUrl: "data:image/png;base64,mockqr2",
-                codeWord: "marmota azul de la esquina",
-                qrToken: "mock-qr-token-222",
-              },
-              {
-                qrDataUrl: "data:image/png;base64,mockqr3",
-                codeWord: "capibara verde de la terraza",
-                qrToken: "mock-qr-token-333",
-              },
-            ],
-          }),
-      })
-      .mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve([]),
-      });
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          ticketCount: 3,
+          tickets: [
+            {
+              qrDataUrl: "data:image/png;base64,mockqr1",
+              codeWord: "lombriz roja del monte",
+              qrToken: "mock-qr-token-111",
+            },
+            {
+              qrDataUrl: "data:image/png;base64,mockqr2",
+              codeWord: "marmota azul de la esquina",
+              qrToken: "mock-qr-token-222",
+            },
+            {
+              qrDataUrl: "data:image/png;base64,mockqr3",
+              codeWord: "capibara verde de la terraza",
+              qrToken: "mock-qr-token-333",
+            },
+          ],
+        }),
+    });
 
     render(<RegisterSalePage />);
 
@@ -351,18 +290,13 @@ describe("RegisterSalePage", () => {
   });
 
   it("displays error message if the API call fails", async () => {
-    mockFetch
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve([]),
-      })
-      .mockResolvedValueOnce({
-        ok: false,
-        json: () =>
-          Promise.resolve({
-            error: "El código de promo no es válido.",
-          }),
-      });
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      json: () =>
+        Promise.resolve({
+          error: "El código de promo no es válido.",
+        }),
+    });
 
     render(<RegisterSalePage />);
 
@@ -379,12 +313,7 @@ describe("RegisterSalePage", () => {
   });
 
   it("displays default error message on network failure", async () => {
-    mockFetch
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve([]),
-      })
-      .mockRejectedValueOnce(new Error("Network error"));
+    mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
     render(<RegisterSalePage />);
 
