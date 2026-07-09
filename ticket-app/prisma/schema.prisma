@@ -19,6 +19,8 @@ model Sale {
   createdAt   DateTime  @default(now())
 
   guardarropaChecks GuardarropaCheck[]
+
+  @@index([createdAt])
 }
 
 model GuardarropaCheck {
@@ -30,7 +32,7 @@ model GuardarropaCheck {
   createdAt   DateTime  @default(now())
   retrievedAt DateTime?
 
-  @@index([saleId])
+  @@index([saleId, retrievedAt])
 }
 
 model RidePost {
