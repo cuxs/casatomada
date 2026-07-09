@@ -181,11 +181,14 @@ describe("guardarropa checks routes", () => {
       expect(body.error).toBe("El ticket es requerido");
     });
 
-    it("returns only active deposits for the sale", async () => {
+    it("returns active and already-retrieved deposits for the sale", async () => {
       const checks = [{ id: "check-1", itemCount: 2, retrievedAt: null }];
-      vi.mocked(prisma.guardarropaCheck.findMany).mockResolvedValueOnce(
-        checks as any,
-      );
+      const retrievedChecks = [
+        { id: "check-2", itemCount: 1, retrievedAt: new Date().toISOString() },
+      ];
+      vi.mocked(prisma.guardarropaCheck.findMany)
+        .mockResolvedValueOnce(checks as any)
+        .mockResolvedValueOnce(retrievedChecks as any);
 
       const req = new NextRequest(
         "http://localhost:3000/api/guardarropa/checks?saleId=s1",
@@ -195,9 +198,14 @@ describe("guardarropa checks routes", () => {
       expect(res.status).toBe(200);
       const body = await res.json();
       expect(body.checks).toEqual(checks);
+      expect(body.retrievedChecks).toEqual(retrievedChecks);
       expect(prisma.guardarropaCheck.findMany).toHaveBeenCalledWith({
         where: { saleId: "s1", retrievedAt: null },
         orderBy: { createdAt: "asc" },
+      });
+      expect(prisma.guardarropaCheck.findMany).toHaveBeenCalledWith({
+        where: { saleId: "s1", retrievedAt: { not: null } },
+        orderBy: { retrievedAt: "desc" },
       });
     });
   });

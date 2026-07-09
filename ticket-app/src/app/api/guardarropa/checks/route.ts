@@ -68,8 +68,8 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET /api/guardarropa/checks?saleId=xxx — active (not yet retrieved)
-// deposits for a ticket, used by the retrieve screen.
+// GET /api/guardarropa/checks?saleId=xxx — active (not yet retrieved) and
+// already-retrieved deposits for a ticket, used by the retrieve screen.
 export async function GET(request: NextRequest) {
   const authResponse = checkApiAuth(request, "guardarropa");
   if (authResponse) return authResponse;
@@ -85,11 +85,17 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const checks = await prisma.guardarropaCheck.findMany({
-      where: { saleId, retrievedAt: null },
-      orderBy: { createdAt: "asc" },
-    });
-    return NextResponse.json({ checks });
+    const [checks, retrievedChecks] = await Promise.all([
+      prisma.guardarropaCheck.findMany({
+        where: { saleId, retrievedAt: null },
+        orderBy: { createdAt: "asc" },
+      }),
+      prisma.guardarropaCheck.findMany({
+        where: { saleId, retrievedAt: { not: null } },
+        orderBy: { retrievedAt: "desc" },
+      }),
+    ]);
+    return NextResponse.json({ checks, retrievedChecks });
   } catch {
     return NextResponse.json(
       { error: "Error al obtener los depósitos" },

@@ -11,11 +11,15 @@ interface GuardarropaCheck {
   itemCount: number;
   description: string;
   createdAt: string;
+  retrievedAt?: string | null;
 }
 
 export default function RetirarPage() {
   const [selected, setSelected] = useState<CodeWordResult | null>(null);
   const [checks, setChecks] = useState<GuardarropaCheck[] | null>(null);
+  const [retrievedChecks, setRetrievedChecks] = useState<GuardarropaCheck[]>(
+    [],
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
@@ -33,6 +37,7 @@ export default function RetirarPage() {
     setLoading(true);
     setError(null);
     setChecks(null);
+    setRetrievedChecks([]);
 
     try {
       const res = await fetch(
@@ -46,6 +51,7 @@ export default function RetirarPage() {
       }
 
       setChecks(data.checks);
+      setRetrievedChecks(data.retrievedChecks ?? []);
     } catch {
       setError("No se pudo conectar con el servidor. Intentá de nuevo.");
     } finally {
@@ -63,6 +69,7 @@ export default function RetirarPage() {
     if (confirmTimeout.current) clearTimeout(confirmTimeout.current);
     setSelected(null);
     setChecks(null);
+    setRetrievedChecks([]);
     setError(null);
     setConfirmingId(null);
     setRetrievingId(null);
@@ -100,6 +107,10 @@ export default function RetirarPage() {
         setChecks(
           (current) => current?.filter((c) => c.id !== check.id) ?? null,
         );
+        setRetrievedChecks((current) => [
+          { ...check, retrievedAt: new Date().toISOString() },
+          ...current,
+        ]);
         setRetrievedCount((count) => count + 1);
         return;
       }
@@ -222,6 +233,39 @@ export default function RetirarPage() {
                 </button>
               </div>
             ))}
+
+          {!loading && retrievedChecks.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-500">Ya retirado</p>
+              {retrievedChecks.map((check) => (
+                <div
+                  key={check.id}
+                  className="bg-gray-50 border border-gray-200 rounded-2xl p-4"
+                >
+                  <p className="font-semibold text-gray-700">
+                    {check.itemCount}{" "}
+                    {check.itemCount === 1 ? "objeto" : "objetos"}
+                  </p>
+                  {check.description && (
+                    <p className="mt-0.5 text-sm text-gray-500">
+                      {check.description}
+                    </p>
+                  )}
+                  {check.retrievedAt && (
+                    <p className="mt-1 text-xs text-gray-400">
+                      Retirado el{" "}
+                      {new Date(check.retrievedAt).toLocaleDateString("es-AR")}{" "}
+                      a las{" "}
+                      {new Date(check.retrievedAt).toLocaleTimeString("es-AR", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
 
           <Link
             href="/guardarropa"
