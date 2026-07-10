@@ -3,20 +3,20 @@
 import { Minus, Plus } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import CodeWordCombobox, {
-  type CodeWordResult,
-} from "../_components/code-word-combobox";
+import TicketCodeCombobox, {
+  type TicketCodeResult,
+} from "../_components/ticket-code-combobox";
 
 const MAX_ITEM_COUNT = 99;
 
 interface SavedCheck {
   itemCount: number;
   description: string;
-  codeWord: string;
+  code: string;
 }
 
 export default function GuardarPage() {
-  const [selected, setSelected] = useState<CodeWordResult | null>(null);
+  const [selected, setSelected] = useState<TicketCodeResult | null>(null);
   const [itemCount, setItemCount] = useState(1);
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
@@ -50,7 +50,7 @@ export default function GuardarPage() {
       setSaved({
         itemCount: data.itemCount,
         description: data.description,
-        codeWord: data.sale.codeWord,
+        code: data.sale.qrToken.slice(-3).toUpperCase(),
       });
     } catch {
       setError("No se pudo conectar con el servidor. Intentá de nuevo.");
@@ -89,7 +89,7 @@ export default function GuardarPage() {
           </div>
           <h1 className="text-2xl font-bold text-gray-900">¡Guardado!</h1>
           <p className="mt-1 text-gray-500 text-sm">
-            Recordale a la persona su animal para retirar
+            Anotá este código en la percha
           </p>
         </div>
 
@@ -97,8 +97,8 @@ export default function GuardarPage() {
           <p className="text-xs text-gray-300 uppercase tracking-wider">
             El código para retirar es
           </p>
-          <p className="mt-1 text-2xl font-bold text-white capitalize">
-            {saved.codeWord}
+          <p className="mt-1 text-2xl font-bold text-white font-mono tracking-widest">
+            {saved.code}
           </p>
         </div>
 
@@ -136,18 +136,18 @@ export default function GuardarPage() {
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Guardar</h1>
         <p className="mt-1 text-gray-500 text-sm">
-          Buscá el animal del ticket y anotá qué deja
+          Buscá el código del ticket y anotá qué deja
         </p>
       </div>
 
       {!selected ? (
-        <CodeWordCombobox onSelect={setSelected} />
+        <TicketCodeCombobox onSelect={setSelected} />
       ) : (
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5 flex items-center justify-between gap-3">
             <div className="min-w-0">
-              <p className="font-bold text-gray-900 text-lg capitalize">
-                {selected.codeWord}
+              <p className="font-bold text-gray-900 text-lg font-mono tracking-widest">
+                {selected.code}
               </p>
               <p className="text-sm text-gray-500 truncate">
                 {selected.buyerName}

@@ -41,6 +41,12 @@ export default function SaleDetailsModal({
           <dt className="text-gray-500">Entradas</dt>
           <dd className="font-bold text-gray-900">{sale.ticketCount}</dd>
         </div>
+        <div className="flex justify-between gap-4">
+          <dt className="text-gray-500">Token</dt>
+          <dd className="font-mono text-xs text-gray-900 text-right break-all">
+            {sale.qrToken}
+          </dd>
+        </div>
         {typeof sale.price === "number" && (
           <div className="flex justify-between gap-4">
             <dt className="text-gray-500">Precio</dt>

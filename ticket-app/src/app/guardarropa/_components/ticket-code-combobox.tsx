@@ -16,27 +16,27 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-export interface CodeWordResult {
+export interface TicketCodeResult {
   saleId: string;
-  codeWord: string;
+  code: string;
   buyerName: string;
   activeDeposits: number;
 }
 
-interface CodeWordComboboxProps {
-  onSelect: (result: CodeWordResult) => void;
+interface TicketCodeComboboxProps {
+  onSelect: (result: TicketCodeResult) => void;
 }
 
 interface SearchState {
   status: "idle" | "loading" | "done";
-  results: CodeWordResult[];
+  results: TicketCodeResult[];
   error: string | null;
 }
 
 type SearchAction =
   | { type: "reset" }
   | { type: "start" }
-  | { type: "success"; results: CodeWordResult[] }
+  | { type: "success"; results: TicketCodeResult[] }
   | { type: "failure"; error: string };
 
 const initialSearchState: SearchState = {
@@ -58,7 +58,9 @@ function searchReducer(_state: SearchState, action: SearchAction): SearchState {
   }
 }
 
-export default function CodeWordCombobox({ onSelect }: CodeWordComboboxProps) {
+export default function TicketCodeCombobox({
+  onSelect,
+}: TicketCodeComboboxProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [search, dispatch] = useReducer(searchReducer, initialSearchState);
@@ -108,7 +110,7 @@ export default function CodeWordCombobox({ onSelect }: CodeWordComboboxProps) {
     if (!nextOpen) setQuery("");
   }
 
-  function handleSelect(result: CodeWordResult) {
+  function handleSelect(result: TicketCodeResult) {
     setOpen(false);
     setQuery("");
     onSelect(result);
@@ -117,7 +119,7 @@ export default function CodeWordCombobox({ onSelect }: CodeWordComboboxProps) {
   return (
     <div className="space-y-2">
       <span className="block text-sm font-medium text-gray-700">
-        Animal del ticket
+        Código del ticket
       </span>
       <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
@@ -127,7 +129,7 @@ export default function CodeWordCombobox({ onSelect }: CodeWordComboboxProps) {
             aria-expanded={open}
             className="w-full h-14 justify-between px-4 text-base font-normal text-gray-500 bg-white"
           >
-            Buscar animal… (ej: capibara)
+            Buscar código… (ej: 9F3)
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
@@ -135,15 +137,16 @@ export default function CodeWordCombobox({ onSelect }: CodeWordComboboxProps) {
           className="w-[--radix-popover-trigger-width] p-0"
           align="start"
         >
-          {/* Search runs server-side against the sales' code words, so
+          {/* Search runs server-side against the sales' ticket codes, so
               cmdk's own filtering must stay off. */}
           <Command shouldFilter={false}>
             <CommandInput
               value={query}
-              onValueChange={setQuery}
-              placeholder="ej: capibara"
+              onValueChange={(value) => setQuery(value.trim().slice(0, 3))}
+              placeholder="ej: 9F3"
+              maxLength={3}
               autoFocus
-              className="text-base"
+              className="text-base font-mono uppercase tracking-widest"
             />
             <CommandList>
               {search.status === "loading" && (
@@ -161,7 +164,7 @@ export default function CodeWordCombobox({ onSelect }: CodeWordComboboxProps) {
 
               {search.status === "idle" && (
                 <p className="py-6 px-4 text-center text-sm text-gray-500">
-                  Escribí el animal del ticket
+                  Escribí el código del ticket
                 </p>
               )}
 
@@ -169,7 +172,7 @@ export default function CodeWordCombobox({ onSelect }: CodeWordComboboxProps) {
                 !search.error &&
                 search.results.length === 0 && (
                   <p className="py-6 px-4 text-center text-sm text-gray-500">
-                    No se encontró ningún ticket con ese animal.
+                    No se encontró ningún ticket con ese código.
                   </p>
                 )}
 
@@ -183,8 +186,8 @@ export default function CodeWordCombobox({ onSelect }: CodeWordComboboxProps) {
                       className="justify-between gap-3 px-3 py-3 cursor-pointer"
                     >
                       <span className="min-w-0">
-                        <span className="block font-bold capitalize">
-                          {result.codeWord}
+                        <span className="block font-bold font-mono tracking-widest">
+                          {result.code}
                         </span>
                         <span className="block text-sm text-gray-500 truncate">
                           {result.buyerName}

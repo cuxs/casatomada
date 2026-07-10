@@ -130,7 +130,10 @@ describe("guardarropa checks routes", () => {
         itemCount: 2,
         description: "campera negra",
         retrievedAt: null,
-        sale: { codeWord: "capibara roja del monte", buyerName: "Juan" },
+        sale: {
+          qrToken: "aaaa1111-bbbb-cccc-dddd-eeeeeee9f3",
+          buyerName: "Juan",
+        },
       };
       vi.mocked(prisma.guardarropaCheck.create).mockResolvedValueOnce(
         created as any,
@@ -149,7 +152,7 @@ describe("guardarropa checks routes", () => {
       expect(body).toEqual(created);
       expect(prisma.guardarropaCheck.create).toHaveBeenCalledWith({
         data: { saleId: "s1", itemCount: 2, description: "campera negra" },
-        include: { sale: { select: { codeWord: true, buyerName: true } } },
+        include: { sale: { select: { qrToken: true, buyerName: true } } },
       });
     });
 

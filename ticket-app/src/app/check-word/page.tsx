@@ -238,13 +238,12 @@ export default function CheckWordPage() {
                     onClick={markCodeAsUsed}
                     disabled={codeMarking}
                     size="lg"
-                    className="w-full h-auto py-4 text-4xl border border-green-200 bg-green-50 text-green-900 hover:bg-green-100"
-                    variant="outline"
+                    className="w-full h-auto py-4 text-lg font-bold bg-green-700 hover:bg-green-600"
                   >
                     {codeMarking ? (
-                      <Loader2 className="size-6 animate-spin" />
+                      <Loader2 className="size-5 animate-spin" />
                     ) : (
-                      "Validar ✅"
+                      "Validar"
                     )}
                   </Button>
                 )}

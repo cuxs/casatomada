@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import CodeWordCombobox, {
-  type CodeWordResult,
-} from "../_components/code-word-combobox";
+import TicketCodeCombobox, {
+  type TicketCodeResult,
+} from "../_components/ticket-code-combobox";
 
 interface GuardarropaCheck {
   id: string;
@@ -15,7 +15,7 @@ interface GuardarropaCheck {
 }
 
 export default function RetirarPage() {
-  const [selected, setSelected] = useState<CodeWordResult | null>(null);
+  const [selected, setSelected] = useState<TicketCodeResult | null>(null);
   const [checks, setChecks] = useState<GuardarropaCheck[] | null>(null);
   const [retrievedChecks, setRetrievedChecks] = useState<GuardarropaCheck[]>(
     [],
@@ -59,7 +59,7 @@ export default function RetirarPage() {
     }
   }
 
-  function handleSelect(result: CodeWordResult) {
+  function handleSelect(result: TicketCodeResult) {
     setSelected(result);
     setRetrievedCount(0);
     loadChecks(result.saleId);
@@ -132,18 +132,18 @@ export default function RetirarPage() {
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Retirar</h1>
         <p className="mt-1 text-gray-500 text-sm">
-          Buscá el animal del ticket para entregar sus prendas
+          Buscá el código del ticket para entregar sus prendas
         </p>
       </div>
 
       {!selected ? (
-        <CodeWordCombobox onSelect={handleSelect} />
+        <TicketCodeCombobox onSelect={handleSelect} />
       ) : (
         <div className="space-y-5">
           <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5 flex items-center justify-between gap-3">
             <div className="min-w-0">
-              <p className="font-bold text-gray-900 text-lg capitalize">
-                {selected.codeWord}
+              <p className="font-bold text-gray-900 text-lg font-mono tracking-widest">
+                {selected.code}
               </p>
               <p className="text-sm text-gray-500 truncate">
                 {selected.buyerName}

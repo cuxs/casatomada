@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 const MAX_ITEM_COUNT = 99;
 
 // POST /api/guardarropa/checks — register items left at the coat check,
-// linked to the guest's ticket (found by its animal code word).
+// linked to the guest's ticket (found by its QR token's last-3-char code).
 export async function POST(request: NextRequest) {
   const authResponse = checkApiAuth(request, "guardarropa");
   if (authResponse) return authResponse;
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
         description: description?.trim() ?? "",
       },
       include: {
-        sale: { select: { codeWord: true, buyerName: true } },
+        sale: { select: { qrToken: true, buyerName: true } },
       },
     });
     return NextResponse.json(check, { status: 201 });

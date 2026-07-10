@@ -38,7 +38,7 @@ describe("GET /api/guardarropa/search", () => {
     process.env.GUARDARROPA_USER = "ropa";
     process.env.GUARDARROPA_PASSWORD = "ropapass";
 
-    const res = await GET(makeRequest("capi"));
+    const res = await GET(makeRequest("9f3"));
 
     expect(res.status).toBe(401);
   });
@@ -53,43 +53,43 @@ describe("GET /api/guardarropa/search", () => {
     expect(prisma.sale.findMany).not.toHaveBeenCalled();
   });
 
-  it("searches code words case-insensitively, capped at 10 results", async () => {
+  it("searches by the ticket's last-3-character code, case-insensitively, capped at 10 results", async () => {
     vi.mocked(prisma.sale.findMany).mockResolvedValueOnce([
       {
         id: "s1",
-        codeWord: "capibara roja del monte",
-        buyerName: "Juan",
+        qrToken: "aaaa1111-bbbb-cccc-dddd-eeeeeee9f3",
+        buyerName: "Ana",
         guardarropaChecks: [{ id: "check-1" }],
       },
       {
         id: "s2",
-        codeWord: "capibara azul del patio",
-        buyerName: "Ana",
+        qrToken: "ffff2222-gggg-hhhh-iiii-jjjjjjj9F3",
+        buyerName: "Juan",
         guardarropaChecks: [],
       },
     ] as any);
 
-    const res = await GET(makeRequest("Capi"));
+    const res = await GET(makeRequest("9F3"));
 
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.results).toEqual([
       {
         saleId: "s1",
-        codeWord: "capibara roja del monte",
-        buyerName: "Juan",
+        code: "9F3",
+        buyerName: "Ana",
         activeDeposits: 1,
       },
       {
         saleId: "s2",
-        codeWord: "capibara azul del patio",
-        buyerName: "Ana",
+        code: "9F3",
+        buyerName: "Juan",
         activeDeposits: 0,
       },
     ]);
     expect(prisma.sale.findMany).toHaveBeenCalledWith({
-      where: { codeWord: { contains: "Capi", mode: "insensitive" } },
-      orderBy: { codeWord: "asc" },
+      where: { qrToken: { endsWith: "9F3", mode: "insensitive" } },
+      orderBy: { buyerName: "asc" },
       take: 10,
       include: {
         guardarropaChecks: {

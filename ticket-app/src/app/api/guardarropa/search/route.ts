@@ -4,8 +4,8 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-// GET /api/guardarropa/search?query=capi — find sales by code word so the
-// guardarropa staff can identify a guest by their ticket's animal.
+// GET /api/guardarropa/search?query=9f3 — find sales by the last characters
+// of their QR token, the short code guardarropa staff write on the hanger.
 export async function GET(request: NextRequest) {
   const authResponse = checkApiAuth(request, "guardarropa");
   if (authResponse) return authResponse;
@@ -22,8 +22,8 @@ export async function GET(request: NextRequest) {
 
   try {
     const sales = await prisma.sale.findMany({
-      where: { codeWord: { contains: query, mode: "insensitive" } },
-      orderBy: { codeWord: "asc" },
+      where: { qrToken: { endsWith: query, mode: "insensitive" } },
+      orderBy: { buyerName: "asc" },
       take: 10,
       include: {
         guardarropaChecks: {
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       results: sales.map((sale) => ({
         saleId: sale.id,
-        codeWord: sale.codeWord,
+        code: sale.qrToken.slice(-3).toUpperCase(),
         buyerName: sale.buyerName,
         activeDeposits: sale.guardarropaChecks.length,
       })),
