@@ -33,6 +33,8 @@ const PRICE_CHANGES = [
   { at: new Date("2026-07-02T03:00:00Z"), toPrice: 15000 },
 ];
 
+const DOOR_CUTOFF = new Date("2026-07-11T00:30:00Z"); // 21:30 Buenos Aires
+
 function getPriceInfo(now: Date) {
   if (now < PRICE_CHANGES[0].at) {
     return {
@@ -52,12 +54,21 @@ function getPriceInfo(now: Date) {
       currentLabel: "primera tanda",
     };
   }
+  if (now < DOOR_CUTOFF) {
+    return {
+      currentTierIndex: 2,
+      currentPrice: 15000,
+      nextPrice: null,
+      changeAt: null,
+      currentLabel: "segunda tanda",
+    };
+  }
   return {
-    currentTierIndex: 2,
-    currentPrice: 15000,
+    currentTierIndex: 3,
+    currentPrice: 20000,
     nextPrice: null,
     changeAt: null,
-    currentLabel: "segunda tanda",
+    currentLabel: "entradas en puerta",
   };
 }
 

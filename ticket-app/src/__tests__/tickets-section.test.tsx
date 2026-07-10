@@ -2,6 +2,10 @@ import { render, screen } from "@testing-library/react";
 import { getEventConfig } from "@/config";
 import EntradasSection from "../app/sections/tickets-section";
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn() }),
+}));
+
 const eventConfig = getEventConfig();
 
 const noop = vi.fn();
@@ -84,5 +88,23 @@ describe("EntradasSection price tiers", () => {
     expect(screen.getByText(/entradas en puerta \$20\.000/)).not.toHaveClass(
       "line-through",
     );
+  });
+
+  it("shows segunda tanda struck through and hides payment instructions when entradas en puerta is active", () => {
+    renderEntradas({
+      currentTierIndex: 3,
+      currentPrice: 20000,
+      nextPrice: null,
+      changeAt: null,
+      currentLabel: "entradas en puerta",
+    });
+
+    expect(screen.getByText(/segunda tanda \$15\.000/)).toHaveClass(
+      "line-through",
+    );
+    expect(
+      screen.getByRole("button", { name: /entradas en puerta/i }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(eventConfig.alias)).not.toBeInTheDocument();
   });
 });

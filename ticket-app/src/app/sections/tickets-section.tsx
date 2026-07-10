@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useRef } from "react";
 import type { EventConfig } from "@/config";
 import SectionHeader from "./section-header";
@@ -49,7 +50,9 @@ export default function EntradasSection({
   onBack,
 }: EntradasSectionProps) {
   const currentPrice = priceInfo?.currentPrice ?? 10000;
+  const isDoorOnly = priceInfo?.currentTierIndex === ALL_TIERS.length - 1;
   const paymentRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   function scrollToPayment() {
     paymentRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -81,92 +84,96 @@ export default function EntradasSection({
             <PriceDisplay
               priceInfo={priceInfo}
               countdown={countdown}
-              onBuyNow={scrollToPayment}
+              onBuyNow={
+                isDoorOnly ? () => router.push("/como-llegar") : scrollToPayment
+              }
             />
           )}
         </div>
       </div>
 
       {/* ── Screen 2: Payment instructions ── */}
-      <div
-        ref={paymentRef}
-        className="relative flex flex-col justify-center min-h-screen pt-[100px] px-7 pb-[60px]"
-      >
+      {!isDoorOnly && (
         <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: "url('/comprar-entradas/03E.webp')",
-            backgroundSize: "290% auto",
-            backgroundPosition: "50% 55%",
-            backgroundRepeat: "no-repeat",
-          }}
-        />
-        <div className="absolute inset-0 bg-black/[0.62]" />
+          ref={paymentRef}
+          className="relative flex flex-col justify-center min-h-screen pt-[100px] px-7 pb-[60px]"
+        >
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: "url('/comprar-entradas/03E.webp')",
+              backgroundSize: "290% auto",
+              backgroundPosition: "50% 55%",
+              backgroundRepeat: "no-repeat",
+            }}
+          />
+          <div className="absolute inset-0 bg-black/[0.62]" />
 
-        <div className="relative z-[1] w-full max-w-[500px] mx-auto">
-          <p className="font-epilogue font-bold text-[clamp(20px,5vw,50px)] tracking-[-0.01em] text-white/90 mb-2 leading-[1.2]">
-            1. Enviá{" "}
-            <span className="text-white font-black">
-              ${currentPrice.toLocaleString("es-AR")}
-            </span>{" "}
-            a este alias
-          </p>
+          <div className="relative z-[1] w-full max-w-[500px] mx-auto">
+            <p className="font-epilogue font-bold text-[clamp(20px,5vw,50px)] tracking-[-0.01em] text-white/90 mb-2 leading-[1.2]">
+              1. Enviá{" "}
+              <span className="text-white font-black">
+                ${currentPrice.toLocaleString("es-AR")}
+              </span>{" "}
+              a este alias
+            </p>
 
-          <p className="font-epilogue font-bold text-[clamp(32px,9vw,75px)] tracking-[-0.01em] text-white mb-4 leading-none">
-            {eventConfig.alias}
-          </p>
+            <p className="font-epilogue font-bold text-[clamp(32px,9vw,75px)] tracking-[-0.01em] text-white mb-4 leading-none">
+              {eventConfig.alias}
+            </p>
 
-          <button
-            type="button"
-            onClick={onCopyAlias}
-            className={`font-epilogue font-medium text-base rounded-full py-2 px-6 cursor-pointer mb-10 tracking-[-0.01em] transition-colors bg-white/[0.18] border border-white/30 ${aliasCopied ? "text-white/50" : "text-white/75"}`}
-          >
-            {aliasCopied ? "¡copiado!" : "copiar el alias"}
-          </button>
-
-          <p className="font-epilogue font-bold text-[clamp(20px,5vw,50px)] tracking-[-0.01em] text-white/90 mb-2 leading-[1.2]">
-            2. Enviá el comprobante a este número
-          </p>
-
-          <p className="font-epilogue font-bold text-[clamp(32px,9vw,75px)] tracking-[-0.01em] text-white mb-4 leading-none">
-            {eventConfig.phone}
-          </p>
-
-          <button
-            type="button"
-            onClick={onCopyPhone}
-            className={`font-epilogue font-medium text-base rounded-full py-2 px-6 cursor-pointer mb-10 tracking-[-0.01em] transition-colors bg-white/[0.18] border border-white/30 ${phoneCopied ? "text-white/50" : "text-white/75"}`}
-          >
-            {phoneCopied ? "¡copiado!" : "copiar el número"}
-          </button>
-
-          <p className="font-epilogue font-medium text-[clamp(16px,4vw,30px)] tracking-[-0.01em] text-white/70 leading-[1.4] text-center">
-            Una vez completados los pasos te va a llegar un QR con la entrada a
-            tu whatsapp
-          </p>
-
-          <button
-            type="button"
-            onClick={onBack}
-            className="mt-12 mx-auto flex items-center gap-2.5 font-epilogue font-medium text-base tracking-[-0.01em] text-white/60 bg-white/[0.16] border border-white/25 rounded-full py-3 px-7 cursor-pointer hover:bg-white/25 hover:text-white/80 transition-colors"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
+            <button
+              type="button"
+              onClick={onCopyAlias}
+              className={`font-epilogue font-medium text-base rounded-full py-2 px-6 cursor-pointer mb-10 tracking-[-0.01em] transition-colors bg-white/[0.18] border border-white/30 ${aliasCopied ? "text-white/50" : "text-white/75"}`}
             >
-              <polyline points="18 15 12 9 6 15" />
-            </svg>
-            volver al inicio
-          </button>
+              {aliasCopied ? "¡copiado!" : "copiar el alias"}
+            </button>
+
+            <p className="font-epilogue font-bold text-[clamp(20px,5vw,50px)] tracking-[-0.01em] text-white/90 mb-2 leading-[1.2]">
+              2. Enviá el comprobante a este número
+            </p>
+
+            <p className="font-epilogue font-bold text-[clamp(32px,9vw,75px)] tracking-[-0.01em] text-white mb-4 leading-none">
+              {eventConfig.phone}
+            </p>
+
+            <button
+              type="button"
+              onClick={onCopyPhone}
+              className={`font-epilogue font-medium text-base rounded-full py-2 px-6 cursor-pointer mb-10 tracking-[-0.01em] transition-colors bg-white/[0.18] border border-white/30 ${phoneCopied ? "text-white/50" : "text-white/75"}`}
+            >
+              {phoneCopied ? "¡copiado!" : "copiar el número"}
+            </button>
+
+            <p className="font-epilogue font-medium text-[clamp(16px,4vw,30px)] tracking-[-0.01em] text-white/70 leading-[1.4] text-center">
+              Una vez completados los pasos te va a llegar un QR con la entrada
+              a tu whatsapp
+            </p>
+
+            <button
+              type="button"
+              onClick={onBack}
+              className="mt-12 mx-auto flex items-center gap-2.5 font-epilogue font-medium text-base tracking-[-0.01em] text-white/60 bg-white/[0.16] border border-white/25 rounded-full py-3 px-7 cursor-pointer hover:bg-white/25 hover:text-white/80 transition-colors"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <polyline points="18 15 12 9 6 15" />
+              </svg>
+              volver al inicio
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

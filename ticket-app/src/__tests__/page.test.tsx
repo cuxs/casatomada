@@ -2,10 +2,21 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { getEventConfig } from "@/config";
 import HomePageClient from "../app/home-page-client";
 
+const mockPush = vi.fn();
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: mockPush }),
+}));
+
 const eventConfig = getEventConfig();
 
 beforeEach(() => {
   vi.clearAllMocks();
+  // "segunda tanda" window, before the entradas-en-puerta cutoff
+  vi.setSystemTime(new Date("2026-07-05T12:00:00Z"));
+});
+
+afterEach(() => {
+  vi.useRealTimers();
 });
 
 describe("HomePage", () => {
@@ -143,6 +154,57 @@ describe("HomePage", () => {
     expect(
       screen.getByText(/te va a llegar un QR con la entrada a tu whatsapp/),
     ).toBeInTheDocument();
+  });
+});
+
+describe("HomePage after the entradas-en-puerta cutoff", () => {
+  beforeEach(() => {
+    vi.setSystemTime(new Date("2026-07-11T01:00:00Z"));
+  });
+
+  it("still shows the entradas button leading to the price tiers", async () => {
+    render(<HomePageClient eventConfig={eventConfig} />);
+
+    fireEvent.click(screen.getByText("entradas"));
+
+    expect(await screen.findByText(/pajarito tempranero/)).toBeInTheDocument();
+    expect(screen.getByText(/primera tanda/)).toBeInTheDocument();
+  });
+
+  it("shows segunda tanda struck through and entradas en puerta as the active tier", async () => {
+    render(<HomePageClient eventConfig={eventConfig} />);
+
+    fireEvent.click(screen.getByText("entradas"));
+
+    expect(await screen.findByText(/segunda tanda \$15\.000/)).toHaveClass(
+      "line-through",
+    );
+    expect(
+      screen.getByRole("button", { name: /entradas en puerta/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("hides the payment instructions screen", () => {
+    render(<HomePageClient eventConfig={eventConfig} />);
+
+    fireEvent.click(screen.getByText("entradas"));
+
+    expect(screen.queryByText(eventConfig.alias)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Enviá el comprobante a este número/),
+    ).not.toBeInTheDocument();
+  });
+
+  it("redirects to cómo llegar when the entradas en puerta tier is clicked", async () => {
+    render(<HomePageClient eventConfig={eventConfig} />);
+
+    fireEvent.click(screen.getByText("entradas"));
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: /entradas en puerta/i }),
+    );
+
+    expect(mockPush).toHaveBeenCalledWith("/como-llegar");
   });
 });
 
