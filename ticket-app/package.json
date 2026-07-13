@@ -33,6 +33,7 @@
     "qrcode": "^1.5.3",
     "react": "^18",
     "react-dom": "^18",
+    "recharts": "^3.9.2",
     "tailwind-merge": "^3.6.0",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^9.0.1"

@@ -11,6 +11,7 @@ import {
 import EditSaleModal from "./edit-sale-modal";
 import SaleDetailsModal from "./sale-details-modal";
 import SaleQrModal from "./sale-qr-modal";
+import SalesCharts from "./sales-charts";
 
 const PAGE_SIZE = 10;
 
@@ -26,6 +27,7 @@ interface SalesResponse {
 export default function SalesPage() {
   const [sales, setSales] = useState<Sale[] | null>(null);
   const [buyers, setBuyers] = useState<BuyerSummary[] | null>(null);
+  const [allSales, setAllSales] = useState<Sale[] | null>(null);
   const [totalPages, setTotalPages] = useState(1);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -114,9 +116,12 @@ export default function SalesPage() {
       const res = await fetch("/api/sales", { method: "GET" });
       const data = await res.json();
       if (res.ok) {
-        const allSales = data as Sale[];
-        setBuyers(aggregateBuyers(allSales));
-        setTotalRevenue(allSales.reduce((sum, s) => sum + (s.price ?? 0), 0));
+        const fetchedSales = data as Sale[];
+        setBuyers(aggregateBuyers(fetchedSales));
+        setAllSales(fetchedSales);
+        setTotalRevenue(
+          fetchedSales.reduce((sum, s) => sum + (s.price ?? 0), 0),
+        );
       }
     } catch {
       // Totals and downloads stay unavailable; the main table still works.
@@ -162,6 +167,8 @@ export default function SalesPage() {
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6">
       <h1 className="text-3xl font-bold text-gray-900">Ventas registradas</h1>
+
+      {allSales && <SalesCharts sales={allSales} />}
 
       <section className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
         <div className="px-6 py-4 lg:px-4 lg:py-2.5 border-b border-gray-100 space-y-3">
