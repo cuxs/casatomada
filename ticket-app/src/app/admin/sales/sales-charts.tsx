@@ -193,50 +193,106 @@ export default function SalesCharts({
                 Sin datos todavía.
               </p>
             ) : (
-              <div className="w-full h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={timeSeries}
-                    margin={{ top: 8, right: 16, left: 0, bottom: 0 }}
-                  >
-                    <CartesianGrid vertical={false} stroke={GRIDLINE} />
-                    <XAxis
-                      dataKey="label"
-                      tick={{ fontSize: 12, fill: TEXT_SECONDARY }}
-                      axisLine={{ stroke: GRIDLINE }}
-                      tickLine={false}
-                    />
-                    <YAxis
-                      tick={{ fontSize: 12, fill: TEXT_SECONDARY }}
-                      axisLine={false}
-                      tickLine={false}
-                      width={56}
-                      tickFormatter={(value: number) =>
-                        `$${(value / 1000).toLocaleString("es-AR")}k`
-                      }
-                    />
-                    <Tooltip
-                      formatter={(value) => [
-                        formatARS(Number(value)),
-                        "Recaudado",
-                      ]}
-                      labelStyle={{ color: "#0b0b0b" }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="total"
-                      stroke={COLOR_ATTENDED}
-                      strokeWidth={2}
-                      dot={{
-                        r: 4,
-                        fill: COLOR_ATTENDED,
-                        strokeWidth: 2,
-                        stroke: SURFACE,
-                      }}
-                      activeDot={{ r: 5 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+              <div className="grid sm:grid-cols-2 gap-6">
+                <div>
+                  <p className="text-xs font-medium text-gray-500 mb-2">
+                    Recaudado
+                  </p>
+                  <div className="w-full h-56">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart
+                        data={timeSeries}
+                        margin={{ top: 8, right: 16, left: 0, bottom: 0 }}
+                      >
+                        <CartesianGrid vertical={false} stroke={GRIDLINE} />
+                        <XAxis
+                          dataKey="label"
+                          tick={{ fontSize: 12, fill: TEXT_SECONDARY }}
+                          axisLine={{ stroke: GRIDLINE }}
+                          tickLine={false}
+                        />
+                        <YAxis
+                          tick={{ fontSize: 12, fill: TEXT_SECONDARY }}
+                          axisLine={false}
+                          tickLine={false}
+                          width={56}
+                          tickFormatter={(value: number) =>
+                            `$${(value / 1000).toLocaleString("es-AR")}k`
+                          }
+                        />
+                        <Tooltip
+                          formatter={(value) => [
+                            formatARS(Number(value)),
+                            "Recaudado",
+                          ]}
+                          labelStyle={{ color: "#0b0b0b" }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="total"
+                          stroke={COLOR_ATTENDED}
+                          strokeWidth={2}
+                          dot={{
+                            r: 4,
+                            fill: COLOR_ATTENDED,
+                            strokeWidth: 2,
+                            stroke: SURFACE,
+                          }}
+                          activeDot={{ r: 5 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-xs font-medium text-gray-500 mb-2">
+                    Entradas vendidas
+                  </p>
+                  <div className="w-full h-56">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart
+                        data={timeSeries}
+                        margin={{ top: 8, right: 16, left: 0, bottom: 0 }}
+                      >
+                        <CartesianGrid vertical={false} stroke={GRIDLINE} />
+                        <XAxis
+                          dataKey="label"
+                          tick={{ fontSize: 12, fill: TEXT_SECONDARY }}
+                          axisLine={{ stroke: GRIDLINE }}
+                          tickLine={false}
+                        />
+                        <YAxis
+                          tick={{ fontSize: 12, fill: TEXT_SECONDARY }}
+                          axisLine={false}
+                          tickLine={false}
+                          width={40}
+                          allowDecimals={false}
+                        />
+                        <Tooltip
+                          formatter={(value) => [
+                            `${Number(value).toLocaleString("es-AR")} entradas`,
+                            "Vendidas",
+                          ]}
+                          labelStyle={{ color: "#0b0b0b" }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="ticketCount"
+                          stroke={COLOR_ATTENDED}
+                          strokeWidth={2}
+                          dot={{
+                            r: 4,
+                            fill: COLOR_ATTENDED,
+                            strokeWidth: 2,
+                            stroke: SURFACE,
+                          }}
+                          activeDot={{ r: 5 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
               </div>
             )}
           </div>

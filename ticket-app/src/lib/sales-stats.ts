@@ -28,6 +28,7 @@ export interface SalesTimePoint {
   key: string;
   label: string;
   total: number;
+  ticketCount: number;
 }
 
 function startOfWeek(date: Date): Date {
@@ -46,7 +47,10 @@ export function salesOverTime(
   sales: Sale[],
   granularity: "day" | "week",
 ): SalesTimePoint[] {
-  const buckets = new Map<string, { date: Date; total: number }>();
+  const buckets = new Map<
+    string,
+    { date: Date; total: number; ticketCount: number }
+  >();
 
   for (const sale of sales) {
     const createdAt = new Date(sale.createdAt);
@@ -59,17 +63,20 @@ export function salesOverTime(
             createdAt.getDate(),
           );
     const key = bucketDate.toISOString();
-    const entry = buckets.get(key) ?? { date: bucketDate, total: 0 };
+    const entry =
+      buckets.get(key) ?? { date: bucketDate, total: 0, ticketCount: 0 };
     entry.total += sale.price ?? 0;
+    entry.ticketCount += sale.ticketCount;
     buckets.set(key, entry);
   }
 
   return Array.from(buckets.entries())
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([key, { date, total }]) => ({
+    .map(([key, { date, total, ticketCount }]) => ({
       key,
       label: BUCKET_LABEL.format(date),
       total,
+      ticketCount,
     }));
 }
 
