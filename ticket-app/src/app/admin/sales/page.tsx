@@ -9,6 +9,7 @@ import {
   type Sale,
 } from "@/lib/sales-summary";
 import { getSelectedEventId } from "@/lib/selected-event";
+import { useCurrentEvent } from "../_components/use-current-event";
 import EditSaleModal from "./edit-sale-modal";
 import SaleDetailsModal from "./sale-details-modal";
 import SaleQrModal from "./sale-qr-modal";
@@ -26,6 +27,7 @@ interface SalesResponse {
 }
 
 export default function SalesPage() {
+  const { currentEvent } = useCurrentEvent();
   const [sales, setSales] = useState<Sale[] | null>(null);
   const [buyers, setBuyers] = useState<BuyerSummary[] | null>(null);
   const [allSales, setAllSales] = useState<Sale[] | null>(null);
@@ -173,7 +175,12 @@ export default function SalesPage() {
     <div className="w-full max-w-4xl mx-auto space-y-6">
       <h1 className="text-3xl font-bold text-gray-900">Ventas registradas</h1>
 
-      {allSales && <SalesCharts sales={allSales} />}
+      {allSales && (
+        <SalesCharts
+          sales={allSales}
+          defaultOpen={currentEvent?.ended ?? false}
+        />
+      )}
 
       <section className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
         <div className="px-6 py-4 lg:px-4 lg:py-2.5 border-b border-gray-100 space-y-3">

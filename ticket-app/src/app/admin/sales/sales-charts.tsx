@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import {
   Bar,
@@ -23,6 +24,7 @@ import {
   salesOverTime,
 } from "@/lib/sales-stats";
 import type { Sale } from "@/lib/sales-summary";
+import { cn } from "@/lib/utils";
 
 const COLOR_ATTENDED = "#2a78d6";
 const COLOR_NOT_ATTENDED = "#c3c2b7";
@@ -106,7 +108,14 @@ function AttendancePie({
   );
 }
 
-export default function SalesCharts({ sales }: { sales: Sale[] }) {
+export default function SalesCharts({
+  sales,
+  defaultOpen = true,
+}: {
+  sales: Sale[];
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
   const [granularity, setGranularity] = useState<"day" | "week">("day");
 
   const attendance = useMemo(() => attendanceBreakdown(sales), [sales]);
@@ -121,146 +130,167 @@ export default function SalesCharts({ sales }: { sales: Sale[] }) {
 
   return (
     <section className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-      <div className="px-6 py-4 lg:px-4 lg:py-2.5 border-b border-gray-100">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className={cn(
+          "w-full flex items-center justify-between px-6 py-4 lg:px-4 lg:py-2.5",
+          open && "border-b border-gray-100",
+        )}
+      >
         <h2 className="text-sm font-semibold text-gray-800 uppercase tracking-wider">
           Estadísticas
         </h2>
-      </div>
+        <ChevronDown
+          className={cn(
+            "h-4 w-4 text-gray-400 transition-transform",
+            open && "rotate-180",
+          )}
+        />
+      </button>
 
-      <div className="grid sm:grid-cols-2 gap-6 px-6 py-6 lg:px-4">
-        <AttendancePie title="Asistencia" data={attendance} />
-        <AttendancePie title="Entradas gratuitas" data={freeAttendance} />
-      </div>
-
-      <div className="px-6 py-6 lg:px-4 border-t border-gray-100">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-gray-800">
-            Ventas en el tiempo
-          </h3>
-          <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
-            <button
-              type="button"
-              onClick={() => setGranularity("day")}
-              className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                granularity === "day"
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              Día
-            </button>
-            <button
-              type="button"
-              onClick={() => setGranularity("week")}
-              className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                granularity === "week"
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              Semana
-            </button>
+      {open && (
+        <>
+          <div className="grid sm:grid-cols-2 gap-6 px-6 py-6 lg:px-4">
+            <AttendancePie title="Asistencia" data={attendance} />
+            <AttendancePie title="Entradas gratuitas" data={freeAttendance} />
           </div>
-        </div>
 
-        {timeSeries.length === 0 ? (
-          <p className="text-sm text-gray-400 py-8 text-center">
-            Sin datos todavía.
-          </p>
-        ) : (
-          <div className="w-full h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={timeSeries}
-                margin={{ top: 8, right: 16, left: 0, bottom: 0 }}
-              >
-                <CartesianGrid vertical={false} stroke={GRIDLINE} />
-                <XAxis
-                  dataKey="label"
-                  tick={{ fontSize: 12, fill: TEXT_SECONDARY }}
-                  axisLine={{ stroke: GRIDLINE }}
-                  tickLine={false}
-                />
-                <YAxis
-                  tick={{ fontSize: 12, fill: TEXT_SECONDARY }}
-                  axisLine={false}
-                  tickLine={false}
-                  width={56}
-                  tickFormatter={(value: number) =>
-                    `$${(value / 1000).toLocaleString("es-AR")}k`
-                  }
-                />
-                <Tooltip
-                  formatter={(value) => [formatARS(Number(value)), "Recaudado"]}
-                  labelStyle={{ color: "#0b0b0b" }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="total"
-                  stroke={COLOR_ATTENDED}
-                  strokeWidth={2}
-                  dot={{
-                    r: 4,
-                    fill: COLOR_ATTENDED,
-                    strokeWidth: 2,
-                    stroke: SURFACE,
-                  }}
-                  activeDot={{ r: 5 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+          <div className="px-6 py-6 lg:px-4 border-t border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-gray-800">
+                Ventas en el tiempo
+              </h3>
+              <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+                <button
+                  type="button"
+                  onClick={() => setGranularity("day")}
+                  className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                    granularity === "day"
+                      ? "bg-white text-gray-900 shadow-sm"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  Día
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setGranularity("week")}
+                  className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                    granularity === "week"
+                      ? "bg-white text-gray-900 shadow-sm"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  Semana
+                </button>
+              </div>
+            </div>
+
+            {timeSeries.length === 0 ? (
+              <p className="text-sm text-gray-400 py-8 text-center">
+                Sin datos todavía.
+              </p>
+            ) : (
+              <div className="w-full h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={timeSeries}
+                    margin={{ top: 8, right: 16, left: 0, bottom: 0 }}
+                  >
+                    <CartesianGrid vertical={false} stroke={GRIDLINE} />
+                    <XAxis
+                      dataKey="label"
+                      tick={{ fontSize: 12, fill: TEXT_SECONDARY }}
+                      axisLine={{ stroke: GRIDLINE }}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 12, fill: TEXT_SECONDARY }}
+                      axisLine={false}
+                      tickLine={false}
+                      width={56}
+                      tickFormatter={(value: number) =>
+                        `$${(value / 1000).toLocaleString("es-AR")}k`
+                      }
+                    />
+                    <Tooltip
+                      formatter={(value) => [
+                        formatARS(Number(value)),
+                        "Recaudado",
+                      ]}
+                      labelStyle={{ color: "#0b0b0b" }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="total"
+                      stroke={COLOR_ATTENDED}
+                      strokeWidth={2}
+                      dot={{
+                        r: 4,
+                        fill: COLOR_ATTENDED,
+                        strokeWidth: 2,
+                        stroke: SURFACE,
+                      }}
+                      activeDot={{ r: 5 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
-      <div className="px-6 py-6 lg:px-4 border-t border-gray-100">
-        <h3 className="text-sm font-semibold text-gray-800 mb-4">
-          Horario de ingreso
-        </h3>
+          <div className="px-6 py-6 lg:px-4 border-t border-gray-100">
+            <h3 className="text-sm font-semibold text-gray-800 mb-4">
+              Horario de ingreso
+            </h3>
 
-        {hourly.length === 0 ? (
-          <p className="text-sm text-gray-400 py-8 text-center">
-            Sin datos todavía.
-          </p>
-        ) : (
-          <div className="w-full h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={hourly}
-                barCategoryGap={4}
-                margin={{ top: 8, right: 16, left: 0, bottom: 0 }}
-              >
-                <CartesianGrid vertical={false} stroke={GRIDLINE} />
-                <XAxis
-                  dataKey="label"
-                  tick={{ fontSize: 12, fill: TEXT_SECONDARY }}
-                  axisLine={{ stroke: GRIDLINE }}
-                  tickLine={false}
-                />
-                <YAxis
-                  tick={{ fontSize: 12, fill: TEXT_SECONDARY }}
-                  axisLine={false}
-                  tickLine={false}
-                  width={40}
-                  allowDecimals={false}
-                />
-                <Tooltip
-                  formatter={(value) => [
-                    `${Number(value).toLocaleString("es-AR")} entradas`,
-                    "Ingresos",
-                  ]}
-                />
-                <Bar
-                  dataKey="count"
-                  fill={COLOR_ATTENDED}
-                  radius={[4, 4, 0, 0]}
-                  maxBarSize={24}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+            {hourly.length === 0 ? (
+              <p className="text-sm text-gray-400 py-8 text-center">
+                Sin datos todavía.
+              </p>
+            ) : (
+              <div className="w-full h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={hourly}
+                    barCategoryGap={4}
+                    margin={{ top: 8, right: 16, left: 0, bottom: 0 }}
+                  >
+                    <CartesianGrid vertical={false} stroke={GRIDLINE} />
+                    <XAxis
+                      dataKey="label"
+                      tick={{ fontSize: 12, fill: TEXT_SECONDARY }}
+                      axisLine={{ stroke: GRIDLINE }}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 12, fill: TEXT_SECONDARY }}
+                      axisLine={false}
+                      tickLine={false}
+                      width={40}
+                      allowDecimals={false}
+                    />
+                    <Tooltip
+                      formatter={(value) => [
+                        `${Number(value).toLocaleString("es-AR")} entradas`,
+                        "Ingresos",
+                      ]}
+                    />
+                    <Bar
+                      dataKey="count"
+                      fill={COLOR_ATTENDED}
+                      radius={[4, 4, 0, 0]}
+                      maxBarSize={24}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </>
+      )}
     </section>
   );
 }

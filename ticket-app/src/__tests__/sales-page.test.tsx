@@ -40,6 +40,13 @@ describe("SalesPage", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // SalesPage's useCurrentEvent() hook fires first (its effect registers
+    // before loadSales'/loadBuyers'), so every test needs one extra queued
+    // response for /api/events ahead of its own mockResolvedValueOnce chain.
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve([]),
+    });
   });
 
   it("shows loading state initially", () => {
@@ -557,6 +564,112 @@ describe("SalesPage", () => {
 
     await waitFor(() => {
       expect(screen.queryByText("Editar compra")).not.toBeInTheDocument();
+    });
+  });
+
+  it("collapses the stats panel by default when the current event hasn't ended", async () => {
+    mockFetch.mockReset();
+    const mockSales = [
+      {
+        id: "1",
+        buyerName: "Juan Pérez",
+        codeWord: "lombriz roja del monte",
+        qrToken: "qr-token-001",
+        price: 10000,
+        ticketCount: 1,
+        used: false,
+        usedAt: null,
+        createdAt: "2026-05-29T10:00:00.000Z",
+      },
+    ];
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve([
+            {
+              id: "evt-1",
+              name: "Evento Activo",
+              date: "2026-08-01",
+              active: true,
+              ended: false,
+            },
+          ]),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve(
+            tablePage({ sales: mockSales, total: 1, totalTickets: 1 }),
+          ),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockSales),
+      });
+
+    render(<SalesPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Estadísticas")).toBeInTheDocument();
+    });
+
+    expect(screen.queryByText("Ventas en el tiempo")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("Estadísticas"));
+
+    await waitFor(() => {
+      expect(screen.getByText("Ventas en el tiempo")).toBeInTheDocument();
+    });
+  });
+
+  it("expands the stats panel by default when the current event has ended", async () => {
+    mockFetch.mockReset();
+    const mockSales = [
+      {
+        id: "1",
+        buyerName: "Juan Pérez",
+        codeWord: "lombriz roja del monte",
+        qrToken: "qr-token-001",
+        price: 10000,
+        ticketCount: 1,
+        used: false,
+        usedAt: null,
+        createdAt: "2026-05-29T10:00:00.000Z",
+      },
+    ];
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve([
+            {
+              id: "evt-1",
+              name: "Evento Finalizado",
+              date: "2026-07-10",
+              active: false,
+              ended: true,
+            },
+          ]),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve(
+            tablePage({ sales: mockSales, total: 1, totalTickets: 1 }),
+          ),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockSales),
+      });
+
+    render(<SalesPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Ventas en el tiempo")).toBeInTheDocument();
     });
   });
 });

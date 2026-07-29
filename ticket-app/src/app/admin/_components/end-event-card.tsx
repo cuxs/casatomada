@@ -94,6 +94,7 @@ export default function EndEventCard() {
               variant="outline"
               onClick={() => setOpen(false)}
               disabled={ending}
+              className="text-gray-700"
             >
               Cancelar
             </Button>
