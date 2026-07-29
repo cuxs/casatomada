@@ -7,6 +7,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Event {
+  id        String   @id @default(uuid())
+  name      String
+  date      DateTime
+  active    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  sales     Sale[]
+  ridePosts RidePost[]
+
+  @@index([active])
+}
+
 model Sale {
   id          String    @id @default(uuid())
   buyerName   String
@@ -16,11 +29,16 @@ model Sale {
   ticketCount Int       @default(1)
   used        Boolean   @default(false)
   usedAt      DateTime?
+  outdated    Boolean   @default(false)
   createdAt   DateTime  @default(now())
+
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id])
 
   guardarropaChecks GuardarropaCheck[]
 
   @@index([createdAt])
+  @@index([eventId])
 }
 
 model GuardarropaCheck {
@@ -41,4 +59,9 @@ model RidePost {
   content    String
   phone      String?
   createdAt  DateTime @default(now())
+
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id])
+
+  @@index([eventId])
 }

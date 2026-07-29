@@ -8,6 +8,7 @@ import {
   downloadBuyersTXT,
   type Sale,
 } from "@/lib/sales-summary";
+import { getSelectedEventId } from "@/lib/selected-event";
 import EditSaleModal from "./edit-sale-modal";
 import SaleDetailsModal from "./sale-details-modal";
 import SaleQrModal from "./sale-qr-modal";
@@ -61,6 +62,8 @@ export default function SalesPage() {
           pageSize: String(PAGE_SIZE),
         });
         if (searchTerm) params.set("search", searchTerm);
+        const eventId = getSelectedEventId();
+        if (eventId) params.set("eventId", eventId);
 
         const res = await fetch(`/api/sales?${params.toString()}`, {
           method: "GET",
@@ -113,7 +116,9 @@ export default function SalesPage() {
 
   const loadBuyers = useCallback(async () => {
     try {
-      const res = await fetch("/api/sales", { method: "GET" });
+      const eventId = getSelectedEventId();
+      const params = eventId ? `?eventId=${encodeURIComponent(eventId)}` : "";
+      const res = await fetch(`/api/sales${params}`, { method: "GET" });
       const data = await res.json();
       if (res.ok) {
         const fetchedSales = data as Sale[];

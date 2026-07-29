@@ -11,6 +11,9 @@ vi.mock("@/lib/prisma", () => ({
       count: vi.fn(),
       aggregate: vi.fn(),
     },
+    event: {
+      findFirst: vi.fn(),
+    },
   },
 }));
 
@@ -256,6 +259,42 @@ describe("POST and GET /api/sales - Auth protection", () => {
     );
     expect(prisma.sale.count).toHaveBeenCalledWith({ where: expectedWhere });
   });
+
+  it("filters by the explicit eventId query param when provided", async () => {
+    delete process.env.USER;
+    delete process.env.PASSWORD;
+
+    vi.mocked(prisma.sale.findMany).mockResolvedValueOnce([] as any);
+
+    const req = new NextRequest(
+      "http://localhost:3000/api/sales?eventId=event-9",
+    );
+    const res = await GET(req);
+
+    expect(res.status).toBe(200);
+    expect(prisma.sale.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { eventId: "event-9" } }),
+    );
+    expect(prisma.event.findFirst).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 for POST if no eventId is given and no event is active", async () => {
+    delete process.env.USER;
+    delete process.env.PASSWORD;
+
+    vi.mocked(prisma.event.findFirst).mockResolvedValueOnce(null as any);
+
+    const req = new NextRequest("http://localhost:3000/api/sales", {
+      method: "POST",
+      body: JSON.stringify({ buyerName: "Juan", price: 10000 }),
+    });
+    const res = await POST(req);
+
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe("No hay ningún evento activo");
+    expect(prisma.sale.create).not.toHaveBeenCalled();
+  });
 });
 
 describe("POST /api/sales - creating sales and distinct QRs", () => {
@@ -285,7 +324,12 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
     vi.mocked(prisma.sale.create).mockResolvedValueOnce({} as any);
 
     const res = await POST(
-      makeRequest({ buyerName: "Juan", price: 10000, ticketCount: 1 }),
+      makeRequest({
+        buyerName: "Juan",
+        price: 10000,
+        ticketCount: 1,
+        eventId: "event-1",
+      }),
     );
 
     expect(res.status).toBe(200);
@@ -310,7 +354,12 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
     vi.mocked(prisma.sale.create).mockResolvedValueOnce({} as any);
 
     const res = await POST(
-      makeRequest({ buyerName: "Ana", price: 15000, ticketCount: 4 }),
+      makeRequest({
+        buyerName: "Ana",
+        price: 15000,
+        ticketCount: 4,
+        eventId: "event-1",
+      }),
     );
 
     expect(res.status).toBe(200);
@@ -333,6 +382,7 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
         price: 10000,
         ticketCount: 1,
         distinctQrs: true,
+        eventId: "event-1",
       }),
     );
 
@@ -352,6 +402,7 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
         price: 13000,
         ticketCount: 3,
         distinctQrs: true,
+        eventId: "event-1",
       }),
     );
 
@@ -399,6 +450,7 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
         price: 13000,
         ticketCount: 2,
         distinctQrs: true,
+        eventId: "event-1",
       }),
     );
 
@@ -422,7 +474,12 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
     );
 
     const res = await POST(
-      makeRequest({ buyerName: "Nadie", price: 10000, ticketCount: 1 }),
+      makeRequest({
+        buyerName: "Nadie",
+        price: 10000,
+        ticketCount: 1,
+        eventId: "event-1",
+      }),
     );
 
     expect(res.status).toBe(500);

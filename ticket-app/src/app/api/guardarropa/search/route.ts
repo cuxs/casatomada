@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { checkApiAuth } from "@/lib/basic-auth";
+import { resolveEventId } from "@/lib/events";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -12,6 +13,7 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const query = searchParams.get("query")?.trim();
+  const eventId = await resolveEventId(searchParams.get("eventId"));
 
   if (!query) {
     return NextResponse.json(
@@ -22,7 +24,10 @@ export async function GET(request: NextRequest) {
 
   try {
     const sales = await prisma.sale.findMany({
-      where: { qrToken: { endsWith: query, mode: "insensitive" } },
+      where: {
+        qrToken: { endsWith: query, mode: "insensitive" },
+        ...(eventId ? { eventId } : {}),
+      },
       orderBy: { buyerName: "asc" },
       take: 10,
       include: {

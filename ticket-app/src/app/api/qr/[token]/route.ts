@@ -21,6 +21,7 @@ export async function GET(
   return NextResponse.json({
     found: true,
     used: sale.used,
+    outdated: sale.outdated,
     buyerName: sale.buyerName,
     ticketCount: sale.ticketCount,
     usedAt: sale.usedAt,
@@ -38,6 +39,10 @@ export async function POST(
 
   if (!sale) {
     return NextResponse.json({ error: "QR not found" }, { status: 404 });
+  }
+
+  if (sale.outdated) {
+    return NextResponse.json({ error: "QR is outdated" }, { status: 400 });
   }
 
   if (sale.used) {

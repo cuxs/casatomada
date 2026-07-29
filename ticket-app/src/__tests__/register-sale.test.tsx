@@ -75,6 +75,7 @@ describe("RegisterSalePage", () => {
         price: getCurrentDefaultPrice(),
         ticketCount: 1,
         distinctQrs: false,
+        eventId: null,
       }),
     });
 
@@ -134,6 +135,7 @@ describe("RegisterSalePage", () => {
         price: 15000,
         ticketCount: 3,
         distinctQrs: false,
+        eventId: null,
       }),
     });
 
@@ -174,6 +176,7 @@ describe("RegisterSalePage", () => {
         price: 0,
         ticketCount: 1,
         distinctQrs: false,
+        eventId: null,
       }),
     });
 
@@ -276,6 +279,7 @@ describe("RegisterSalePage", () => {
         price: 15000,
         ticketCount: 3,
         distinctQrs: true,
+        eventId: null,
       }),
     });
 

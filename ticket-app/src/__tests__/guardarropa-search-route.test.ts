@@ -7,15 +7,21 @@ vi.mock("@/lib/prisma", () => ({
     sale: {
       findMany: vi.fn(),
     },
+    event: {
+      findFirst: vi.fn(),
+    },
   },
 }));
 
-function makeRequest(query?: string) {
+function makeRequest(query?: string, eventId?: string) {
   const url =
     query === undefined
       ? "http://localhost:3000/api/guardarropa/search"
       : `http://localhost:3000/api/guardarropa/search?query=${encodeURIComponent(query)}`;
-  return new NextRequest(url);
+  const withEvent = eventId
+    ? `${url}${url.includes("?") ? "&" : "?"}eventId=${encodeURIComponent(eventId)}`
+    : url;
+  return new NextRequest(withEvent);
 }
 
 describe("GET /api/guardarropa/search", () => {
@@ -98,5 +104,22 @@ describe("GET /api/guardarropa/search", () => {
         },
       },
     });
+  });
+
+  it("scopes the search to the given eventId when provided", async () => {
+    vi.mocked(prisma.sale.findMany).mockResolvedValueOnce([] as any);
+
+    const res = await GET(makeRequest("9F3", "event-1"));
+
+    expect(res.status).toBe(200);
+    expect(prisma.sale.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          qrToken: { endsWith: "9F3", mode: "insensitive" },
+          eventId: "event-1",
+        },
+      }),
+    );
+    expect(prisma.event.findFirst).not.toHaveBeenCalled();
   });
 });

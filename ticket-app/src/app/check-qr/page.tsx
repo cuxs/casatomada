@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 interface SaleInfo {
   found: boolean;
   used: boolean;
+  outdated: boolean;
   buyerName: string;
   ticketCount: number;
   usedAt: string | null;
@@ -137,8 +138,27 @@ function CheckQRContent() {
               </div>
             )}
 
+            {/* Outdated — ticket from a previous event */}
+            {sale.found && sale.outdated && (
+              <div className="bg-gray-100 border border-gray-200 rounded-2xl p-6 space-y-3">
+                <div className="text-4xl text-center">🚫</div>
+                <p className="text-center font-bold text-gray-800 text-lg">
+                  Entrada de un evento anterior
+                </p>
+                <p className="text-center text-gray-600 text-sm">
+                  Este QR ya no es válido para este evento.
+                </p>
+                <div className="bg-white border border-gray-200 rounded-xl px-4 py-3 space-y-1">
+                  <p className="text-sm text-gray-500">Nombre</p>
+                  <p className="font-semibold text-gray-900">
+                    {sale.buyerName}
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Already used */}
-            {sale.found && sale.used && (
+            {sale.found && !sale.outdated && sale.used && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 space-y-3">
                 <div className="text-4xl text-center">⚠️</div>
                 <p className="text-center font-bold text-yellow-800 text-lg">
@@ -162,7 +182,7 @@ function CheckQRContent() {
             )}
 
             {/* Valid — not yet used */}
-            {sale.found && !sale.used && (
+            {sale.found && !sale.outdated && !sale.used && (
               <div className="bg-green-50 border border-green-200 rounded-2xl p-6 space-y-4">
                 <div className="text-4xl text-center">✅</div>
                 <p className="text-center font-bold text-green-800 text-lg">

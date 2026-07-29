@@ -8,6 +8,9 @@ vi.mock("@/lib/prisma", () => ({
       findMany: vi.fn(),
       create: vi.fn(),
     },
+    event: {
+      findFirst: vi.fn(),
+    },
   },
 }));
 
@@ -23,10 +26,17 @@ function makePost(body: unknown) {
   });
 }
 
+function makeGet(eventId?: string) {
+  const url = eventId
+    ? `http://localhost:3000/api/ride-posts?eventId=${encodeURIComponent(eventId)}`
+    : "http://localhost:3000/api/ride-posts";
+  return new NextRequest(url);
+}
+
 describe("GET /api/ride-posts", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("returns all posts ordered by createdAt desc", async () => {
+  it("returns all posts ordered by createdAt desc, falling back to the active event", async () => {
     const mockPosts = [
       {
         id: "1",
@@ -38,13 +48,27 @@ describe("GET /api/ride-posts", () => {
     ];
     vi.mocked(prisma.ridePost.findMany).mockResolvedValueOnce(mockPosts as any);
 
-    const res = await GET();
+    const res = await GET(makeGet());
 
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual(mockPosts);
     expect(prisma.ridePost.findMany).toHaveBeenCalledWith({
+      where: {},
       orderBy: { createdAt: "desc" },
     });
+  });
+
+  it("filters by the explicit eventId query param when provided (admin list)", async () => {
+    vi.mocked(prisma.ridePost.findMany).mockResolvedValueOnce([] as any);
+
+    const res = await GET(makeGet("event-1"));
+
+    expect(res.status).toBe(200);
+    expect(prisma.ridePost.findMany).toHaveBeenCalledWith({
+      where: { eventId: "event-1" },
+      orderBy: { createdAt: "desc" },
+    });
+    expect(prisma.event.findFirst).not.toHaveBeenCalled();
   });
 
   it("returns 500 when the db throws", async () => {
@@ -52,7 +76,7 @@ describe("GET /api/ride-posts", () => {
       new Error("db error"),
     );
 
-    const res = await GET();
+    const res = await GET(makeGet());
 
     expect(res.status).toBe(500);
     expect((await res.json()).error).toBe("Error al obtener los posts");
@@ -60,7 +84,12 @@ describe("GET /api/ride-posts", () => {
 });
 
 describe("POST /api/ride-posts", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(prisma.event.findFirst).mockResolvedValue({
+      id: "event-1",
+    } as any);
+  });
 
   it("creates a post without phone and returns 201", async () => {
     const mockPost = {
@@ -79,7 +108,12 @@ describe("POST /api/ride-posts", () => {
     expect(res.status).toBe(201);
     expect(await res.json()).toEqual(mockPost);
     expect(prisma.ridePost.create).toHaveBeenCalledWith({
-      data: { authorName: "Juan", content: "Voy desde Palermo", phone: null },
+      data: {
+        authorName: "Juan",
+        content: "Voy desde Palermo",
+        phone: null,
+        eventId: "event-1",
+      },
     });
   });
 
@@ -107,6 +141,7 @@ describe("POST /api/ride-posts", () => {
         authorName: "Juan",
         content: "Voy desde Palermo",
         phone: "+54 9 11 1234-5678",
+        eventId: "event-1",
       },
     });
   });
@@ -136,9 +171,24 @@ describe("POST /api/ride-posts", () => {
 
     expect(prisma.ridePost.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: { authorName: "Juan", content: "Hola", phone: "123" },
+        data: {
+          authorName: "Juan",
+          content: "Hola",
+          phone: "123",
+          eventId: "event-1",
+        },
       }),
     );
+  });
+
+  it("returns 400 when no event is active", async () => {
+    vi.mocked(prisma.event.findFirst).mockResolvedValueOnce(null as any);
+
+    const res = await POST(makePost({ authorName: "Juan", content: "Hola" }));
+
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("No hay ningún evento activo");
+    expect(prisma.ridePost.create).not.toHaveBeenCalled();
   });
 
   it("rejects missing authorName with 400", async () => {

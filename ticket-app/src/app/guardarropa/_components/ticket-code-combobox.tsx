@@ -15,6 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { getSelectedEventId } from "@/lib/selected-event";
 
 export interface TicketCodeResult {
   saleId: string;
@@ -76,8 +77,12 @@ export default function TicketCodeCombobox({
     const controller = new AbortController();
     const timeout = setTimeout(async () => {
       try {
+        const eventId = getSelectedEventId();
+        const eventParam = eventId
+          ? `&eventId=${encodeURIComponent(eventId)}`
+          : "";
         const res = await fetch(
-          `/api/guardarropa/search?query=${encodeURIComponent(trimmed)}`,
+          `/api/guardarropa/search?query=${encodeURIComponent(trimmed)}${eventParam}`,
           { signal: controller.signal },
         );
         const data = await res.json();

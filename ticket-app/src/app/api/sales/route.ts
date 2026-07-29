@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 import { checkApiAuth } from "@/lib/basic-auth";
 import { codeWordForIndex, TOTAL_CODE_WORDS } from "@/lib/code-words";
+import { resolveEventId } from "@/lib/events";
 import { generateMockSales } from "@/lib/mock-sales";
 import { prisma } from "@/lib/prisma";
 import { generateQrDataUrl } from "@/lib/qr";
@@ -26,11 +27,13 @@ export async function POST(request: NextRequest) {
     price,
     ticketCount: rawTicketCount,
     distinctQrs,
+    eventId: rawEventId,
   } = body as {
     buyerName: string;
     price: number;
     ticketCount?: number;
     distinctQrs?: boolean;
+    eventId?: string;
   };
 
   if (!buyerName?.trim()) {
@@ -43,6 +46,14 @@ export async function POST(request: NextRequest) {
   if (!VALID_PRICES.includes(price)) {
     return NextResponse.json(
       { error: "El precio no es válido" },
+      { status: 400 },
+    );
+  }
+
+  const eventId = await resolveEventId(rawEventId);
+  if (!eventId) {
+    return NextResponse.json(
+      { error: "No hay ningún evento activo" },
       { status: 400 },
     );
   }
@@ -81,6 +92,7 @@ export async function POST(request: NextRequest) {
             qrToken,
             codeWord,
             ticketCount: ticketCountPerSale,
+            eventId,
           },
         });
         nextCodeIndex += attempt + 1;
@@ -124,10 +136,12 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const search = searchParams.get("search")?.trim();
   const pageParam = searchParams.get("page");
+  const eventId = await resolveEventId(searchParams.get("eventId"));
 
-  const where: Prisma.SaleWhereInput = search
-    ? { buyerName: { contains: search, mode: "insensitive" } }
-    : {};
+  const where: Prisma.SaleWhereInput = {
+    ...(eventId ? { eventId } : {}),
+    ...(search ? { buyerName: { contains: search, mode: "insensitive" } } : {}),
+  };
 
   if (MOCK_SALES) {
     const filtered = search

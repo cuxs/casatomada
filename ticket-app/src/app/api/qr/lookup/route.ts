@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     found: true,
     used: sale.used,
+    outdated: sale.outdated,
     buyerName: sale.buyerName,
     ticketCount: sale.ticketCount,
     usedAt: sale.usedAt,

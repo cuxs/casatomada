@@ -13,6 +13,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import EventSwitcher from "./event-switcher";
 
 const NAV_ITEMS = [
   { label: "Panel", icon: LayoutDashboard, href: "/admin", exact: true },
@@ -46,6 +47,8 @@ export default function AdminNav() {
         </p>
         <p className="text-sm font-bold text-gray-900 mt-0.5">Admin</p>
       </div>
+
+      <EventSwitcher />
 
       <nav className="flex-1 space-y-0.5">
         {NAV_ITEMS.map(({ label, icon: Icon, href, exact }) => (

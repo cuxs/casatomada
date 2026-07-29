@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useReducer } from "react";
+import { getSelectedEventId } from "@/lib/selected-event";
 
 interface Ticket {
   qrDataUrl: string;
@@ -100,6 +101,7 @@ export default function RegisterSalePage() {
           price: state.price,
           ticketCount: state.ticketCount,
           distinctQrs: state.distinctQrs,
+          eventId: getSelectedEventId(),
         }),
       });
 

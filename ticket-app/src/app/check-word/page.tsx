@@ -21,6 +21,7 @@ function focusAndOpen(el: HTMLSelectElement | HTMLInputElement | null) {
 interface CodeResult {
   found: boolean;
   used: boolean;
+  outdated: boolean;
   buyerName: string;
   ticketCount: number;
   usedAt: string | null;
@@ -216,8 +217,26 @@ export default function CheckWordPage() {
 
           {lookup.status === "checked" &&
             lookup.result &&
-            (lookup.result.found &&
-            (!lookup.result.used || lookup.justMarked) ? (
+            (lookup.result.found && lookup.result.outdated ? (
+              <div className="space-y-3 text-center">
+                <p className="text-4xl">🚫</p>
+                <p className="font-bold text-gray-800">
+                  Entrada de un evento anterior
+                </p>
+                <p className="text-sm text-gray-600">
+                  Este código ya no es válido para este evento.
+                </p>
+                <Button
+                  type="button"
+                  variant="link"
+                  onClick={resetCodeSearch}
+                  className="text-gray-500"
+                >
+                  Validar otra entrada
+                </Button>
+              </div>
+            ) : lookup.result.found &&
+              (!lookup.result.used || lookup.justMarked) ? (
               <div className="space-y-3 text-center">
                 <div className="bg-green-50 border border-green-100 rounded-xl px-4 py-3 space-y-1">
                   <p className="text-sm text-gray-500">Nombre</p>

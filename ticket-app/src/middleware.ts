@@ -31,6 +31,8 @@ export const config = {
     "/admin/:path*",
     "/api/sales",
     "/api/sales/:path*",
+    "/api/events",
+    "/api/events/:path*",
     "/guardarropa",
     "/guardarropa/:path*",
     "/api/guardarropa/:path*",

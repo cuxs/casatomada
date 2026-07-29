@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getSelectedEventId } from "@/lib/selected-event";
 
 interface RidePost {
   id: string;
@@ -30,7 +31,9 @@ export default function AdminRidePostsPage() {
     let cancelled = false;
     async function load() {
       try {
-        const res = await fetch("/api/ride-posts");
+        const eventId = getSelectedEventId();
+        const params = eventId ? `?eventId=${encodeURIComponent(eventId)}` : "";
+        const res = await fetch(`/api/ride-posts${params}`);
         const data = await res.json();
         if (cancelled) return;
         if (!res.ok) {
