@@ -58,6 +58,17 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const event = await prisma.event.findUnique({
+    where: { id: eventId },
+    select: { ended: true },
+  });
+  if (event?.ended) {
+    return NextResponse.json(
+      { error: "Este evento ya finalizó" },
+      { status: 400 },
+    );
+  }
+
   const ticketCount =
     typeof rawTicketCount === "number" && rawTicketCount >= 1
       ? Math.floor(rawTicketCount)
@@ -70,7 +81,9 @@ export async function POST(request: NextRequest) {
     distinctQrs === true && ticketCount > 1 ? ticketCount : 1;
   const ticketCountPerSale = salesToCreate > 1 ? 1 : ticketCount;
 
-  let nextCodeIndex = await prisma.sale.count();
+  // Scoped by event so the animal/color/place cycle restarts fresh for each
+  // new event, instead of sharing one global pool across every event ever.
+  let nextCodeIndex = await prisma.sale.count({ where: { eventId } });
   const created: { qrToken: string; qrDataUrl: string; codeWord: string }[] =
     [];
 

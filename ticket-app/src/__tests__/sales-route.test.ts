@@ -13,6 +13,7 @@ vi.mock("@/lib/prisma", () => ({
     },
     event: {
       findFirst: vi.fn(),
+      findUnique: vi.fn(),
     },
   },
 }));
@@ -295,6 +296,30 @@ describe("POST and GET /api/sales - Auth protection", () => {
     expect(body.error).toBe("No hay ningún evento activo");
     expect(prisma.sale.create).not.toHaveBeenCalled();
   });
+
+  it("rejects registering a sale for an ended event", async () => {
+    delete process.env.USER;
+    delete process.env.PASSWORD;
+
+    vi.mocked(prisma.event.findUnique).mockResolvedValueOnce({
+      ended: true,
+    } as any);
+
+    const req = new NextRequest("http://localhost:3000/api/sales", {
+      method: "POST",
+      body: JSON.stringify({
+        buyerName: "Juan",
+        price: 10000,
+        eventId: "event-1",
+      }),
+    });
+    const res = await POST(req);
+
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe("Este evento ya finalizó");
+    expect(prisma.sale.create).not.toHaveBeenCalled();
+  });
 });
 
 describe("POST /api/sales - creating sales and distinct QRs", () => {
@@ -485,5 +510,52 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
     expect(res.status).toBe(500);
     const body = await res.json();
     expect(body.error).toBe("No se pudo generar una palabra clave única");
+  });
+
+  it("scopes the code word counter to the sale's event", async () => {
+    vi.mocked(prisma.sale.count).mockResolvedValueOnce(0);
+    vi.mocked(prisma.sale.create).mockResolvedValueOnce({} as any);
+
+    const res = await POST(
+      makeRequest({
+        buyerName: "Primero del evento",
+        price: 10000,
+        ticketCount: 1,
+        eventId: "event-2",
+      }),
+    );
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    // codeWordForIndex(0): first animal, first color, first place.
+    expect(body.codeWord).toBe("lombriz roja del monte");
+    expect(prisma.sale.count).toHaveBeenCalledWith({
+      where: { eventId: "event-2" },
+    });
+  });
+
+  it("still detects a collision on the composite (eventId, codeWord) unique constraint", async () => {
+    vi.mocked(prisma.sale.count).mockResolvedValueOnce(0);
+    vi.mocked(prisma.sale.create)
+      .mockRejectedValueOnce(
+        new Prisma.PrismaClientKnownRequestError("Unique constraint failed", {
+          code: "P2002",
+          clientVersion: "5.10.2",
+          meta: { target: ["eventId", "codeWord"] },
+        }),
+      )
+      .mockResolvedValueOnce({} as any);
+
+    const res = await POST(
+      makeRequest({
+        buyerName: "Reintento",
+        price: 10000,
+        ticketCount: 1,
+        eventId: "event-2",
+      }),
+    );
+
+    expect(res.status).toBe(200);
+    expect(prisma.sale.create).toHaveBeenCalledTimes(2);
   });
 });

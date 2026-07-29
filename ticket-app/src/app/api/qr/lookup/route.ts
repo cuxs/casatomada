@@ -1,10 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { resolveEventId } from "@/lib/events";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 // GET /api/qr/lookup?codeWord=...&suffix=... — find a sale by its
-// "palabra clave" plus the last 3 characters of its QR token.
+// "palabra clave" plus the last 3 characters of its QR token. codeWords are
+// only unique within an event, and this door-facing page has no event
+// selection of its own, so the lookup is scoped to the active event.
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const codeWord = searchParams.get("codeWord")?.trim().toLowerCase() ?? "";
@@ -14,7 +17,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ found: false });
   }
 
-  const sale = await prisma.sale.findUnique({ where: { codeWord } });
+  const eventId = await resolveEventId(null);
+  if (!eventId) {
+    return NextResponse.json({ found: false });
+  }
+
+  const sale = await prisma.sale.findUnique({
+    where: { eventId_codeWord: { eventId, codeWord } },
+  });
 
   if (!sale?.qrToken.toLowerCase().endsWith(suffix)) {
     return NextResponse.json({ found: false });

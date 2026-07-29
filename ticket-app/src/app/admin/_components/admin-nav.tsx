@@ -14,6 +14,7 @@ import { usePathname } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import EventSwitcher from "./event-switcher";
+import { useCurrentEvent } from "./use-current-event";
 
 const NAV_ITEMS = [
   { label: "Panel", icon: LayoutDashboard, href: "/admin", exact: true },
@@ -23,6 +24,7 @@ const NAV_ITEMS = [
     icon: Plus,
     href: "/admin/register-sale",
     exact: false,
+    disableWhenEventEnded: true,
   },
   {
     label: "Viajes compartidos",
@@ -34,6 +36,7 @@ const NAV_ITEMS = [
 
 export default function AdminNav() {
   const pathname = usePathname();
+  const { currentEvent } = useCurrentEvent();
 
   function isActive(href: string, exact: boolean) {
     return exact ? pathname === href : pathname.startsWith(href);
@@ -51,21 +54,40 @@ export default function AdminNav() {
       <EventSwitcher />
 
       <nav className="flex-1 space-y-0.5">
-        {NAV_ITEMS.map(({ label, icon: Icon, href, exact }) => (
-          <Link
-            key={href}
-            href={href}
-            className={cn(
-              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-              isActive(href, exact)
-                ? "bg-gray-900 text-white"
-                : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
-            )}
-          >
-            <Icon className="h-4 w-4 shrink-0" />
-            {label}
-          </Link>
-        ))}
+        {NAV_ITEMS.map(
+          ({ label, icon: Icon, href, exact, disableWhenEventEnded }) => {
+            const disabled = disableWhenEventEnded && currentEvent?.ended;
+
+            if (disabled) {
+              return (
+                <span
+                  key={href}
+                  title="El evento actual finalizó — no se pueden registrar más ventas"
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 cursor-not-allowed"
+                >
+                  <Icon className="h-4 w-4 shrink-0" />
+                  {label}
+                </span>
+              );
+            }
+
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                  isActive(href, exact)
+                    ? "bg-gray-900 text-white"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                )}
+              >
+                <Icon className="h-4 w-4 shrink-0" />
+                {label}
+              </Link>
+            );
+          },
+        )}
 
         <Separator className="my-2" />
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, ChevronsUpDown, Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -22,52 +22,18 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { getSelectedEventId, setSelectedEventId } from "@/lib/selected-event";
-
-interface EventItem {
-  id: string;
-  name: string;
-  date: string;
-  active: boolean;
-}
+import { setSelectedEventId } from "@/lib/selected-event";
+import { useCurrentEvent } from "./use-current-event";
 
 export default function EventSwitcher() {
   const [open, setOpen] = useState(false);
-  const [events, setEvents] = useState<EventItem[] | null>(null);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const { events, selectedId, currentEvent } = useCurrentEvent();
 
   const [createOpen, setCreateOpen] = useState(false);
   const [newName, setNewName] = useState("");
   const [newDate, setNewDate] = useState("");
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      try {
-        const res = await fetch("/api/events");
-        const data = await res.json();
-        if (cancelled || !res.ok) return;
-
-        const list = data as EventItem[];
-        const stored = getSelectedEventId();
-        const fallback = list.find((e) => e.active)?.id ?? list[0]?.id ?? null;
-
-        setEvents(list);
-        setSelectedId(
-          stored && list.some((e) => e.id === stored) ? stored : fallback,
-        );
-      } catch {
-        // Switcher stays unavailable; API routes still fall back to the
-        // active event server-side, so pages keep working either way.
-      }
-    }
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   function handleSelect(id: string) {
     setOpen(false);
@@ -100,8 +66,6 @@ export default function EventSwitcher() {
     }
   }
 
-  const selectedEvent = events?.find((e) => e.id === selectedId);
-
   return (
     <div className="mb-4">
       <Popover open={open} onOpenChange={setOpen}>
@@ -113,7 +77,7 @@ export default function EventSwitcher() {
             className="w-full justify-between px-3 text-sm font-medium text-gray-900 bg-white"
           >
             <span className="truncate">
-              {selectedEvent?.name ?? "Seleccionar evento"}
+              {currentEvent?.name ?? "Seleccionar evento"}
             </span>
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
@@ -145,8 +109,15 @@ export default function EventSwitcher() {
                       className="justify-between gap-3 px-3 py-2.5 cursor-pointer"
                     >
                       <span className="min-w-0">
-                        <span className="block font-medium truncate">
-                          {event.name}
+                        <span className="flex items-center gap-1.5">
+                          <span className="font-medium truncate">
+                            {event.name}
+                          </span>
+                          {event.ended && (
+                            <span className="shrink-0 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                              Finalizado
+                            </span>
+                          )}
                         </span>
                         <span className="block text-xs text-gray-500">
                           {new Date(event.date).toLocaleDateString("es-AR")}

@@ -12,6 +12,7 @@ model Event {
   name      String
   date      DateTime
   active    Boolean  @default(false)
+  ended     Boolean  @default(false)
   createdAt DateTime @default(now())
 
   sales     Sale[]
@@ -25,7 +26,7 @@ model Sale {
   buyerName   String
   price       Int
   qrToken     String    @unique
-  codeWord    String    @unique
+  codeWord    String
   ticketCount Int       @default(1)
   used        Boolean   @default(false)
   usedAt      DateTime?
@@ -39,6 +40,7 @@ model Sale {
 
   @@index([createdAt])
   @@index([eventId])
+  @@unique([eventId, codeWord])
 }
 
 model GuardarropaCheck {

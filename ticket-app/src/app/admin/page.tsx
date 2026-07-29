@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import EndEventCard from "./_components/end-event-card";
 
 export const metadata: Metadata = { title: "Panel" };
 
@@ -46,6 +47,8 @@ export default function AdminPage() {
           Herramientas de administración para Casa Tomada
         </p>
       </div>
+
+      <EndEventCard />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {SECTIONS.map(({ label, description, icon: Icon, href }) => (
