@@ -2,27 +2,14 @@ import type { Metadata } from "next";
 import { getEventConfig } from "@/config";
 import HomePageClient from "./home-page-client";
 
-const PRICE_CHANGES = [
-  {
-    at: new Date("2026-06-24T03:00:00Z"),
-    label: "Pajarito tempranero",
-    price: 10000,
-  },
-  {
-    at: new Date("2026-07-02T03:00:00Z"),
-    label: "Primera tanda",
-    price: 13000,
-  },
-];
+const SALE_CUTOFF = new Date("2026-08-23T00:00:00Z"); // 21:00 Buenos Aires, Aug 22
 
 function getCurrentTierDescription(): string {
   const now = new Date();
-  for (const change of PRICE_CHANGES) {
-    if (now < change.at) {
-      return `${change.label} $${change.price.toLocaleString("es-AR")} — Conseguí tu entrada`;
-    }
+  if (now < SALE_CUTOFF) {
+    return "Entradas $8.000 — Conseguí tu entrada";
   }
-  return "Segunda tanda $15.000 — Conseguí tu entrada";
+  return "Casa Tomada";
 }
 
 export async function generateMetadata(): Promise<Metadata> {

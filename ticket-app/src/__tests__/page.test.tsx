@@ -11,8 +11,8 @@ const eventConfig = getEventConfig();
 
 beforeEach(() => {
   vi.clearAllMocks();
-  // "segunda tanda" window, before the entradas-en-puerta cutoff
-  vi.setSystemTime(new Date("2026-07-05T12:00:00Z"));
+  // before the sale cutoff (Aug 22 21:00 Buenos Aires)
+  vi.setSystemTime(new Date("2026-08-10T12:00:00Z"));
 });
 
 afterEach(() => {
@@ -25,13 +25,13 @@ describe("HomePage", () => {
 
     expect(screen.getByText("manifiest@")).toBeInTheDocument();
     expect(screen.getByText("rizoma 001")).toBeInTheDocument();
-    expect(screen.getByText("entradas")).toBeInTheDocument();
+    expect(screen.getByText("rizoma 002")).toBeInTheDocument();
   });
 
   it("shows entradas section when entradas button is clicked", async () => {
     render(<HomePageClient eventConfig={eventConfig} />);
 
-    fireEvent.click(screen.getByText("entradas"));
+    fireEvent.click(screen.getByText("rizoma 002"));
 
     await waitFor(() => {
       expect(screen.getByText(eventConfig.alias)).toBeInTheDocument();
@@ -58,7 +58,7 @@ describe("HomePage", () => {
   it("handles copy alias functionality", async () => {
     render(<HomePageClient eventConfig={eventConfig} />);
 
-    fireEvent.click(screen.getByText("entradas"));
+    fireEvent.click(screen.getByText("rizoma 002"));
 
     await waitFor(() => {
       expect(
@@ -91,7 +91,7 @@ describe("HomePage", () => {
   it("handles copy phone functionality", async () => {
     render(<HomePageClient eventConfig={eventConfig} />);
 
-    fireEvent.click(screen.getByText("entradas"));
+    fireEvent.click(screen.getByText("rizoma 002"));
 
     await waitFor(() => {
       expect(
@@ -124,7 +124,7 @@ describe("HomePage", () => {
   it("shows sold out state when soldOut is true", () => {
     render(<HomePageClient eventConfig={{ ...eventConfig, soldOut: true }} />);
 
-    fireEvent.click(screen.getByText("entradas"));
+    fireEvent.click(screen.getByText("rizoma 002"));
 
     expect(screen.getByText("sold out")).toBeInTheDocument();
     expect(
@@ -132,21 +132,21 @@ describe("HomePage", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows price tiers when not sold out", async () => {
+  it("shows the current price when not sold out", async () => {
     render(<HomePageClient eventConfig={eventConfig} />);
 
-    fireEvent.click(screen.getByText("entradas"));
+    fireEvent.click(screen.getByText("rizoma 002"));
 
-    expect(await screen.findByText(/pajarito tempranero/)).toBeInTheDocument();
-    expect(screen.getByText(/segunda tanda/)).toBeInTheDocument();
-    expect(screen.getByText(/entradas en puerta/)).toBeInTheDocument();
+    expect(
+      await screen.findByRole("button", { name: /entradas \$8\.000/ }),
+    ).toBeInTheDocument();
     expect(screen.queryByText("sold out")).not.toBeInTheDocument();
   });
 
   it("shows payment instructions in entradas section", () => {
     render(<HomePageClient eventConfig={eventConfig} />);
 
-    fireEvent.click(screen.getByText("entradas"));
+    fireEvent.click(screen.getByText("rizoma 002"));
 
     expect(
       screen.getByText(/Enviá el comprobante a este número/),
@@ -157,54 +157,29 @@ describe("HomePage", () => {
   });
 });
 
-describe("HomePage after the entradas-en-puerta cutoff", () => {
+describe("HomePage after the sale cutoff", () => {
   beforeEach(() => {
-    vi.setSystemTime(new Date("2026-07-11T01:00:00Z"));
+    vi.setSystemTime(new Date("2026-08-23T01:00:00Z"));
   });
 
-  it("still shows the entradas button leading to the price tiers", async () => {
+  it("hides the price button and shows only the flyer", () => {
     render(<HomePageClient eventConfig={eventConfig} />);
 
-    fireEvent.click(screen.getByText("entradas"));
+    fireEvent.click(screen.getByText("rizoma 002"));
 
-    expect(await screen.findByText(/pajarito tempranero/)).toBeInTheDocument();
-    expect(screen.getByText(/primera tanda/)).toBeInTheDocument();
-  });
-
-  it("shows segunda tanda struck through and entradas en puerta as the active tier", async () => {
-    render(<HomePageClient eventConfig={eventConfig} />);
-
-    fireEvent.click(screen.getByText("entradas"));
-
-    expect(await screen.findByText(/segunda tanda \$15\.000/)).toHaveClass(
-      "line-through",
-    );
-    expect(
-      screen.getByRole("button", { name: /entradas en puerta/i }),
-    ).toBeInTheDocument();
+    expect(screen.queryByText(/entradas \$8\.000/)).not.toBeInTheDocument();
+    expect(screen.getByAltText("evento")).toBeInTheDocument();
   });
 
   it("hides the payment instructions screen", () => {
     render(<HomePageClient eventConfig={eventConfig} />);
 
-    fireEvent.click(screen.getByText("entradas"));
+    fireEvent.click(screen.getByText("rizoma 002"));
 
     expect(screen.queryByText(eventConfig.alias)).not.toBeInTheDocument();
     expect(
       screen.queryByText(/Enviá el comprobante a este número/),
     ).not.toBeInTheDocument();
-  });
-
-  it("redirects to cómo llegar when the entradas en puerta tier is clicked", async () => {
-    render(<HomePageClient eventConfig={eventConfig} />);
-
-    fireEvent.click(screen.getByText("entradas"));
-
-    fireEvent.click(
-      await screen.findByRole("button", { name: /entradas en puerta/i }),
-    );
-
-    expect(mockPush).toHaveBeenCalledWith("/como-llegar");
   });
 });
 

@@ -63,8 +63,11 @@ export function salesOverTime(
             createdAt.getDate(),
           );
     const key = bucketDate.toISOString();
-    const entry =
-      buckets.get(key) ?? { date: bucketDate, total: 0, ticketCount: 0 };
+    const entry = buckets.get(key) ?? {
+      date: bucketDate,
+      total: 0,
+      ticketCount: 0,
+    };
     entry.total += sale.price ?? 0;
     entry.ticketCount += sale.ticketCount;
     buckets.set(key, entry);

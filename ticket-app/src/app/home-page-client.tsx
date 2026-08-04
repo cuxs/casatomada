@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { EventConfig } from "@/config";
 import ManifiestaSection from "./sections/manifesta-section";
@@ -28,59 +29,8 @@ const LANDING_IMAGES = [
   "/fotos-landing/009.webp",
 ];
 
-const PRICE_CHANGES = [
-  { at: new Date("2026-06-24T03:00:00Z"), toPrice: 13000 },
-  { at: new Date("2026-07-02T03:00:00Z"), toPrice: 15000 },
-];
-
-const DOOR_CUTOFF = new Date("2026-07-11T00:30:00Z"); // 21:30 Buenos Aires
-
-function getPriceInfo(now: Date) {
-  if (now < PRICE_CHANGES[0].at) {
-    return {
-      currentTierIndex: 0,
-      currentPrice: 10000,
-      nextPrice: 13000,
-      changeAt: PRICE_CHANGES[0].at,
-      currentLabel: "pajarito tempranero",
-    };
-  }
-  if (now < PRICE_CHANGES[1].at) {
-    return {
-      currentTierIndex: 1,
-      currentPrice: 13000,
-      nextPrice: 15000,
-      changeAt: PRICE_CHANGES[1].at,
-      currentLabel: "primera tanda",
-    };
-  }
-  if (now < DOOR_CUTOFF) {
-    return {
-      currentTierIndex: 2,
-      currentPrice: 15000,
-      nextPrice: null,
-      changeAt: null,
-      currentLabel: "segunda tanda",
-    };
-  }
-  return {
-    currentTierIndex: 3,
-    currentPrice: 20000,
-    nextPrice: null,
-    changeAt: null,
-    currentLabel: "entradas en puerta",
-  };
-}
-
-function formatCountdown(ms: number) {
-  const s = Math.floor(ms / 1000);
-  return {
-    days: Math.floor(s / 86400),
-    hours: Math.floor((s % 86400) / 3600),
-    minutes: Math.floor((s % 3600) / 60),
-    seconds: s % 60,
-  };
-}
+const SALE_CUTOFF = new Date("2026-08-23T00:00:00Z"); // 21:00 Buenos Aires, Aug 22
+const CURRENT_PRICE = 8000;
 
 type Section = "hero" | "entradas" | "manifiest" | "rizoma";
 
@@ -118,14 +68,12 @@ export default function HomePageClient({
   useEffect(() => {
     let last = 0;
     const id = setInterval(() => {
-      setFontVariant(() => {
-        let next: number;
-        do {
-          next = Math.floor(Math.random() * FONT_VARIANTS.length);
-        } while (next === last);
-        last = next;
-        return FONT_VARIANTS[next];
-      });
+      let next: number;
+      do {
+        next = Math.floor(Math.random() * FONT_VARIANTS.length);
+      } while (next === last);
+      last = next;
+      setFontVariant(FONT_VARIANTS[next]);
     }, 120);
     return () => clearInterval(id);
   }, []);
@@ -149,12 +97,8 @@ export default function HomePageClient({
     if (el && typeof el.scrollTo === "function") el.scrollTo(0, 0);
   }
 
-  const priceInfo = now ? getPriceInfo(now) : null;
-  const msLeft = priceInfo?.changeAt
-    ? // biome-ignore lint/style/noNonNullAssertion: priceInfo is only set when now is set
-      priceInfo.changeAt.getTime() - now!.getTime()
-    : null;
-  const countdown = msLeft !== null ? formatCountdown(msLeft) : null;
+  const saleClosed = now ? now >= SALE_CUTOFF : false;
+  const priceInfo = now && !saleClosed ? { currentPrice: CURRENT_PRICE } : null;
 
   function copyAlias() {
     navigator.clipboard.writeText(eventConfig.alias).then(() => {
@@ -244,15 +188,15 @@ export default function HomePageClient({
                 fontStyle: fontVariant.italic ? "italic" : "normal",
               }}
             >
-              entradas
+              rizoma 002
             </button>
 
-            <a
+            <Link
               href="/como-llegar"
               className="font-epilogue text-sm text-white/45 hover:text-white/65 transition-colors tracking-[-0.02em]"
             >
               ¿cómo llegar al evento?
-            </a>
+            </Link>
 
             <button
               type="button"
@@ -290,7 +234,7 @@ export default function HomePageClient({
         <EntradasSection
           eventConfig={eventConfig}
           priceInfo={priceInfo}
-          countdown={countdown}
+          saleClosed={saleClosed}
           aliasCopied={aliasCopied}
           phoneCopied={phoneCopied}
           onCopyAlias={copyAlias}
