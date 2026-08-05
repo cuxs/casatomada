@@ -27,7 +27,7 @@ import { useCurrentEvent } from "./use-current-event";
 
 export default function EventSwitcher() {
   const [open, setOpen] = useState(false);
-  const { events, selectedId, currentEvent } = useCurrentEvent();
+  const { events, selectedId, currentEvent, error, reload } = useCurrentEvent();
 
   const [createOpen, setCreateOpen] = useState(false);
   const [newName, setNewName] = useState("");
@@ -88,10 +88,24 @@ export default function EventSwitcher() {
         >
           <Command>
             <CommandList>
-              {!events && (
+              {!events && !error && (
                 <div className="flex items-center justify-center gap-2 py-6 text-sm text-gray-500">
                   <span className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
                   Cargando…
+                </div>
+              )}
+
+              {error && (
+                <div className="flex flex-col items-center gap-2 py-6 px-3 text-center">
+                  <p className="text-sm text-gray-500">{error}</p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={reload}
+                  >
+                    Reintentar
+                  </Button>
                 </div>
               )}
 

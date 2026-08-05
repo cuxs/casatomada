@@ -1,5 +1,6 @@
 import { KeyRound, ListIcon, Plus, QrCode } from "lucide-react";
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import {
   Card,
@@ -7,7 +8,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { listEvents } from "@/lib/events";
 import EndEventCard from "./_components/end-event-card";
+import EventPicker from "./_components/event-picker";
 
 export const metadata: Metadata = { title: "Panel" };
 
@@ -38,7 +41,26 @@ const SECTIONS = [
   },
 ];
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  const events = await listEvents();
+  const selected = cookies().get("selectedEventId")?.value ?? null;
+  const hasValidSelection =
+    selected != null && events.some((e) => e.id === selected);
+
+  if (!hasValidSelection) {
+    return (
+      <EventPicker
+        events={events.map((e) => ({
+          id: e.id,
+          name: e.name,
+          date: e.date.toISOString(),
+          active: e.active,
+          ended: e.ended,
+        }))}
+      />
+    );
+  }
+
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-8">

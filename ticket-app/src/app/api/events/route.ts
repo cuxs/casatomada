@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { checkApiAuth } from "@/lib/basic-auth";
+import { listEvents } from "@/lib/events";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -9,7 +10,7 @@ export async function GET(request: NextRequest) {
   if (authResponse) return authResponse;
 
   try {
-    const events = await prisma.event.findMany({ orderBy: { date: "desc" } });
+    const events = await listEvents();
     return NextResponse.json(events);
   } catch {
     return NextResponse.json(

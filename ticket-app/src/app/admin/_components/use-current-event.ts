@@ -17,15 +17,23 @@ export interface EventItem {
 export function useCurrentEvent() {
   const [events, setEvents] = useState<EventItem[] | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
+    setError(null);
     try {
       const res = await fetch("/api/events");
       const data = await res.json();
-      if (!res.ok) return;
+      if (!res.ok) {
+        setError(data.error ?? "No se pudieron cargar los eventos");
+        return;
+      }
 
       const list = data as EventItem[];
       const stored = getSelectedEventId();
+      // Prefers the active event; list[0] only kicks in once no event is
+      // active at all (e.g. right after ending one, before creating the
+      // next), so sales/nav "ended" state still resolves to something.
       const fallback = list.find((e) => e.active)?.id ?? list[0]?.id ?? null;
 
       setEvents(list);
@@ -33,7 +41,7 @@ export function useCurrentEvent() {
         stored && list.some((e) => e.id === stored) ? stored : fallback,
       );
     } catch {
-      // Stays unavailable; callers should handle the null/loading state.
+      setError("No se pudo conectar con el servidor");
     }
   }, []);
 
@@ -43,5 +51,5 @@ export function useCurrentEvent() {
 
   const currentEvent = events?.find((e) => e.id === selectedId) ?? null;
 
-  return { events, selectedId, currentEvent, reload: load };
+  return { events, selectedId, currentEvent, error, reload: load };
 }

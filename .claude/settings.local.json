@@ -15,7 +15,11 @@
       "Bash(curl -s http://localhost:3000/check-word)",
       "Bash(pkill -f \"next dev\")",
       "Bash(pkill -f \"next-server\")",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "Bash(npm view *)",
+      "Bash(npx react-doctor@latest --help)",
+      "Bash(npx react-doctor@latest --scope changed --base main --no-telemetry)",
+      "Bash(npx react-doctor@latest --scope changed --base main --no-telemetry --verbose)"
     ]
   }
 }
