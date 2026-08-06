@@ -5,6 +5,7 @@ import { checkApiAuth } from "@/lib/basic-auth";
 import { codeWordForIndex, TOTAL_CODE_WORDS } from "@/lib/code-words";
 import { resolveEventId } from "@/lib/events";
 import { generateMockSales } from "@/lib/mock-sales";
+import { VALID_PRICES } from "@/lib/pricing";
 import { prisma } from "@/lib/prisma";
 import { generateQrDataUrl } from "@/lib/qr";
 
@@ -14,8 +15,6 @@ export const dynamic = "force-dynamic";
 // generated rows instead of hitting the database.
 const MOCK_SALES =
   process.env.MOCK_SALES === "true" ? generateMockSales(500) : null;
-
-const VALID_PRICES = [0, 10000, 13000, 15000];
 
 export async function POST(request: NextRequest) {
   const authResponse = checkApiAuth(request);

@@ -498,7 +498,7 @@ describe("SalesPage", () => {
       buyerName: "Juan Pérez",
       codeWord: "lombriz roja del monte",
       qrToken: "qr-token-001",
-      price: 13000,
+      price: 8000,
       ticketCount: 1,
       used: false,
       usedAt: null,
@@ -545,7 +545,7 @@ describe("SalesPage", () => {
     );
 
     const priceSelect = screen.getByLabelText("Precio");
-    expect(priceSelect).toHaveValue("13000");
+    expect(priceSelect).toHaveValue("8000");
 
     fireEvent.change(priceSelect, { target: { value: "0" } });
     fireEvent.click(screen.getByRole("button", { name: "Guardar" }));

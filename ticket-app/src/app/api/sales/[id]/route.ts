@@ -1,11 +1,10 @@
 import { Prisma } from "@prisma/client";
 import { type NextRequest, NextResponse } from "next/server";
 import { checkApiAuth } from "@/lib/basic-auth";
+import { VALID_PRICES } from "@/lib/pricing";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
-
-const VALID_PRICES = [0, 10000, 13000, 15000];
 
 // PATCH /api/sales/[id] — update a sale's buyer name, ticket count, and/or price
 export async function PATCH(

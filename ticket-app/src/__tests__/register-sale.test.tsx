@@ -4,13 +4,9 @@ import RegisterSalePage from "../app/admin/register-sale/page";
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
-// Mirrors getCurrentPrice() in the component so this test doesn't go stale
-// as real time crosses the pricing-tier thresholds.
+// Mirrors getCurrentPrice() in the component.
 function getCurrentDefaultPrice(): number {
-  const now = new Date();
-  if (now < new Date("2026-06-24T03:00:00Z")) return 10000;
-  if (now < new Date("2026-07-02T03:00:00Z")) return 13000;
-  return 15000;
+  return 8000;
 }
 
 describe("RegisterSalePage", () => {
@@ -120,7 +116,7 @@ describe("RegisterSalePage", () => {
       target: { value: "Ana Díaz" },
     });
     fireEvent.change(screen.getByLabelText("Precio"), {
-      target: { value: "15000" },
+      target: { value: "0" },
     });
     fireEvent.change(screen.getByLabelText("Válido por"), {
       target: { value: "3" },
@@ -132,7 +128,7 @@ describe("RegisterSalePage", () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         buyerName: "Ana Díaz",
-        price: 15000,
+        price: 0,
         ticketCount: 3,
         distinctQrs: false,
         eventId: null,
@@ -263,7 +259,7 @@ describe("RegisterSalePage", () => {
       target: { value: "Grupo Grande" },
     });
     fireEvent.change(screen.getByLabelText("Precio"), {
-      target: { value: "15000" },
+      target: { value: "0" },
     });
     fireEvent.change(screen.getByLabelText("Válido por"), {
       target: { value: "3" },
@@ -276,7 +272,7 @@ describe("RegisterSalePage", () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         buyerName: "Grupo Grande",
-        price: 15000,
+        price: 0,
         ticketCount: 3,
         distinctQrs: true,
         eventId: null,

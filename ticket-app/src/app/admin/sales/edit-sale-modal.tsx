@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { DEFAULT_PRICE, VALID_PRICES } from "@/lib/pricing";
 import type { Sale } from "@/lib/sales-summary";
 import Modal from "./modal";
 
@@ -10,8 +11,6 @@ interface EditSaleModalProps {
   onSaved: (sale: Sale) => void;
 }
 
-const PRICES = [0, 10000, 13000, 15000];
-
 export default function EditSaleModal({
   sale,
   onClose,
@@ -19,7 +18,7 @@ export default function EditSaleModal({
 }: EditSaleModalProps) {
   const [buyerName, setBuyerName] = useState(sale.buyerName);
   const [ticketCount, setTicketCount] = useState(sale.ticketCount);
-  const [price, setPrice] = useState<number>(sale.price ?? 13000);
+  const [price, setPrice] = useState<number>(sale.price ?? DEFAULT_PRICE);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -83,7 +82,7 @@ export default function EditSaleModal({
             onChange={(e) => setPrice(Number(e.target.value))}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
           >
-            {PRICES.map((p) => (
+            {VALID_PRICES.map((p) => (
               <option key={p} value={p}>
                 {p === 0 ? "Gratis" : `$${p.toLocaleString("es-AR")}`}
               </option>

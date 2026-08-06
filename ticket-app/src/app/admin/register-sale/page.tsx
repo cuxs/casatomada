@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useReducer } from "react";
+import { DEFAULT_PRICE, VALID_PRICES } from "@/lib/pricing";
 import { getSelectedEventId } from "@/lib/selected-event";
 
 interface Ticket {
@@ -15,10 +16,8 @@ interface SaleResult {
   tickets: Ticket[];
 }
 
-const PRICES = [0, 8000];
-
 function getCurrentPrice(): number {
-  return 8000;
+  return DEFAULT_PRICE;
 }
 
 interface PageState {
@@ -276,7 +275,7 @@ export default function RegisterSalePage() {
             }
             className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
           >
-            {PRICES.map((p) => (
+            {VALID_PRICES.map((p) => (
               <option key={p} value={p}>
                 {p === 0 ? "Gratis" : `$${p.toLocaleString("es-AR")}`}
               </option>

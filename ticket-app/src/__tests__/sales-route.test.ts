@@ -287,7 +287,7 @@ describe("POST and GET /api/sales - Auth protection", () => {
 
     const req = new NextRequest("http://localhost:3000/api/sales", {
       method: "POST",
-      body: JSON.stringify({ buyerName: "Juan", price: 10000 }),
+      body: JSON.stringify({ buyerName: "Juan", price: 8000 }),
     });
     const res = await POST(req);
 
@@ -309,7 +309,7 @@ describe("POST and GET /api/sales - Auth protection", () => {
       method: "POST",
       body: JSON.stringify({
         buyerName: "Juan",
-        price: 10000,
+        price: 8000,
         eventId: "event-1",
       }),
     });
@@ -344,6 +344,25 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
     process.env = originalEnv;
   });
 
+  it("accepts the current fixed price of 8000", async () => {
+    vi.mocked(prisma.sale.count).mockResolvedValueOnce(0);
+    vi.mocked(prisma.sale.create).mockResolvedValueOnce({} as any);
+
+    const res = await POST(
+      makeRequest({
+        buyerName: "Juan",
+        price: 8000,
+        ticketCount: 1,
+        eventId: "event-1",
+      }),
+    );
+
+    expect(res.status).toBe(200);
+    expect(prisma.sale.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({ price: 8000 }),
+    });
+  });
+
   it("creates a single sale when ticketCount is 1", async () => {
     vi.mocked(prisma.sale.count).mockResolvedValueOnce(0);
     vi.mocked(prisma.sale.create).mockResolvedValueOnce({} as any);
@@ -351,7 +370,7 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
     const res = await POST(
       makeRequest({
         buyerName: "Juan",
-        price: 10000,
+        price: 8000,
         ticketCount: 1,
         eventId: "event-1",
       }),
@@ -368,7 +387,7 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
     expect(prisma.sale.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
         buyerName: "Juan",
-        price: 10000,
+        price: 8000,
         ticketCount: 1,
       }),
     });
@@ -381,7 +400,7 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
     const res = await POST(
       makeRequest({
         buyerName: "Ana",
-        price: 15000,
+        price: 8000,
         ticketCount: 4,
         eventId: "event-1",
       }),
@@ -404,7 +423,7 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
     const res = await POST(
       makeRequest({
         buyerName: "Solo",
-        price: 10000,
+        price: 8000,
         ticketCount: 1,
         distinctQrs: true,
         eventId: "event-1",
@@ -424,7 +443,7 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
     const res = await POST(
       makeRequest({
         buyerName: "Grupo",
-        price: 13000,
+        price: 8000,
         ticketCount: 3,
         distinctQrs: true,
         eventId: "event-1",
@@ -443,7 +462,7 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
     calls.forEach((call, index) => {
       expect((call[0] as any).data).toMatchObject({
         buyerName: `Grupo QR ${index + 1}`,
-        price: 13000,
+        price: 8000,
         ticketCount: 1,
       });
     });
@@ -472,7 +491,7 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
     const res = await POST(
       makeRequest({
         buyerName: "Grupo",
-        price: 13000,
+        price: 8000,
         ticketCount: 2,
         distinctQrs: true,
         eventId: "event-1",
@@ -501,7 +520,7 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
     const res = await POST(
       makeRequest({
         buyerName: "Nadie",
-        price: 10000,
+        price: 8000,
         ticketCount: 1,
         eventId: "event-1",
       }),
@@ -519,7 +538,7 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
     const res = await POST(
       makeRequest({
         buyerName: "Primero del evento",
-        price: 10000,
+        price: 8000,
         ticketCount: 1,
         eventId: "event-2",
       }),
@@ -549,7 +568,7 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
     const res = await POST(
       makeRequest({
         buyerName: "Reintento",
-        price: 10000,
+        price: 8000,
         ticketCount: 1,
         eventId: "event-2",
       }),
