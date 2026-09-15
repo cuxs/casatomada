@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { NextRequest } from "next/server";
+import { VALID_PRICES } from "@/lib/pricing";
 import { prisma } from "@/lib/prisma";
 import { GET, POST } from "../app/api/sales/route";
 
@@ -287,7 +288,7 @@ describe("POST and GET /api/sales - Auth protection", () => {
 
     const req = new NextRequest("http://localhost:3000/api/sales", {
       method: "POST",
-      body: JSON.stringify({ buyerName: "Juan", price: 8000 }),
+      body: JSON.stringify({ buyerName: "Juan", price: 10000 }),
     });
     const res = await POST(req);
 
@@ -309,7 +310,7 @@ describe("POST and GET /api/sales - Auth protection", () => {
       method: "POST",
       body: JSON.stringify({
         buyerName: "Juan",
-        price: 8000,
+        price: 10000,
         eventId: "event-1",
       }),
     });
@@ -344,10 +345,47 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
     process.env = originalEnv;
   });
 
-  it("accepts the current fixed price of 8000", async () => {
+  it("accepts the first tier price of 10000", async () => {
     vi.mocked(prisma.sale.count).mockResolvedValueOnce(0);
     vi.mocked(prisma.sale.create).mockResolvedValueOnce({} as any);
 
+    const res = await POST(
+      makeRequest({
+        buyerName: "Juan",
+        price: 10000,
+        ticketCount: 1,
+        eventId: "event-1",
+      }),
+    );
+
+    expect(res.status).toBe(200);
+    expect(prisma.sale.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({ price: 10000 }),
+    });
+  });
+
+  it.each(
+    VALID_PRICES.filter((p) => p !== 10000),
+  )("accepts the %s price tier", async (price) => {
+    vi.mocked(prisma.sale.count).mockResolvedValueOnce(0);
+    vi.mocked(prisma.sale.create).mockResolvedValueOnce({} as any);
+
+    const res = await POST(
+      makeRequest({
+        buyerName: "Juan",
+        price,
+        ticketCount: 1,
+        eventId: "event-1",
+      }),
+    );
+
+    expect(res.status).toBe(200);
+    expect(prisma.sale.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({ price }),
+    });
+  });
+
+  it("rejects a price that is not one of the tiers", async () => {
     const res = await POST(
       makeRequest({
         buyerName: "Juan",
@@ -357,10 +395,10 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
       }),
     );
 
-    expect(res.status).toBe(200);
-    expect(prisma.sale.create).toHaveBeenCalledWith({
-      data: expect.objectContaining({ price: 8000 }),
-    });
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe("El precio no es válido");
+    expect(prisma.sale.create).not.toHaveBeenCalled();
   });
 
   it("creates a single sale when ticketCount is 1", async () => {
@@ -370,7 +408,7 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
     const res = await POST(
       makeRequest({
         buyerName: "Juan",
-        price: 8000,
+        price: 10000,
         ticketCount: 1,
         eventId: "event-1",
       }),
@@ -387,7 +425,7 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
     expect(prisma.sale.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
         buyerName: "Juan",
-        price: 8000,
+        price: 10000,
         ticketCount: 1,
       }),
     });
@@ -400,7 +438,7 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
     const res = await POST(
       makeRequest({
         buyerName: "Ana",
-        price: 8000,
+        price: 10000,
         ticketCount: 4,
         eventId: "event-1",
       }),
@@ -423,7 +461,7 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
     const res = await POST(
       makeRequest({
         buyerName: "Solo",
-        price: 8000,
+        price: 10000,
         ticketCount: 1,
         distinctQrs: true,
         eventId: "event-1",
@@ -443,7 +481,7 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
     const res = await POST(
       makeRequest({
         buyerName: "Grupo",
-        price: 8000,
+        price: 10000,
         ticketCount: 3,
         distinctQrs: true,
         eventId: "event-1",
@@ -462,7 +500,7 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
     calls.forEach((call, index) => {
       expect((call[0] as any).data).toMatchObject({
         buyerName: `Grupo QR ${index + 1}`,
-        price: 8000,
+        price: 10000,
         ticketCount: 1,
       });
     });
@@ -491,7 +529,7 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
     const res = await POST(
       makeRequest({
         buyerName: "Grupo",
-        price: 8000,
+        price: 10000,
         ticketCount: 2,
         distinctQrs: true,
         eventId: "event-1",
@@ -520,7 +558,7 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
     const res = await POST(
       makeRequest({
         buyerName: "Nadie",
-        price: 8000,
+        price: 10000,
         ticketCount: 1,
         eventId: "event-1",
       }),
@@ -538,7 +576,7 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
     const res = await POST(
       makeRequest({
         buyerName: "Primero del evento",
-        price: 8000,
+        price: 10000,
         ticketCount: 1,
         eventId: "event-2",
       }),
@@ -568,7 +606,7 @@ describe("POST /api/sales - creating sales and distinct QRs", () => {
     const res = await POST(
       makeRequest({
         buyerName: "Reintento",
-        price: 8000,
+        price: 10000,
         ticketCount: 1,
         eventId: "event-2",
       }),

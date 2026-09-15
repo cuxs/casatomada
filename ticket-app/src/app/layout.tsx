@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     description: "Conseguí tu entrada para el evento",
     images: [
       {
-        url: "/comprar-entradas/02E.jpg",
+        url: "/comprar-entradas/ct-kiki.jpg",
         width: 1080,
         height: 1350,
         alt: "Casa Tomada — Entradas",
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Casa Tomada",
     description: "Conseguí tu entrada para el evento",
-    images: ["/comprar-entradas/02E.jpg"],
+    images: ["/comprar-entradas/ct-kiki.jpg"],
   },
   manifest: "/manifest.json",
   icons: {

@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { getEventConfig } from "@/config";
+import { getPriceInfo, SALE_CUTOFF } from "@/lib/pricing";
 import HomePageClient from "./home-page-client";
-
-const SALE_CUTOFF = new Date("2026-08-23T00:00:00Z"); // 21:00 Buenos Aires, Aug 22
 
 function getCurrentTierDescription(): string {
   const now = new Date();
   if (now < SALE_CUTOFF) {
-    return "Entradas $8.000 — Conseguí tu entrada";
+    const { currentLabel, currentPrice } = getPriceInfo(now);
+    const label = currentLabel.charAt(0).toUpperCase() + currentLabel.slice(1);
+    return `${label} $${currentPrice.toLocaleString("es-AR")} — Conseguí tu entrada`;
   }
   return "Casa Tomada";
 }
@@ -22,7 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       images: [
         {
-          url: "/comprar-entradas/02E.jpg",
+          url: "/comprar-entradas/ct-kiki.jpg",
           width: 1080,
           height: 1350,
           alt: "Casa Tomada — Entradas",
@@ -33,7 +34,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title: "Casa Tomada",
       description,
-      images: ["/comprar-entradas/02E.jpg"],
+      images: ["/comprar-entradas/ct-kiki.jpg"],
     },
   };
 }

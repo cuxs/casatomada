@@ -9,15 +9,20 @@ import {
   useControls,
 } from "react-zoom-pan-pinch";
 import type { EventConfig } from "@/config";
+import { PRICE_TIERS, type PriceInfo } from "@/lib/pricing";
 import SectionHeader from "./section-header";
 
-interface PriceInfo {
-  currentPrice: number;
+interface Countdown {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
 }
 
 interface EntradasSectionProps {
   eventConfig: EventConfig;
   priceInfo: PriceInfo | null;
+  countdown: Countdown | null;
   saleClosed: boolean;
   aliasCopied: boolean;
   phoneCopied: boolean;
@@ -29,6 +34,7 @@ interface EntradasSectionProps {
 export default function EntradasSection({
   eventConfig,
   priceInfo,
+  countdown,
   saleClosed,
   aliasCopied,
   phoneCopied,
@@ -36,7 +42,7 @@ export default function EntradasSection({
   onCopyPhone,
   onBack,
 }: EntradasSectionProps) {
-  const currentPrice = priceInfo?.currentPrice ?? 8000;
+  const currentPrice = priceInfo?.currentPrice ?? PRICE_TIERS[0].price;
   const paymentRef = useRef<HTMLDivElement>(null);
   const [flyerOpen, setFlyerOpen] = useState(false);
 
@@ -61,7 +67,9 @@ export default function EntradasSection({
       <div className="relative flex flex-col items-center justify-center min-h-screen pt-[26px] px-5 pb-12 overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center brightness-50"
-          style={{ backgroundImage: "url('/comprar-entradas/01E.webp')" }}
+          style={{
+            backgroundImage: "url('/comprar-entradas/ct-kiki-bg.webp')",
+          }}
         />
 
         <button
@@ -71,7 +79,7 @@ export default function EntradasSection({
           className="relative z-[1] mb-7 block cursor-zoom-in border-0 bg-transparent p-0"
         >
           <Image
-            src="/comprar-entradas/02E.webp"
+            src="/comprar-entradas/ct-kiki.webp"
             alt="evento"
             width={760}
             height={950}
@@ -84,7 +92,11 @@ export default function EntradasSection({
             {eventConfig.soldOut ? (
               <SoldOutDisplay />
             ) : (
-              <PriceDisplay priceInfo={priceInfo} onBuyNow={scrollToPayment} />
+              <PriceDisplay
+                priceInfo={priceInfo}
+                countdown={countdown}
+                onBuyNow={scrollToPayment}
+              />
             )}
           </div>
         )}
@@ -99,7 +111,7 @@ export default function EntradasSection({
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{
-              backgroundImage: "url('/comprar-entradas/02E.webp')",
+              backgroundImage: "url('/comprar-entradas/ct-kiki.webp')",
             }}
           />
           <div className="absolute inset-0 bg-black/[0.62]" />
@@ -208,7 +220,7 @@ export default function EntradasSection({
               contentClass="!w-full !h-full !flex !items-center !justify-center"
             >
               <Image
-                src="/comprar-entradas/02E.webp"
+                src="/comprar-entradas/ct-kiki.webp"
                 alt="evento"
                 width={1080}
                 height={1350}
@@ -226,7 +238,7 @@ export default function EntradasSection({
               className="!absolute bottom-6 right-6 z-10 overflow-hidden rounded-md border border-white/25 bg-black/60"
             >
               <Image
-                src="/comprar-entradas/02E.webp"
+                src="/comprar-entradas/ct-kiki.webp"
                 alt=""
                 aria-hidden="true"
                 width={1080}
@@ -276,23 +288,74 @@ function FlyerZoomControls() {
 
 function PriceDisplay({
   priceInfo,
+  countdown,
   onBuyNow,
 }: {
   priceInfo: PriceInfo | null;
+  countdown: Countdown | null;
   onBuyNow: () => void;
 }) {
   if (!priceInfo) return null;
 
+  const pastTiers = PRICE_TIERS.slice(0, priceInfo.currentTierIndex);
+  const activeTier = PRICE_TIERS[priceInfo.currentTierIndex];
+  const futureTiers = PRICE_TIERS.slice(priceInfo.currentTierIndex + 1);
+
   return (
-    <button
-      type="button"
-      onClick={onBuyNow}
-      className="entradas-glow bg-[rgba(8,8,8,0.88)] border-2 border-white/[0.28] rounded-[18px] px-6 py-4 text-center backdrop-blur-sm mb-5 cursor-pointer w-full"
-    >
-      <p className="font-epilogue font-bold text-[clamp(24px,7vw,38px)] tracking-[-0.05em] text-white leading-none m-0">
-        entradas ${priceInfo.currentPrice.toLocaleString("es-AR")}
-      </p>
-    </button>
+    <div className="flex flex-col">
+      {pastTiers.map((tier) => (
+        <p
+          key={tier.label}
+          className="font-epilogue font-medium text-[clamp(18px,5vw,26px)] tracking-[-0.05em] text-white/40 line-through m-0 leading-[1.8] text-center"
+        >
+          {tier.label} ${tier.price.toLocaleString("es-AR")}
+        </p>
+      ))}
+
+      <button
+        type="button"
+        onClick={onBuyNow}
+        className="entradas-glow bg-[rgba(8,8,8,0.88)] border-2 border-white/[0.28] rounded-[18px] px-6 py-4 text-center backdrop-blur-sm mb-5 cursor-pointer w-full"
+      >
+        <p className="font-epilogue font-bold text-[clamp(24px,7vw,38px)] tracking-[-0.05em] text-white leading-none m-0">
+          {activeTier.label} ${activeTier.price.toLocaleString("es-AR")}
+        </p>
+
+        {countdown && priceInfo.nextPrice !== null && (
+          <div className="mt-2.5">
+            <p className="font-epilogue text-xs text-white/45 m-0 mb-1.5 tracking-[-0.01em]">
+              sube a ${priceInfo.nextPrice.toLocaleString("es-AR")} en:
+            </p>
+            <div className="flex justify-center gap-3.5">
+              {[
+                { v: countdown.days, l: "días" },
+                { v: countdown.hours, l: "hs" },
+                { v: countdown.minutes, l: "min" },
+                { v: countdown.seconds, l: "seg" },
+              ].map(({ v, l }) => (
+                <div key={l} className="flex flex-col items-center">
+                  <span className="font-epilogue font-bold text-xl text-white tabular-nums min-w-7 text-center">
+                    {String(v).padStart(2, "0")}
+                  </span>
+                  <span className="font-epilogue text-[10px] text-white/35">
+                    {l}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </button>
+
+      {futureTiers.map((tier) => (
+        <p
+          key={tier.label}
+          className="font-epilogue font-medium text-[clamp(18px,5vw,26px)] tracking-[-0.05em] text-white/40 m-0 leading-[1.8] text-center"
+        >
+          {tier.label} ${tier.price.toLocaleString("es-AR")}
+        </p>
+      ))}
+    </div>
   );
 }
 

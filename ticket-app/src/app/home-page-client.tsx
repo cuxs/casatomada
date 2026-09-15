@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { EventConfig } from "@/config";
+import { getPriceInfo, SALE_CUTOFF } from "@/lib/pricing";
 import ManifiestaSection from "./sections/manifesta-section";
 import RizomaSection from "./sections/rizoma-section";
 import EntradasSection from "./sections/tickets-section";
@@ -29,8 +30,15 @@ const LANDING_IMAGES = [
   "/fotos-landing/009.webp",
 ];
 
-const SALE_CUTOFF = new Date("2026-08-23T00:00:00Z"); // 21:00 Buenos Aires, Aug 22
-const CURRENT_PRICE = 8000;
+function formatCountdown(ms: number) {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  return {
+    days: Math.floor(s / 86400),
+    hours: Math.floor((s % 86400) / 3600),
+    minutes: Math.floor((s % 3600) / 60),
+    seconds: s % 60,
+  };
+}
 
 type Section = "hero" | "entradas" | "manifiest" | "rizoma";
 
@@ -98,7 +106,11 @@ export default function HomePageClient({
   }
 
   const saleClosed = now ? now >= SALE_CUTOFF : false;
-  const priceInfo = now && !saleClosed ? { currentPrice: CURRENT_PRICE } : null;
+  const priceInfo = now && !saleClosed ? getPriceInfo(now) : null;
+  const countdown =
+    now && priceInfo?.changeAt
+      ? formatCountdown(priceInfo.changeAt.getTime() - now.getTime())
+      : null;
 
   function copyAlias() {
     navigator.clipboard.writeText(eventConfig.alias).then(() => {
@@ -188,7 +200,7 @@ export default function HomePageClient({
                 fontStyle: fontVariant.italic ? "italic" : "normal",
               }}
             >
-              rizoma 002
+              CT + KIKI
             </button>
 
             <Link
@@ -234,6 +246,7 @@ export default function HomePageClient({
         <EntradasSection
           eventConfig={eventConfig}
           priceInfo={priceInfo}
+          countdown={countdown}
           saleClosed={saleClosed}
           aliasCopied={aliasCopied}
           phoneCopied={phoneCopied}

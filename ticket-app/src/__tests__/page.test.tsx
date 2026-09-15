@@ -11,8 +11,8 @@ const eventConfig = getEventConfig();
 
 beforeEach(() => {
   vi.clearAllMocks();
-  // before the sale cutoff (Aug 22 21:00 Buenos Aires)
-  vi.setSystemTime(new Date("2026-08-10T12:00:00Z"));
+  // before the sale cutoff (Oct 2 21:00 Buenos Aires)
+  vi.setSystemTime(new Date("2026-09-14T12:00:00Z"));
 });
 
 afterEach(() => {
@@ -25,13 +25,13 @@ describe("HomePage", () => {
 
     expect(screen.getByText("manifiest@")).toBeInTheDocument();
     expect(screen.getByText("rizoma 001")).toBeInTheDocument();
-    expect(screen.getByText("rizoma 002")).toBeInTheDocument();
+    expect(screen.getByText("CT + KIKI")).toBeInTheDocument();
   });
 
   it("shows entradas section when entradas button is clicked", async () => {
     render(<HomePageClient eventConfig={eventConfig} />);
 
-    fireEvent.click(screen.getByText("rizoma 002"));
+    fireEvent.click(screen.getByText("CT + KIKI"));
 
     await waitFor(() => {
       expect(screen.getByText(eventConfig.alias)).toBeInTheDocument();
@@ -58,7 +58,7 @@ describe("HomePage", () => {
   it("handles copy alias functionality", async () => {
     render(<HomePageClient eventConfig={eventConfig} />);
 
-    fireEvent.click(screen.getByText("rizoma 002"));
+    fireEvent.click(screen.getByText("CT + KIKI"));
 
     await waitFor(() => {
       expect(
@@ -91,7 +91,7 @@ describe("HomePage", () => {
   it("handles copy phone functionality", async () => {
     render(<HomePageClient eventConfig={eventConfig} />);
 
-    fireEvent.click(screen.getByText("rizoma 002"));
+    fireEvent.click(screen.getByText("CT + KIKI"));
 
     await waitFor(() => {
       expect(
@@ -124,7 +124,7 @@ describe("HomePage", () => {
   it("shows sold out state when soldOut is true", () => {
     render(<HomePageClient eventConfig={{ ...eventConfig, soldOut: true }} />);
 
-    fireEvent.click(screen.getByText("rizoma 002"));
+    fireEvent.click(screen.getByText("CT + KIKI"));
 
     expect(screen.getByText("sold out")).toBeInTheDocument();
     expect(
@@ -135,18 +135,22 @@ describe("HomePage", () => {
   it("shows the current price when not sold out", async () => {
     render(<HomePageClient eventConfig={eventConfig} />);
 
-    fireEvent.click(screen.getByText("rizoma 002"));
+    fireEvent.click(screen.getByText("CT + KIKI"));
 
     expect(
-      await screen.findByRole("button", { name: /entradas \$8\.000/ }),
+      await screen.findByRole("button", {
+        name: /pajarito tempranero \$10\.000/,
+      }),
     ).toBeInTheDocument();
+    expect(screen.getByText(/primera tanda \$12\.000/)).toBeInTheDocument();
+    expect(screen.getByText(/segunda tanda \$14\.000/)).toBeInTheDocument();
     expect(screen.queryByText("sold out")).not.toBeInTheDocument();
   });
 
   it("shows payment instructions in entradas section", () => {
     render(<HomePageClient eventConfig={eventConfig} />);
 
-    fireEvent.click(screen.getByText("rizoma 002"));
+    fireEvent.click(screen.getByText("CT + KIKI"));
 
     expect(
       screen.getByText(/Enviá el comprobante a este número/),
@@ -159,22 +163,24 @@ describe("HomePage", () => {
 
 describe("HomePage after the sale cutoff", () => {
   beforeEach(() => {
-    vi.setSystemTime(new Date("2026-08-23T01:00:00Z"));
+    vi.setSystemTime(new Date("2026-10-03T01:00:00Z"));
   });
 
   it("hides the price button and shows only the flyer", () => {
     render(<HomePageClient eventConfig={eventConfig} />);
 
-    fireEvent.click(screen.getByText("rizoma 002"));
+    fireEvent.click(screen.getByText("CT + KIKI"));
 
-    expect(screen.queryByText(/entradas \$8\.000/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/pajarito tempranero \$10\.000/),
+    ).not.toBeInTheDocument();
     expect(screen.getByAltText("evento")).toBeInTheDocument();
   });
 
   it("hides the payment instructions screen", () => {
     render(<HomePageClient eventConfig={eventConfig} />);
 
-    fireEvent.click(screen.getByText("rizoma 002"));
+    fireEvent.click(screen.getByText("CT + KIKI"));
 
     expect(screen.queryByText(eventConfig.alias)).not.toBeInTheDocument();
     expect(

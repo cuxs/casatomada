@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useReducer } from "react";
-import { DEFAULT_PRICE, VALID_PRICES } from "@/lib/pricing";
+import { getCurrentPrice, VALID_PRICES } from "@/lib/pricing";
 import { getSelectedEventId } from "@/lib/selected-event";
 
 interface Ticket {
@@ -14,10 +14,6 @@ interface Ticket {
 interface SaleResult {
   ticketCount: number;
   tickets: Ticket[];
-}
-
-function getCurrentPrice(): number {
-  return DEFAULT_PRICE;
 }
 
 interface PageState {

@@ -1,12 +1,13 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { getCurrentPrice } from "@/lib/pricing";
 import RegisterSalePage from "../app/admin/register-sale/page";
 
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
-// Mirrors getCurrentPrice() in the component.
+// Same default the component preselects.
 function getCurrentDefaultPrice(): number {
-  return 8000;
+  return getCurrentPrice();
 }
 
 describe("RegisterSalePage", () => {
