@@ -1,4 +1,5 @@
 import {
+  ADMIN_ONLY_PRICES,
   DEFAULT_PRICE,
   getCurrentPrice,
   getPriceInfo,
@@ -13,8 +14,16 @@ describe("pricing", () => {
   });
 
   it("accepts free tickets plus every tier price", () => {
-    expect(VALID_PRICES).toEqual([0, 10000, 12000, 14000]);
+    expect(VALID_PRICES).toEqual([0, 6500, 10000, 12000, 14000]);
     expect(DEFAULT_PRICE).toBe(10000);
+  });
+
+  it("keeps admin-only prices out of the public tiers", () => {
+    expect(ADMIN_ONLY_PRICES).toEqual([6500]);
+    for (const p of ADMIN_ONLY_PRICES) {
+      expect(PRICE_TIERS.map((t) => t.price)).not.toContain(p);
+      expect(VALID_PRICES).toContain(p);
+    }
   });
 
   it("starts on the first tier with no scheduled change", () => {

@@ -51,7 +51,16 @@ export function getPriceInfo(now: Date): PriceInfo {
   };
 }
 
-export const VALID_PRICES = [0, ...PRICE_TIERS.map((t) => t.price)];
+// Prices only available from the admin (special discounts, etc.). They
+// are accepted by the sales forms and API but never shown on the landing
+// page, so they don't belong in PRICE_TIERS.
+export const ADMIN_ONLY_PRICES = [6500];
+
+export const VALID_PRICES = [
+  0,
+  ...ADMIN_ONLY_PRICES,
+  ...PRICE_TIERS.map((t) => t.price),
+];
 
 export const DEFAULT_PRICE = PRICE_TIERS[0].price;
 

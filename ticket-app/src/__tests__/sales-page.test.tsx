@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { ADMIN_ONLY_PRICES } from "@/lib/pricing";
 import SalesPage from "../app/admin/sales/page";
 
 const mockFetch = vi.fn();
@@ -546,6 +547,11 @@ describe("SalesPage", () => {
 
     const priceSelect = screen.getByLabelText("Precio");
     expect(priceSelect).toHaveValue("10000");
+    for (const p of ADMIN_ONLY_PRICES) {
+      expect(
+        screen.getByRole("option", { name: `$${p.toLocaleString("es-AR")}` }),
+      ).toBeInTheDocument();
+    }
 
     fireEvent.change(priceSelect, { target: { value: "0" } });
     fireEvent.click(screen.getByRole("button", { name: "Guardar" }));

@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { getCurrentPrice } from "@/lib/pricing";
+import { ADMIN_ONLY_PRICES, getCurrentPrice } from "@/lib/pricing";
 import RegisterSalePage from "../app/admin/register-sale/page";
 
 const mockFetch = vi.fn();
@@ -171,6 +171,50 @@ describe("RegisterSalePage", () => {
       body: JSON.stringify({
         buyerName: "Invitado VIP",
         price: 0,
+        ticketCount: 1,
+        distinctQrs: false,
+        eventId: null,
+      }),
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("¡Listo!")).toBeInTheDocument();
+    });
+  });
+
+  it("offers admin-only discount prices in the picker and can submit them", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          qrDataUrl: "data:image/png;base64,mockqr",
+          codeWord: "lombriz roja del monte",
+          qrToken: "mock-qr-token-ddd",
+          ticketCount: 1,
+        }),
+    });
+
+    render(<RegisterSalePage />);
+
+    const priceSelect = screen.getByLabelText("Precio");
+    for (const p of ADMIN_ONLY_PRICES) {
+      expect(
+        screen.getByRole("option", { name: `$${p.toLocaleString("es-AR")}` }),
+      ).toBeInTheDocument();
+    }
+
+    fireEvent.change(screen.getByLabelText(/Nombre/), {
+      target: { value: "Amiga con descuento" },
+    });
+    fireEvent.change(priceSelect, { target: { value: "6500" } });
+    fireEvent.click(screen.getByRole("button", { name: "Confirmar compra" }));
+
+    expect(mockFetch).toHaveBeenCalledWith("/api/sales", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        buyerName: "Amiga con descuento",
+        price: 6500,
         ticketCount: 1,
         distinctQrs: false,
         eventId: null,

@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { getEventConfig } from "@/config";
-import type { PriceInfo } from "@/lib/pricing";
+import { ADMIN_ONLY_PRICES, type PriceInfo } from "@/lib/pricing";
 import EntradasSection from "../app/sections/tickets-section";
 
 vi.mock("next/navigation", () => ({
@@ -60,6 +60,23 @@ describe("EntradasSection price tiers", () => {
     expect(screen.getByText(/segunda tanda \$14\.000/)).toBeInTheDocument();
     expect(screen.queryByText(/sube a/)).not.toBeInTheDocument();
     expect(screen.getByText(eventConfig.alias)).toBeInTheDocument();
+  });
+
+  it("never shows admin-only discount prices on the landing page", () => {
+    renderEntradas({
+      priceInfo: {
+        currentTierIndex: 0,
+        currentPrice: 10000,
+        currentLabel: "pajarito tempranero",
+        nextPrice: null,
+        changeAt: null,
+      },
+    });
+
+    for (const p of ADMIN_ONLY_PRICES) {
+      const formatted = `$${p.toLocaleString("es-AR")}`;
+      expect(document.body.textContent).not.toContain(formatted);
+    }
   });
 
   it("shows a countdown to the next price when the change is scheduled", () => {
