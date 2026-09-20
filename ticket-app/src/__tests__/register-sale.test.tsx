@@ -1,6 +1,18 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { ADMIN_ONLY_PRICES, getCurrentPrice } from "@/lib/pricing";
+import { copyTicketCard } from "@/lib/ticket-image";
 import RegisterSalePage from "../app/admin/register-sale/page";
+
+vi.mock("@/lib/ticket-image", () => ({
+  copyTicketCard: vi.fn(() => Promise.resolve()),
+}));
+const mockCopyTicketCard = vi.mocked(copyTicketCard);
 
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
@@ -373,6 +385,143 @@ describe("RegisterSalePage", () => {
           "No se pudo conectar con el servidor. Intentá de nuevo.",
         ),
       ).toBeInTheDocument();
+    });
+  });
+
+  describe("copy card button", () => {
+    async function submitSingleSale(ticketCount = 1) {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            qrDataUrl: "data:image/png;base64,mockqr",
+            codeWord: "lombriz roja del monte",
+            qrToken: "mock-qr-token-a3f",
+            ticketCount,
+          }),
+      });
+
+      render(<RegisterSalePage />);
+      fireEvent.change(screen.getByLabelText(/Nombre/), {
+        target: { value: "Pedro Gómez" },
+      });
+      fireEvent.change(screen.getByLabelText("Válido por"), {
+        target: { value: String(ticketCount) },
+      });
+      fireEvent.click(screen.getByRole("button", { name: "Confirmar compra" }));
+      await waitFor(() => {
+        expect(screen.getByText("¡Listo!")).toBeInTheDocument();
+      });
+    }
+
+    it("is not shown on the form", () => {
+      render(<RegisterSalePage />);
+
+      expect(
+        screen.queryByRole("button", { name: "Copiar imagen de la entrada" }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("copies the card with the ticket data for a single QR", async () => {
+      await submitSingleSale(2);
+
+      fireEvent.click(
+        screen.getByRole("button", { name: "Copiar imagen de la entrada" }),
+      );
+
+      expect(mockCopyTicketCard).toHaveBeenCalledTimes(1);
+      expect(mockCopyTicketCard).toHaveBeenCalledWith({
+        qrDataUrl: "data:image/png;base64,mockqr",
+        codeWord: "lombriz roja del monte",
+        code: "A3F",
+        entries: 2,
+        label: undefined,
+      });
+    });
+
+    it("shows a check mark after copying and reverts to the icon", async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      await submitSingleSale();
+
+      const button = screen.getByRole("button", {
+        name: "Copiar imagen de la entrada",
+      });
+      expect(button.querySelector("svg.lucide-copy")).toBeInTheDocument();
+
+      fireEvent.click(button);
+      await waitFor(() => {
+        expect(button.querySelector("svg.lucide-check")).toBeInTheDocument();
+      });
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(2000);
+      });
+      expect(button.querySelector("svg.lucide-copy")).toBeInTheDocument();
+
+      vi.useRealTimers();
+    });
+
+    it("shows an error state when copying fails", async () => {
+      mockCopyTicketCard.mockRejectedValueOnce(new Error("blocked"));
+      await submitSingleSale();
+
+      fireEvent.click(
+        screen.getByRole("button", { name: "Copiar imagen de la entrada" }),
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText("Error")).toBeInTheDocument();
+      });
+    });
+
+    it("renders one button per card and copies each with its own label", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            ticketCount: 2,
+            tickets: [
+              {
+                qrDataUrl: "data:image/png;base64,mockqr1",
+                codeWord: "lombriz roja del monte",
+                qrToken: "mock-qr-token-111",
+              },
+              {
+                qrDataUrl: "data:image/png;base64,mockqr2",
+                codeWord: "marmota azul de la esquina",
+                qrToken: "mock-qr-token-2b2",
+              },
+            ],
+          }),
+      });
+
+      render(<RegisterSalePage />);
+      fireEvent.change(screen.getByLabelText(/Nombre/), {
+        target: { value: "Grupo" },
+      });
+      fireEvent.change(screen.getByLabelText("Válido por"), {
+        target: { value: "2" },
+      });
+      fireEvent.click(screen.getByLabelText(/Generar QRs distintos/));
+      fireEvent.click(screen.getByRole("button", { name: "Confirmar compra" }));
+      await waitFor(() => {
+        expect(screen.getByText("¡Listo!")).toBeInTheDocument();
+      });
+
+      const buttons = screen.getAllByRole("button", {
+        name: "Copiar imagen de la entrada",
+      });
+      expect(buttons).toHaveLength(2);
+
+      fireEvent.click(buttons[1]);
+
+      expect(mockCopyTicketCard).toHaveBeenCalledWith({
+        qrDataUrl: "data:image/png;base64,mockqr2",
+        codeWord: "marmota azul de la esquina",
+        code: "2B2",
+        entries: 1,
+        label: "Entrada 2 de 2",
+      });
     });
   });
 });

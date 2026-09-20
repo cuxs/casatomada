@@ -12,7 +12,7 @@
     "test:watch": "vitest",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate && git config core.hooksPath .githooks || true"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"

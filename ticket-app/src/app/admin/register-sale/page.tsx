@@ -1,9 +1,11 @@
 "use client";
 
+import { Check, Copy } from "lucide-react";
 import Link from "next/link";
-import { useReducer } from "react";
+import { useReducer, useState } from "react";
 import { getCurrentPrice, VALID_PRICES } from "@/lib/pricing";
 import { getSelectedEventId } from "@/lib/selected-event";
+import { copyTicketCard, type TicketCardData } from "@/lib/ticket-image";
 
 interface Ticket {
   qrDataUrl: string;
@@ -46,6 +48,38 @@ function createInitialPageState(): PageState {
     error: null,
     result: null,
   };
+}
+
+function CopyCardButton({ ticket }: { ticket: TicketCardData }) {
+  const [status, setStatus] = useState<"idle" | "copied" | "error">("idle");
+
+  async function handleCopy() {
+    try {
+      await copyTicketCard(ticket);
+      setStatus("copied");
+    } catch {
+      setStatus("error");
+    }
+    setTimeout(() => setStatus("idle"), 2000);
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      title="Copiar imagen"
+      aria-label="Copiar imagen de la entrada"
+      className="absolute top-3 right-3 p-2 rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+    >
+      {status === "copied" ? (
+        <Check className="w-4 h-4 text-green-600" />
+      ) : status === "error" ? (
+        <span className="text-xs text-red-600">Error</span>
+      ) : (
+        <Copy className="w-4 h-4" />
+      )}
+    </button>
+  );
 }
 
 function pageReducer(state: PageState, action: PageAction): PageState {
@@ -160,49 +194,62 @@ export default function RegisterSalePage() {
           </p>
         </div>
 
-        {result.tickets.map((ticket, index) => (
-          <div
-            key={ticket.qrToken}
-            className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 flex flex-col items-center gap-4"
-          >
-            {result.tickets.length > 1 && (
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                Entrada {index + 1} de {result.tickets.length}
+        {result.tickets.map((ticket, index) => {
+          const entries = result.tickets.length > 1 ? 1 : result.ticketCount;
+          const label =
+            result.tickets.length > 1
+              ? `Entrada ${index + 1} de ${result.tickets.length}`
+              : undefined;
+          return (
+            <div
+              key={ticket.qrToken}
+              className="relative bg-white border border-gray-200 rounded-2xl shadow-sm p-6 flex flex-col items-center gap-4"
+            >
+              <CopyCardButton
+                ticket={{
+                  qrDataUrl: ticket.qrDataUrl,
+                  codeWord: ticket.codeWord,
+                  code: ticket.qrToken.slice(-3).toUpperCase(),
+                  entries,
+                  label,
+                }}
+              />
+              {label && (
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                  {label}
+                </p>
+              )}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={ticket.qrDataUrl}
+                alt="QR de entrada"
+                className="w-56 h-56"
+              />
+              <p className="text-sm font-medium text-gray-700 bg-gray-100 px-4 py-2 rounded-full">
+                Válido para{" "}
+                <span className="font-bold">
+                  {entries} {entries === 1 ? "entrada" : "entradas"}
+                </span>
               </p>
-            )}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={ticket.qrDataUrl}
-              alt="QR de entrada"
-              className="w-56 h-56"
-            />
-            <p className="text-sm font-medium text-gray-700 bg-gray-100 px-4 py-2 rounded-full">
-              Válido para{" "}
-              <span className="font-bold">
-                {result.tickets.length > 1 ? 1 : result.ticketCount}{" "}
-                {(result.tickets.length > 1 ? 1 : result.ticketCount) === 1
-                  ? "entrada"
-                  : "entradas"}
-              </span>
-            </p>
-            <div className="w-full text-center bg-gray-900 rounded-xl px-4 py-3">
-              <p className="text-xs text-gray-300 uppercase tracking-wider">
-                Tu animal
-              </p>
-              <p className="mt-1 text-lg font-bold text-white capitalize">
-                {ticket.codeWord}
-              </p>
+              <div className="w-full text-center bg-gray-900 rounded-xl px-4 py-3">
+                <p className="text-xs text-gray-300 uppercase tracking-wider">
+                  Tu animal
+                </p>
+                <p className="mt-1 text-lg font-bold text-white capitalize">
+                  {ticket.codeWord}
+                </p>
+              </div>
+              <div className="w-full text-center bg-gray-900 rounded-xl px-4 py-3">
+                <p className="text-xs text-gray-300 uppercase tracking-wider">
+                  Tu código
+                </p>
+                <p className="mt-1 text-lg font-bold text-white tracking-widest">
+                  {ticket.qrToken.slice(-3).toUpperCase()}
+                </p>
+              </div>
             </div>
-            <div className="w-full text-center bg-gray-900 rounded-xl px-4 py-3">
-              <p className="text-xs text-gray-300 uppercase tracking-wider">
-                Tu código
-              </p>
-              <p className="mt-1 text-lg font-bold text-white tracking-widest">
-                {ticket.qrToken.slice(-3).toUpperCase()}
-              </p>
-            </div>
-          </div>
-        ))}
+          );
+        })}
 
         <div className="flex flex-col gap-3">
           <button
