@@ -17,13 +17,13 @@ export const PRICE_TIERS: PriceTier[] = [
   // 00:00 Buenos Aires, Sep 28
   {
     label: "primera tanda",
-    price: 12000,
+    price: 13000,
     from: new Date("2026-09-28T03:00:00Z"),
   },
   // 00:00 Buenos Aires, Oct 1
   {
     label: "segunda tanda",
-    price: 14000,
+    price: 15000,
     from: new Date("2026-10-01T03:00:00Z"),
   },
 ];

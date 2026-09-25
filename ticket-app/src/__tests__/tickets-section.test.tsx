@@ -56,8 +56,8 @@ describe("EntradasSection price tiers", () => {
     expect(
       screen.getByRole("button", { name: /pajarito tempranero \$10\.000/ }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/primera tanda \$12\.000/)).toBeInTheDocument();
-    expect(screen.getByText(/segunda tanda \$14\.000/)).toBeInTheDocument();
+    expect(screen.getByText(/primera tanda \$13\.000/)).toBeInTheDocument();
+    expect(screen.getByText(/segunda tanda \$15\.000/)).toBeInTheDocument();
     expect(screen.queryByText(/sube a/)).not.toBeInTheDocument();
     expect(screen.getByText(eventConfig.alias)).toBeInTheDocument();
   });
@@ -85,13 +85,13 @@ describe("EntradasSection price tiers", () => {
         currentTierIndex: 0,
         currentPrice: 10000,
         currentLabel: "pajarito tempranero",
-        nextPrice: 12000,
+        nextPrice: 13000,
         changeAt: new Date("2026-09-20T03:00:00Z"),
       },
       countdown: { days: 5, hours: 3, minutes: 2, seconds: 1 },
     });
 
-    expect(screen.getByText(/sube a \$12\.000 en:/)).toBeInTheDocument();
+    expect(screen.getByText(/sube a \$13\.000 en:/)).toBeInTheDocument();
     expect(screen.getByText("05")).toBeInTheDocument();
     expect(screen.getByText("03")).toBeInTheDocument();
   });
@@ -100,7 +100,7 @@ describe("EntradasSection price tiers", () => {
     renderEntradas({
       priceInfo: {
         currentTierIndex: 1,
-        currentPrice: 12000,
+        currentPrice: 13000,
         currentLabel: "primera tanda",
         nextPrice: null,
         changeAt: null,
@@ -111,9 +111,9 @@ describe("EntradasSection price tiers", () => {
       "line-through",
     );
     expect(
-      screen.getByRole("button", { name: /primera tanda \$12\.000/ }),
+      screen.getByRole("button", { name: /primera tanda \$13\.000/ }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/segunda tanda \$14\.000/)).not.toHaveClass(
+    expect(screen.getByText(/segunda tanda \$15\.000/)).not.toHaveClass(
       "line-through",
     );
   });
@@ -122,7 +122,7 @@ describe("EntradasSection price tiers", () => {
     renderEntradas({
       priceInfo: {
         currentTierIndex: 2,
-        currentPrice: 14000,
+        currentPrice: 15000,
         currentLabel: "segunda tanda",
         nextPrice: null,
         changeAt: null,
@@ -132,11 +132,11 @@ describe("EntradasSection price tiers", () => {
     expect(screen.getByText(/pajarito tempranero \$10\.000/)).toHaveClass(
       "line-through",
     );
-    expect(screen.getByText(/primera tanda \$12\.000/)).toHaveClass(
+    expect(screen.getByText(/primera tanda \$13\.000/)).toHaveClass(
       "line-through",
     );
     expect(
-      screen.getByRole("button", { name: /segunda tanda \$14\.000/ }),
+      screen.getByRole("button", { name: /segunda tanda \$15\.000/ }),
     ).toBeInTheDocument();
   });
 
@@ -144,7 +144,7 @@ describe("EntradasSection price tiers", () => {
     renderEntradas({
       priceInfo: {
         currentTierIndex: 2,
-        currentPrice: 14000,
+        currentPrice: 15000,
         currentLabel: "segunda tanda",
         nextPrice: null,
         changeAt: new Date("2026-10-03T00:00:00Z"),
@@ -160,7 +160,7 @@ describe("EntradasSection price tiers", () => {
     renderEntradas({
       priceInfo: {
         currentTierIndex: 2,
-        currentPrice: 14000,
+        currentPrice: 15000,
         currentLabel: "segunda tanda",
         nextPrice: null,
         changeAt: new Date("2026-10-03T00:00:00Z"),
@@ -171,7 +171,7 @@ describe("EntradasSection price tiers", () => {
     expect(
       screen.getByRole("button", { name: /^taquilla$/ }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/segunda tanda \$14\.000/)).toHaveClass(
+    expect(screen.getByText(/segunda tanda \$15\.000/)).toHaveClass(
       "line-through",
     );
     expect(screen.queryByText(eventConfig.alias)).not.toBeInTheDocument();

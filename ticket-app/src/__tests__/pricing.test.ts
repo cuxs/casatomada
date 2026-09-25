@@ -10,11 +10,11 @@ import {
 
 describe("pricing", () => {
   it("lists the three tiers in ascending order", () => {
-    expect(PRICE_TIERS.map((t) => t.price)).toEqual([10000, 12000, 14000]);
+    expect(PRICE_TIERS.map((t) => t.price)).toEqual([10000, 13000, 15000]);
   });
 
   it("accepts free tickets plus every tier price", () => {
-    expect(VALID_PRICES).toEqual([0, 6500, 10000, 12000, 14000]);
+    expect(VALID_PRICES).toEqual([0, 6500, 10000, 13000, 15000]);
     expect(DEFAULT_PRICE).toBe(10000);
   });
 
@@ -32,7 +32,7 @@ describe("pricing", () => {
       currentTierIndex: 0,
       currentPrice: 10000,
       currentLabel: "pajarito tempranero",
-      nextPrice: 12000,
+      nextPrice: 13000,
       changeAt: new Date("2026-09-28T03:00:00Z"),
     });
     expect(getCurrentPrice(new Date("2026-09-28T02:59:59Z"))).toBe(10000);
@@ -42,19 +42,19 @@ describe("pricing", () => {
     const info = getPriceInfo(new Date("2026-09-28T03:00:00Z"));
     expect(info).toEqual({
       currentTierIndex: 1,
-      currentPrice: 12000,
+      currentPrice: 13000,
       currentLabel: "primera tanda",
-      nextPrice: 14000,
+      nextPrice: 15000,
       changeAt: new Date("2026-10-01T03:00:00Z"),
     });
-    expect(getCurrentPrice(new Date("2026-10-01T02:59:59Z"))).toBe(12000);
+    expect(getCurrentPrice(new Date("2026-10-01T02:59:59Z"))).toBe(13000);
   });
 
   it("ends segunda tanda at the sale cutoff with no next price", () => {
     const info = getPriceInfo(new Date("2026-10-01T03:00:00Z"));
     expect(info).toEqual({
       currentTierIndex: 2,
-      currentPrice: 14000,
+      currentPrice: 15000,
       currentLabel: "segunda tanda",
       nextPrice: null,
       changeAt: SALE_CUTOFF,

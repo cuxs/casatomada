@@ -142,8 +142,8 @@ describe("HomePage", () => {
         name: /pajarito tempranero \$10\.000/,
       }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/primera tanda \$12\.000/)).toBeInTheDocument();
-    expect(screen.getByText(/segunda tanda \$14\.000/)).toBeInTheDocument();
+    expect(screen.getByText(/primera tanda \$13\.000/)).toBeInTheDocument();
+    expect(screen.getByText(/segunda tanda \$15\.000/)).toBeInTheDocument();
     expect(screen.queryByText("sold out")).not.toBeInTheDocument();
   });
 
@@ -174,7 +174,7 @@ describe("HomePage after the sale cutoff", () => {
     expect(
       await screen.findByRole("button", { name: /^taquilla$/ }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/segunda tanda \$14\.000/)).toHaveClass(
+    expect(screen.getByText(/segunda tanda \$15\.000/)).toHaveClass(
       "line-through",
     );
     expect(screen.queryByText(/la preventa termina/)).not.toBeInTheDocument();
