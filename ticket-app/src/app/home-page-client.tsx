@@ -106,9 +106,9 @@ export default function HomePageClient({
   }
 
   const saleClosed = now ? now >= SALE_CUTOFF : false;
-  const priceInfo = now && !saleClosed ? getPriceInfo(now) : null;
+  const priceInfo = now ? getPriceInfo(now) : null;
   const countdown =
-    now && priceInfo?.changeAt
+    now && !saleClosed && priceInfo?.changeAt
       ? formatCountdown(priceInfo.changeAt.getTime() - now.getTime())
       : null;
 

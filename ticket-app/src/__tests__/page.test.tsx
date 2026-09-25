@@ -166,15 +166,27 @@ describe("HomePage after the sale cutoff", () => {
     vi.setSystemTime(new Date("2026-10-03T01:00:00Z"));
   });
 
-  it("hides the price button and shows only the flyer", () => {
+  it("strikes through every tier and shows the taquilla button", async () => {
     render(<HomePageClient eventConfig={eventConfig} />);
 
     fireEvent.click(screen.getByText("CT + KIKI"));
 
     expect(
-      screen.queryByText(/pajarito tempranero \$10\.000/),
-    ).not.toBeInTheDocument();
-    expect(screen.getByAltText("evento")).toBeInTheDocument();
+      await screen.findByRole("button", { name: /^taquilla$/ }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/segunda tanda \$14\.000/)).toHaveClass(
+      "line-through",
+    );
+    expect(screen.queryByText(/la preventa termina/)).not.toBeInTheDocument();
+  });
+
+  it("redirects to cómo llegar when taquilla is clicked", async () => {
+    render(<HomePageClient eventConfig={eventConfig} />);
+
+    fireEvent.click(screen.getByText("CT + KIKI"));
+    fireEvent.click(await screen.findByRole("button", { name: /^taquilla$/ }));
+
+    expect(mockPush).toHaveBeenCalledWith("/como-llegar");
   });
 
   it("hides the payment instructions screen", () => {

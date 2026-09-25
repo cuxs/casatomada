@@ -26,22 +26,39 @@ describe("pricing", () => {
     }
   });
 
-  it("starts on the first tier with no scheduled change", () => {
+  it("starts on pajarito tempranero until Sep 28 00:00 Buenos Aires", () => {
     const info = getPriceInfo(new Date("2026-09-14T12:00:00Z"));
     expect(info).toEqual({
       currentTierIndex: 0,
       currentPrice: 10000,
       currentLabel: "pajarito tempranero",
-      nextPrice: null,
-      changeAt: null,
+      nextPrice: 12000,
+      changeAt: new Date("2026-09-28T03:00:00Z"),
     });
-    expect(getCurrentPrice(new Date("2026-09-14T12:00:00Z"))).toBe(10000);
+    expect(getCurrentPrice(new Date("2026-09-28T02:59:59Z"))).toBe(10000);
   });
 
-  it("stays on the first tier until later tiers get a date", () => {
-    // Later tiers are unscheduled (from: null) so they must never
-    // activate on their own, even right before the sale closes.
-    const justBeforeCutoff = new Date(SALE_CUTOFF.getTime() - 1000);
-    expect(getPriceInfo(justBeforeCutoff).currentPrice).toBe(10000);
+  it("switches to primera tanda on Sep 28 until Oct 1 00:00 Buenos Aires", () => {
+    const info = getPriceInfo(new Date("2026-09-28T03:00:00Z"));
+    expect(info).toEqual({
+      currentTierIndex: 1,
+      currentPrice: 12000,
+      currentLabel: "primera tanda",
+      nextPrice: 14000,
+      changeAt: new Date("2026-10-01T03:00:00Z"),
+    });
+    expect(getCurrentPrice(new Date("2026-10-01T02:59:59Z"))).toBe(12000);
+  });
+
+  it("ends segunda tanda at the sale cutoff with no next price", () => {
+    const info = getPriceInfo(new Date("2026-10-01T03:00:00Z"));
+    expect(info).toEqual({
+      currentTierIndex: 2,
+      currentPrice: 14000,
+      currentLabel: "segunda tanda",
+      nextPrice: null,
+      changeAt: SALE_CUTOFF,
+    });
+    expect(SALE_CUTOFF).toEqual(new Date("2026-10-03T00:00:00Z"));
   });
 });

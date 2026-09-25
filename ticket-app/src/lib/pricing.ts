@@ -14,11 +14,22 @@ export interface PriceTier {
 
 export const PRICE_TIERS: PriceTier[] = [
   { label: "pajarito tempranero", price: 10000, from: null },
-  { label: "primera tanda", price: 12000, from: null }, // TODO: date pending
-  { label: "segunda tanda", price: 14000, from: null }, // TODO: date pending
+  // 00:00 Buenos Aires, Sep 28
+  {
+    label: "primera tanda",
+    price: 12000,
+    from: new Date("2026-09-28T03:00:00Z"),
+  },
+  // 00:00 Buenos Aires, Oct 1
+  {
+    label: "segunda tanda",
+    price: 14000,
+    from: new Date("2026-10-01T03:00:00Z"),
+  },
 ];
 
 // Online sale closes when the doors open: 21:00 Buenos Aires, Oct 2.
+// From then on the landing only points to the taquilla.
 export const SALE_CUTOFF = new Date("2026-10-03T00:00:00Z");
 
 export interface PriceInfo {
@@ -26,6 +37,8 @@ export interface PriceInfo {
   currentPrice: number;
   currentLabel: string;
   nextPrice: number | null;
+  // When the current tier ends: the next tier's start, or SALE_CUTOFF for
+  // the last tier (nextPrice is null in that case).
   changeAt: Date | null;
 }
 
@@ -47,7 +60,7 @@ export function getPriceInfo(now: Date): PriceInfo {
     currentPrice: current.price,
     currentLabel: current.label,
     nextPrice: next?.from ? next.price : null,
-    changeAt: next?.from ?? null,
+    changeAt: next ? next.from : SALE_CUTOFF,
   };
 }
 

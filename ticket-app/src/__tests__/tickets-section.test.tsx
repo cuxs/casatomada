@@ -140,13 +140,40 @@ describe("EntradasSection price tiers", () => {
     ).toBeInTheDocument();
   });
 
-  it("hides the price list and payment instructions once the sale is closed", () => {
-    renderEntradas({ priceInfo: null, saleClosed: true });
+  it("counts down to the end of the preventa on the last tier", () => {
+    renderEntradas({
+      priceInfo: {
+        currentTierIndex: 2,
+        currentPrice: 14000,
+        currentLabel: "segunda tanda",
+        nextPrice: null,
+        changeAt: new Date("2026-10-03T00:00:00Z"),
+      },
+      countdown: { days: 1, hours: 2, minutes: 3, seconds: 4 },
+    });
+
+    expect(screen.getByText("la preventa termina en:")).toBeInTheDocument();
+    expect(screen.queryByText(/sube a/)).not.toBeInTheDocument();
+  });
+
+  it("shows taquilla and hides payment instructions once the sale is closed", () => {
+    renderEntradas({
+      priceInfo: {
+        currentTierIndex: 2,
+        currentPrice: 14000,
+        currentLabel: "segunda tanda",
+        nextPrice: null,
+        changeAt: new Date("2026-10-03T00:00:00Z"),
+      },
+      saleClosed: true,
+    });
 
     expect(
-      screen.queryByRole("button", { name: /\$1\d\.000/ }),
-    ).not.toBeInTheDocument();
+      screen.getByRole("button", { name: /^taquilla$/ }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/segunda tanda \$14\.000/)).toHaveClass(
+      "line-through",
+    );
     expect(screen.queryByText(eventConfig.alias)).not.toBeInTheDocument();
-    expect(screen.getByAltText("evento")).toBeInTheDocument();
   });
 });

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
   MiniMap,
@@ -44,6 +45,7 @@ export default function EntradasSection({
 }: EntradasSectionProps) {
   const currentPrice = priceInfo?.currentPrice ?? PRICE_TIERS[0].price;
   const paymentRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
   const [flyerOpen, setFlyerOpen] = useState(false);
 
   useEffect(() => {
@@ -87,19 +89,20 @@ export default function EntradasSection({
           />
         </button>
 
-        {!saleClosed && (
-          <div className="relative z-[1] w-[min(86vw,380px)]">
-            {eventConfig.soldOut ? (
-              <SoldOutDisplay />
-            ) : (
-              <PriceDisplay
-                priceInfo={priceInfo}
-                countdown={countdown}
-                onBuyNow={scrollToPayment}
-              />
-            )}
-          </div>
-        )}
+        <div className="relative z-[1] w-[min(86vw,380px)]">
+          {eventConfig.soldOut ? (
+            <SoldOutDisplay />
+          ) : (
+            <PriceDisplay
+              priceInfo={priceInfo}
+              countdown={countdown}
+              saleClosed={saleClosed}
+              onBuyNow={
+                saleClosed ? () => router.push("/como-llegar") : scrollToPayment
+              }
+            />
+          )}
+        </div>
       </div>
 
       {/* ── Screen 2: Payment instructions ── */}
@@ -289,17 +292,23 @@ function FlyerZoomControls() {
 function PriceDisplay({
   priceInfo,
   countdown,
+  saleClosed,
   onBuyNow,
 }: {
   priceInfo: PriceInfo | null;
   countdown: Countdown | null;
+  saleClosed: boolean;
   onBuyNow: () => void;
 }) {
   if (!priceInfo) return null;
 
-  const pastTiers = PRICE_TIERS.slice(0, priceInfo.currentTierIndex);
-  const activeTier = PRICE_TIERS[priceInfo.currentTierIndex];
-  const futureTiers = PRICE_TIERS.slice(priceInfo.currentTierIndex + 1);
+  // Once online sales close every tier is past and only the taquilla is left.
+  const activeIndex = saleClosed
+    ? PRICE_TIERS.length
+    : priceInfo.currentTierIndex;
+  const pastTiers = PRICE_TIERS.slice(0, activeIndex);
+  const activeTier = PRICE_TIERS[activeIndex];
+  const futureTiers = PRICE_TIERS.slice(activeIndex + 1);
 
   return (
     <div className="flex flex-col">
@@ -318,13 +327,17 @@ function PriceDisplay({
         className="entradas-glow bg-[rgba(8,8,8,0.88)] border-2 border-white/[0.28] rounded-[18px] px-6 py-4 text-center backdrop-blur-sm mb-5 cursor-pointer w-full"
       >
         <p className="font-epilogue font-bold text-[clamp(24px,7vw,38px)] tracking-[-0.05em] text-white leading-none m-0">
-          {activeTier.label} ${activeTier.price.toLocaleString("es-AR")}
+          {activeTier
+            ? `${activeTier.label} $${activeTier.price.toLocaleString("es-AR")}`
+            : "taquilla"}
         </p>
 
-        {countdown && priceInfo.nextPrice !== null && (
+        {countdown && activeTier && (
           <div className="mt-2.5">
             <p className="font-epilogue text-xs text-white/45 m-0 mb-1.5 tracking-[-0.01em]">
-              sube a ${priceInfo.nextPrice.toLocaleString("es-AR")} en:
+              {priceInfo.nextPrice !== null
+                ? `sube a $${priceInfo.nextPrice.toLocaleString("es-AR")} en:`
+                : "la preventa termina en:"}
             </p>
             <div className="flex justify-center gap-3.5">
               {[
